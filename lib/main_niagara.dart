@@ -3,5 +3,5 @@ import 'app.dart';
 
 Future<void> main() async {
   FlavorConfig.setup(Flavor.niagara);
-  await appMain(); // shared bootstrap (initializes DI, then runApp)
+  await appMain();
 }

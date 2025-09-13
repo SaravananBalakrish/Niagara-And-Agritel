@@ -7,7 +7,7 @@ void main() {
   setUpAll(() async {
     FlavorConfig.setup(Flavor.niagara);
     // reset ensures a clean graph for tests
-    await di.reset();
+    // await di.reset();
     await di.init(clear: true);
 
     // register any mocks/test doubles here, e.g.:

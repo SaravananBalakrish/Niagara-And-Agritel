@@ -41,7 +41,7 @@ class FlavorBanner extends StatelessWidget {
 /// Builder that exposes FlavorConfig to builder callbacks.
 class FlavorAwareBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, FlavorConfig flavorConfig) builder;
-  const FlavorAwareBuilder({Key? key, required this.builder}) : super(key: key);
+  const FlavorAwareBuilder({super.key, required this.builder});
 
   @override
   Widget build(BuildContext context) => builder(context, FlavorConfig.instance);

@@ -1,4 +1,4 @@
-package com.niagaraautomations.niagaraSmartDrip.niagara_smart_drip_irrigation
+package com.niagaraautomations
 
 import io.flutter.embedding.android.FlutterActivity
 

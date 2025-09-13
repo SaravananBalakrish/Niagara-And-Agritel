@@ -1,32 +1,49 @@
 import 'package:flutter/material.dart';
+import '../flavor/flavor_config.dart';
 
 class AppThemes {
-  // keys used in FlavorConfig.values.themeKey
-  static const String niagara = 'niagara';
-  static const String agritel = 'agritel';
-
-  static ThemeData themeFor(String key) {
-    switch (key) {
-      case niagara:
-        return ThemeData(
-          primarySwatch: Colors.indigo,
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(backgroundColor: Colors.indigo),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.indigo).copyWith(
-            secondary: Colors.pinkAccent,
-          ),
-        );
-      case agritel:
-      default:
-        return ThemeData(
-          primarySwatch: Colors.green,
-          brightness: Brightness.light,
-          scaffoldBackgroundColor: Colors.grey[50],
-          appBarTheme: const AppBarTheme(backgroundColor: Colors.green),
-          colorScheme:
-          ColorScheme.fromSwatch(primarySwatch: Colors.green).copyWith(secondary: Colors.orangeAccent),
-        );
+  static ThemeData get lightTheme {
+    switch (FlavorConfig.instance.flavor) {
+      case Flavor.agritel:
+        return _agritelLightTheme;
+      case Flavor.niagara:
+        return _niagaraLightTheme;
     }
   }
+
+  static ThemeData get darkTheme {
+    switch (FlavorConfig.instance.flavor) {
+      case Flavor.agritel:
+        return _agritelDarkTheme;
+      case Flavor.niagara:
+        return _niagaraDarkTheme;
+    }
+  }
+
+  // Agritel Theme Variants
+  static final ThemeData _agritelLightTheme = ThemeData(
+    brightness: Brightness.light,
+    primarySwatch: Colors.green,
+    appBarTheme: AppBarTheme(backgroundColor: Colors.green[600]),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(backgroundColor: Colors.green[700]),
+    ),
+  );
+
+  static final ThemeData _agritelDarkTheme = ThemeData(
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(primary: Colors.green),
+  );
+
+  // Niagara Theme Variants
+  static final ThemeData _niagaraLightTheme = ThemeData(
+    brightness: Brightness.light,
+    primarySwatch: Colors.blue,
+    appBarTheme: AppBarTheme(backgroundColor: Colors.blue[600]),
+  );
+
+  static final ThemeData _niagaraDarkTheme = ThemeData(
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.dark(primary: Colors.blue),
+  );
 }

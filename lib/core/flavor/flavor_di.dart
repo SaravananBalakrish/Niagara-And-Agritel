@@ -1,10 +1,6 @@
-// Small helpers to register flavor-specific dependencies.
-//
-// Usage:
-// - Call FlavorConfig.setup(...) in per-flavor entrypoint
-// - Call your DI init and inside it call registerFlavorDependencies(sl)
-
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
+import '../network/api_client.dart';
 import 'flavor_config.dart';
 
 abstract class ExampleService {
@@ -21,8 +17,24 @@ class ExampleServiceImpl implements ExampleService {
 void registerFlavorDependencies(GetIt sl) {
   final cfg = FlavorConfig.instance;
 
-  // Example: register a flavor-aware ExampleService
-  sl.registerLazySingleton<ExampleService>(() => ExampleServiceImpl(cfg.values.displayName));
+  // --------------------------
+  // Example flavor-aware service
+  // --------------------------
+  sl.registerLazySingleton<ExampleService>(
+          () => ExampleServiceImpl(cfg.values.displayName));
 
-  // Register other flavor-specific services (analytics, crashlytics) here...
+  // --------------------------
+  // Flavor-aware ApiClient
+  // --------------------------
+  if (!sl.isRegistered<ApiClient>()) {
+    sl.registerLazySingleton<ApiClient>(() => ApiClient(
+      baseUrl: cfg.values.apiBaseUrl,
+      client: sl<http.Client>(),
+    ));
+  }
+
+  // --------------------------
+  // Optional: other flavor-specific services
+  // --------------------------
+  // e.g., AnalyticsService, CrashlyticsService
 }
