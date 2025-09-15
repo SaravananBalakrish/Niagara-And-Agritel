@@ -44,6 +44,7 @@ dependencies:
   mockito: ^5.5.1
   connectivity_plus: ^7.0.0
   mqtt_client: ^10.11.1
+  firebase_core: ^4.1.0
 
 dev_dependencies:
   flutter_test:
