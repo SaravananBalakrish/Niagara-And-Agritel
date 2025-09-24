@@ -17,7 +17,7 @@ import '../theme/theme_provider.dart';
 
 final GetIt sl = GetIt.instance;
 
-Future<void> init({bool clear = false}) async {
+Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? httpClient}) async {
   if (clear) await reset();
 
   // Ensure FlavorConfig was setup
@@ -27,13 +27,11 @@ Future<void> init({bool clear = false}) async {
     throw StateError('FlavorConfig must be initialized before DI. Call FlavorConfig.setup(...) in main.');
   }
 
-  // --------------------------
-  // 1) External / third-party
-  // --------------------------
-  sl.registerLazySingleton<http.Client>(() => http.Client());
+  // External / third-party
+  sl.registerLazySingleton<http.Client>(() => httpClient ?? http.Client());
 
-  final prefs = await SharedPreferences.getInstance();
-  sl.registerSingleton<SharedPreferences>(prefs);
+  final actualPrefs = prefs ?? await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(actualPrefs);
 
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(Connectivity()));
 
@@ -45,20 +43,13 @@ Future<void> init({bool clear = false}) async {
     ),
   );
 
-  // --------------------------
-  // 2) Flavor-specific services
-  // --------------------------
+  // Flavor-specific services
   registerFlavorDependencies(sl);
 
-  // --------------------------
-  // 3) Core services
-  // --------------------------
+  // Core services
   sl.registerLazySingleton(() => ThemeProvider());
 
-  // --------------------------
-  // 4) Feature: Auth
-  // --------------------------
-  // Data sources
+  // Feature: Auth
   sl.registerLazySingleton<AuthLocalDataSource>(
         () => AuthLocalDataSourceImpl(prefs: sl()),
   );
@@ -67,16 +58,23 @@ Future<void> init({bool clear = false}) async {
         () => AuthRemoteDataSourceImpl(apiClient: ApiClient(baseUrl: FlavorConfig.instance.values.apiBaseUrl, client: sl())),
   );
 
-  // Repository
   sl.registerLazySingleton<AuthRepository>(
         () => AuthRepositoryImpl(remote: sl(), local: sl()),
   );
 
-  // Use case
-  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  // Use cases
+  sl.registerLazySingleton(() => LoginWithPassword(sl()));
+  sl.registerLazySingleton(() => SendOtp(sl()));
+  sl.registerLazySingleton(() => VerifyOtp(sl()));
+  sl.registerLazySingleton(() => Logout(sl()));
 
   // Bloc
-  sl.registerFactory(() => AuthBloc(loginUseCase: sl()));
+  sl.registerLazySingleton(() => AuthBloc(
+    loginWithPassword: sl(),
+    sendOtp: sl(),
+    verifyOtp: sl(),
+    logout: sl(),
+  ));
 }
 
 // Reset all

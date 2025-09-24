@@ -1,7 +1,11 @@
-import '../../data/models/user_model.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/error/failures.dart';
+import '../entities/user_entity.dart';
 
 abstract class AuthRepository {
-  Future<UserModel> loginWithOtp(String mobileNumber, String otp);
-  Future<UserModel> loginWithPassword(String mobileNumber, String password);
-  Future<void> logout();
+  Future<Either<Failure, UserEntity>> loginWithPassword(String phone, String password);
+  Future<Either<Failure, String>> sendOtp(String phone);
+  Future<Either<Failure, UserEntity>> verifyOtp(String phone, String otp);
+  Future<Either<Failure, void>> logout(); // ✅ new
 }

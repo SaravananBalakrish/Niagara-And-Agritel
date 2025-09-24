@@ -1,7 +1,9 @@
-import '../../domain/entities/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../../domain/entities/user_entity.dart';
 import 'dart:convert';
 
-class UserModel extends User {
+class UserModel extends UserEntity {
   UserModel({
     required super.id,
     required super.name,
@@ -36,5 +38,15 @@ class UserModel extends User {
   String toJsonString() => json.encode(toJson());
 
   /// Convert to domain entity (already extends User, so this is trivial)
-  User toEntity() => this;
+  UserEntity toEntity() => this;
+
+  // In user_model.dart
+  factory UserModel.fromFirebaseUser(User firebaseUser) {
+    return UserModel(
+        id: firebaseUser.uid,
+        mobile: firebaseUser.phoneNumber ?? '',
+        name: ''
+      // Add other fields: email: firebaseUser.email, etc.
+    );
+  }
 }

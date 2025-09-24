@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -24,6 +27,29 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+    signingConfigs {
+        debug {
+            storeFile file("C:/Users/Saravanan/.android/debug.keystore")
+            storePassword "android" // Use the password you set
+            keyAlias "androiddebugkey"
+            keyPassword "android" // Use the same password
+        }
+        /*release {
+            if (keyProperties.containsKey('storeFile')) {
+                storeFile file(keyProperties['storeFile'])
+                storePassword keyProperties['storePassword']
+                keyAlias keyProperties['keyAlias']
+                keyPassword keyProperties['keyPassword']
+            } else {
+                // Fallback for local builds (optional)
+                storeFile file("mykeystore.jks")
+                storePassword "niagara@2025"
+                keyAlias "newalias"
+                keyPassword "niagara@2025"
+            }
+        }*/
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -39,12 +65,22 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
     }
 
     buildTypes {
-        release {
-            signingConfig = signingConfigs.debug
+        debug {
+            signingConfig signingConfigs.debug
         }
+       /* release {
+            signingConfig signingConfigs.release
+        }*/
+    }
+    dependencies {
+        implementation platform('com.google.firebase:firebase-bom:34.3.0')
+        implementation 'com.google.firebase:firebase-appcheck-playintegrity:19.0.1'
+        implementation 'com.google.firebase:firebase-appcheck-debug:19.0.1'
+        implementation 'androidx.multidex:multidex:2.0.1'
     }
 }
 

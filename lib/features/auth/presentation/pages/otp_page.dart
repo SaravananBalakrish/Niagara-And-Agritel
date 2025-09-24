@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../bloc/auth_bloc.dart';
@@ -10,19 +9,24 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../widgets/custom_button.dart';
-import 'otp_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class OtpVerificationPage extends StatefulWidget {
+  final String verificationId;
+  final String phone;
+
+  const OtpVerificationPage({
+    super.key,
+    required this.verificationId,
+    required this.phone,
+  });
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<OtpVerificationPage> createState() => _OtpVerificationPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _OtpVerificationPageState extends State<OtpVerificationPage> {
   final _formKey = GlobalKey<FormState>();
-  final phoneController = TextEditingController();
-  String countryCode = '+91';
+  final otpController = TextEditingController();
   String? errorMessage;
   bool isRateLimited = false;
 
@@ -37,8 +41,8 @@ class _LoginPageState extends State<LoginPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              theme.primaryColor.withOpacity(0.9),
-              theme.primaryColorDark.withOpacity(0.9),
+              theme.primaryColor.withOpacity(0.85),
+              theme.primaryColorDark.withOpacity(0.85),
             ],
           ),
         ),
@@ -47,22 +51,11 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
-                print('BlocConsumer listener received state: $state');
-                if (state is OtpSent) {
-                  print('Navigating to OTP screen: verificationId=${state.verificationId}, phone=${state.phone}');
+                if (state is Authenticated) {
                   setState(() {
                     errorMessage = null;
                     isRateLimited = false;
                   });
-                  Future.delayed(Duration.zero, () {
-                    context.pushReplacement(
-                      RouteConstants.verifyOtp,
-                      extra: <String, String>{'verificationId': state.verificationId, 'phone': state.phone},
-                    );
-                  });
-                }
-                if (state is Authenticated) {
-                  print('Authenticated: ${state.user.mobile}');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text("Welcome ${state.user.mobile}"),
@@ -71,11 +64,13 @@ class _LoginPageState extends State<LoginPage> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
+                  context.go(RouteConstants.dashboard);
                 }
                 if (state is AuthError) {
-                  print('AuthError: code=${state.code}, message=${state.message}');
                   setState(() {
-                    errorMessage = state.message;
+                    errorMessage = state.code == 'timeout'
+                        ? 'OTP request timed out. Please request a new OTP.'
+                        : state.message;
                     if (state.code == 'too-many-requests') {
                       isRateLimited = true;
                       Future.delayed(const Duration(minutes: 2), () {
@@ -86,7 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                 }
               },
               builder: (context, state) {
-                print('Builder state: $state');
                 return AnimatedSwitcher(
                   duration: const Duration(milliseconds: 500),
                   transitionBuilder: (child, animation) {
@@ -94,12 +88,12 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   child: state is AuthLoading
                       ? const Center(
-                    key: ValueKey('loading'),
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 6,
-                    ),
-                  )
+                          key: ValueKey('loading'),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 6,
+                          ),
+                        )
                       : SingleChildScrollView(
                     key: const ValueKey('form'),
                     child: Column(
@@ -138,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 40),
                         Text(
-                          'Welcome Back',
+                          'Verify OTP',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
@@ -156,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                         ).animate().fadeIn(duration: 800.ms),
                         const SizedBox(height: 12),
                         Text(
-                          'Enter your phone number to sign in',
+                          'Enter the OTP sent to ${widget.phone}',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white70,
@@ -182,11 +176,11 @@ class _LoginPageState extends State<LoginPage> {
                             padding: const EdgeInsets.all(20.0),
                             child: Form(
                               key: _formKey,
-                              child: IntlPhoneField(
-                                controller: phoneController,
-                                initialCountryCode: 'IN',
+                              child: TextFormField(
+                                controller: otpController,
+                                keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
-                                  labelText: 'Phone Number',
+                                  labelText: 'OTP',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide.none,
@@ -197,18 +191,15 @@ class _LoginPageState extends State<LoginPage> {
                                     horizontal: 16,
                                     vertical: 14,
                                   ),
-                                  prefixIcon: const Icon(Icons.phone, color: Colors.blue),
+                                  prefixIcon: const Icon(Icons.lock, color: Colors.blue),
                                   errorStyle: const TextStyle(color: Colors.redAccent),
                                 ),
-                                onCountryChanged: (country) {
-                                  setState(() {
-                                    countryCode = '+${country.dialCode}';
-                                    errorMessage = null;
-                                  });
-                                },
                                 validator: (value) {
-                                  if (value == null || value.number.isEmpty) {
-                                    return 'Please enter a valid phone number';
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter the OTP';
+                                  }
+                                  if (value.length != 6) {
+                                    return 'OTP must be 6 digits';
                                   }
                                   return null;
                                 },
@@ -218,15 +209,18 @@ class _LoginPageState extends State<LoginPage> {
                         ).animate().slideY(begin: 0.2, end: 0, duration: 600.ms),
                         if (errorMessage != null) ...[
                           const SizedBox(height: 16),
-                          Text(
-                            errorMessage!,
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
-                          ).animate().fadeIn(duration: 500.ms),
+                          GestureDetector(
+                            onTap: () => setState(() => errorMessage = null),
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ).animate().fadeIn(duration: 500.ms).shake(duration: 600.ms, hz: 4),
+                          ),
                         ],
                         const SizedBox(height: 32),
                         CustomButton(
@@ -235,47 +229,38 @@ class _LoginPageState extends State<LoginPage> {
                               : () {
                             if (_formKey.currentState!.validate()) {
                               context.read<AuthBloc>().add(
-                                SendOtpEvent(
-                                  PhoneParams('$countryCode${phoneController.text}'),
+                                VerifyOtpEvent(
+                                  VerifyOtpParams(
+                                    verificationId: widget.verificationId,
+                                    otp: otpController.text,
+                                  ),
                                 ),
                               );
                             }
                           },
-                          text: 'Send OTP',
+                          text: 'Verify OTP',
                           isLoading: state is AuthLoading,
                         ),
-                        /*CustomButton(
-                                onPressed: () => context.pushReplacement(
-                                  RouteConstants.verifyOtp,
-                                  extra: {'verificationId': '', 'phone': '$countryCode${phoneController.text}'},
-                                ),
-                                text: 'Send OTP',
-                                isLoading: state is AuthLoading,
-                              ),*/
+                       /* CustomButton(
+                          onPressed: () => context.pushReplacement(RouteConstants.dashboard),
+                          text: 'Verify OTP',
+                          isLoading: state is AuthLoading,
+                        ),*/
                         const SizedBox(height: 20),
                         TextButton(
-                          onPressed: () {
-                            context.push(RouteConstants.signUp);
+                          onPressed: isRateLimited
+                              ? null
+                              : () {
+                            context.read<AuthBloc>().add(
+                              SendOtpEvent(PhoneParams(widget.phone)),
+                            );
                           },
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Not registered? ',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: 'Create an account',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ],
+                          child: Text(
+                            isRateLimited ? 'Please wait before resending OTP' : 'Resend OTP',
+                            style: TextStyle(
+                              color: isRateLimited ? Colors.white38 : Colors.white70,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ).animate().fadeIn(duration: 1200.ms),
@@ -301,6 +286,20 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ).animate().fadeIn(duration: 1200.ms),
                         ],
+                        if (errorMessage != null &&
+                            state is AuthError &&
+                            (state.code == 'session-expired' || state.code == 'invalid-verification-id')) ...[
+                          const SizedBox(height: 16),
+                          CustomButton(
+                            onPressed: () {
+                              context.read<AuthBloc>().add(
+                                SendOtpEvent(PhoneParams(widget.phone)),
+                              );
+                            },
+                            text: 'Request New OTP',
+                            isLoading: state is AuthLoading,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -315,7 +314,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    phoneController.dispose();
+    otpController.dispose();
     super.dispose();
   }
 }

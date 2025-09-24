@@ -1,23 +1,38 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../../../core/usecases/usecase.dart';
 
 abstract class AuthEvent extends Equatable {
-  const AuthEvent();
-
   @override
   List<Object?> get props => [];
 }
 
-// Login event (OTP or password)
-class LoginEvent extends AuthEvent {
-  final String mobileNumber;
-  final String? otp;
-  final String? password;
-
-  const LoginEvent({required this.mobileNumber, this.otp, this.password});
+class LoginWithPasswordEvent extends AuthEvent {
+  final LoginParams params;
+  LoginWithPasswordEvent(this.params);
 
   @override
-  List<Object?> get props => [mobileNumber, otp ?? '', password ?? ''];
+  List<Object?> get props => [params];
 }
 
-// Logout event
-class LogoutEvent extends AuthEvent {}
+class SendOtpEvent extends AuthEvent {
+  final PhoneParams params;
+  SendOtpEvent(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}
+
+class VerifyOtpEvent extends AuthEvent {
+  final VerifyOtpParams params;
+  VerifyOtpEvent(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}
+
+class LogoutEvent extends AuthEvent {
+  final NoParams params = const NoParams(); // always same
+}
+
+class CheckCachedUserEvent extends AuthEvent {}

@@ -1,9 +1,7 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/user_model.dart';
+import '../../domain/entities/user_entity.dart';
 
 abstract class AuthState extends Equatable {
-  const AuthState();
-
   @override
   List<Object?> get props => [];
 }
@@ -12,18 +10,34 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-class AuthAuthenticated extends AuthState {
-  final UserModel user;
-  const AuthAuthenticated(this.user);
+class Authenticated extends AuthState {
+  final UserEntity user;
+  Authenticated(this.user);
 
   @override
   List<Object?> get props => [user];
 }
 
-class AuthError extends AuthState {
-  final String message;
-  const AuthError(this.message);
+class OtpSent extends AuthState {
+  final String verificationId;
+  final String phone;
+
+  OtpSent({required this.verificationId, required this.phone});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [verificationId, phone];
 }
+
+class OtpVerified extends AuthState {}
+
+class AuthError extends AuthState {
+  final String message;
+  final String? code; // Added to capture specific error codes
+
+  AuthError({required this.message, this.code});
+
+  @override
+  List<Object?> get props => [message, code];
+}
+
+class LoggedOut extends AuthState {}

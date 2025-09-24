@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'core/di/injection.dart' as di;
-import 'core/flavor/flavor_widgets.dart';
 import 'core/theme/theme_provider.dart';
 import 'routes.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
-import 'features/auth/data/datasources/auth_local_data_source.dart';
 
 Future<void> appMain() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,25 +24,19 @@ class RootApp extends StatefulWidget {
 class _RootAppState extends State<RootApp> {
   final _authBloc = di.sl<AuthBloc>();
   final _themeProvider = di.sl<ThemeProvider>();
-  final _router = AppRouter();
+  late final AppRouter _router;
 
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _router = AppRouter(authBloc: _authBloc);
     _checkCachedUser();
   }
 
   Future<void> _checkCachedUser() async {
-    final cachedUser = await di.sl<AuthLocalDataSource>().getCachedUser();
-    /*if (cachedUser != null) {
-      _authBloc.add(LoginEvent(
-        mobileNumber: cachedUser.mobileNumber,
-        password: cachedUser.password,
-        otp: null,
-      ));
-    }*/
+    _authBloc.add(CheckCachedUserEvent());
     setState(() {
       _isLoading = false;
     });
@@ -71,8 +63,8 @@ class _RootAppState extends State<RootApp> {
             debugShowCheckedModeBanner: false,
             theme: themeProvider.theme,
             routerConfig: _router.router,
-            builder: (context, child) =>
-                FlavorBanner(child: child ?? const SizedBox()),
+            /*builder: (context, child) =>
+                FlavorBanner(child: child ?? const SizedBox()),*/
           );
         },
       ),

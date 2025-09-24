@@ -57,7 +57,7 @@ class FlavorConfig {
       case Flavor.niagara:
         return const FlavorValues(
           displayName: 'Niagara',
-          apiBaseUrl: 'https://api.example.com',
+          apiBaseUrl: "http://3.1.62.165:8080",
           themeKey: 'niagara',
           showFlavorBanner: true,
         );

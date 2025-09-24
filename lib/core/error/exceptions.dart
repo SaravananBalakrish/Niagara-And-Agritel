@@ -12,6 +12,16 @@ class ServerException implements Exception {
   String toString() => "ServerException: $message (code: $statusCode)";
 }
 
+class AuthException implements Exception {
+  final String message;
+  final String? statusCode;
+
+  AuthException({this.message = "Server Exception", this.statusCode});
+
+  @override
+  String toString() => "ServerException: $message (code: $statusCode)";
+}
+
 /// Thrown when there is an error with cached/local data.
 class CacheException implements Exception {
   final String message;

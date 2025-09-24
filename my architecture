@@ -36,7 +36,6 @@ lib/
 │   │   │   │   ├── auth_repository.dart
 │   │   │   ├── usecases/
 │   │   │   │   ├── login_usecase.dart
-│   │   │   │   ├── signup_usecase.dart
 │   │   ├── presentation/
 │   │   │   ├── bloc/
 │   │   │   │   ├── auth_bloc.dart
@@ -44,7 +43,6 @@ lib/
 │   │   │   │   ├── auth_state.dart
 │   │   │   ├── pages/
 │   │   │   │   ├── login_page.dart
-│   │   │   │   ├── signup_page.dart
 │   │   │   ├── widgets/
 │   │   │   │   ├── auth_text_field.dart
 │   │   │   │   ├── login_button.dart

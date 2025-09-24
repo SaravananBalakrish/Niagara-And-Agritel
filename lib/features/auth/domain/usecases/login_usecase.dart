@@ -1,26 +1,68 @@
+import 'package:dartz/dartz.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/usecases/usecase.dart';
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
-import '../../data/models/user_model.dart';
 
-class LoginUseCase {
+/// Login with password use case
+class LoginWithPassword extends UseCase<UserEntity, LoginParams> {
   final AuthRepository repository;
+  LoginWithPassword(this.repository);
 
-  LoginUseCase(this.repository);
-
-  Future<UserModel> call({
-    required String mobileNumber,
-    String? otp,
-    String? password,
-  }) async {
-    if (otp != null) {
-      return repository.loginWithOtp(mobileNumber, otp);
-    } else if (password != null) {
-      return repository.loginWithPassword(mobileNumber, password);
-    } else {
-      throw Exception('OTP or password must be provided');
-    }
+  @override
+  Future<Either<Failure, UserEntity>> call(LoginParams params) {
+    return repository.loginWithPassword(params.phone, params.password);
   }
+}
 
-  Future<void> logout() async {
-    await repository.logout();
+class LoginParams {
+  final String phone;
+  final String password;
+
+  LoginParams({required this.phone, required this.password});
+}
+
+/// Send OTP use case
+class SendOtp extends UseCase<void, PhoneParams> {
+  final AuthRepository repository;
+  SendOtp(this.repository);
+
+  @override
+  Future<Either<Failure, String>> call(PhoneParams params) {
+    return repository.sendOtp(params.phone);
+  }
+}
+
+class PhoneParams {
+  final String phone;
+  PhoneParams(this.phone);
+}
+
+/// Verify OTP use case
+class VerifyOtp extends UseCase<UserEntity, VerifyOtpParams> {
+  final AuthRepository repository;
+  VerifyOtp(this.repository);
+
+  @override
+  Future<Either<Failure, UserEntity>> call(VerifyOtpParams params) {
+    return repository.verifyOtp(params.verificationId, params.otp);
+  }
+}
+
+class VerifyOtpParams {
+  final String verificationId;
+  final String otp;
+
+  VerifyOtpParams({required this.verificationId, required this.otp});
+}
+
+/// Logout use case
+class Logout extends UseCase<void, NoParams> {
+  final AuthRepository repository;
+  Logout(this.repository);
+
+  @override
+  Future<Either<Failure, void>> call(NoParams params) {
+    return repository.logout();
   }
 }

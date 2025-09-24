@@ -1,45 +1,100 @@
+
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/otp_page.dart';
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  StreamSubscription? _subscription;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
 
 class AppRouter {
   late final GoRouter router;
+  final AuthBloc authBloc; // Add AuthBloc parameter
 
-  AppRouter() {
+  AppRouter({required this.authBloc}) {
     router = GoRouter(
       initialLocation: RouteConstants.login,
       debugLogDiagnostics: true,
-      /*refreshListenable: GoRouterRefreshStream(
-        di.sl<AuthBloc>().stream,
-      ),*/
+      refreshListenable: GoRouterRefreshStream(authBloc.stream), // Use provided authBloc
       redirect: (context, state) {
-        final authState = di.sl<AuthBloc>().state;
-        final isLoggedIn = authState is AuthAuthenticated;
+        final authState = authBloc.state; // Use provided authBloc
+        final isLoggedIn = authState is Authenticated;
+        final isOtpSent = authState is OtpSent;
 
-        // If user is not logged in, always go to login
-        if (!isLoggedIn && state.matchedLocation != RouteConstants.login) {
-          return RouteConstants.login;
+        print('GoRouter redirect: authState=$authState, currentLocation=${state.matchedLocation}');
+
+        if (isOtpSent && state.matchedLocation != RouteConstants.verifyOtp) {
+          print('Redirecting to OTP screen: ${RouteConstants.verifyOtp}');
+          return RouteConstants.verifyOtp;
         }
-
-        // If user is logged in, prevent going back to login
-        if (isLoggedIn && state.matchedLocation == RouteConstants.login) {
+        if (isLoggedIn &&
+            (state.matchedLocation == RouteConstants.login ||
+                state.matchedLocation == RouteConstants.verifyOtp)) {
+          print('Redirecting to dashboard: ${RouteConstants.dashboard}');
           return RouteConstants.dashboard;
         }
-
-        return null; // no redirect
+        if (!isLoggedIn &&
+            !isOtpSent &&
+            state.matchedLocation != RouteConstants.login &&
+            state.matchedLocation != RouteConstants.verifyOtp) {
+          print('Redirecting to login: ${RouteConstants.login}');
+          return RouteConstants.login;
+        }
+        print('No redirect needed');
+        return null;
       },
       routes: [
         GoRoute(
           path: RouteConstants.login,
           builder: (context, state) {
+            print('Building LoginPage, AuthBloc state: ${authBloc.state}');
             return BlocProvider.value(
-              value: di.sl<AuthBloc>(),
+              value: authBloc,
               child: const LoginPage(),
+            );
+          },
+        ),
+        GoRoute(
+          path: RouteConstants.verifyOtp,
+          builder: (context, state) {
+            print('Building OtpVerificationPage, AuthBloc state: ${authBloc.state}');
+            final authState = authBloc.state;
+            final params = state.extra is Map ? state.extra as Map : null;
+            final verificationId = params?['verificationId'] ?? (authState is OtpSent ? authState.verificationId : '');
+            final phone = params?['phone'] ?? (authState is OtpSent ? authState.phone : '');
+
+            if (verificationId.isEmpty || phone.isEmpty) {
+              print('Invalid OTP parameters, redirecting to login');
+              return const LoginPage();
+            }
+
+            return BlocProvider.value(
+              value: authBloc,
+              child: OtpVerificationPage(
+                verificationId: verificationId,
+                phone: phone,
+              ),
             );
           },
         ),
