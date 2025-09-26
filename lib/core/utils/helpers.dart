@@ -14,7 +14,7 @@ class Helpers {
     log("[$tag] $message");
   }
 
-  /// Retry logic (e.g., network retries)
+  /// Retry logic (e.g., services retries)
   static Future<T> retry<T>(
       Future<T> Function() task, {
         int retries = 3,

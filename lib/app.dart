@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/di/injection.dart' as di;
+import 'core/services/notification_service.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/utils/route_constants.dart';
 import 'routes.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  final notificationService = di.sl<NotificationService>();
+  notificationService.handleBackgroundMessage(message);
+}
+
 Future<void> appMain() async {
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await di.sl<NotificationService>().init();
 
   runApp(const RootApp());
 }
@@ -33,6 +44,25 @@ class _RootAppState extends State<RootApp> {
     super.initState();
     _router = AppRouter(authBloc: _authBloc);
     _checkCachedUser();
+    // _setupFcm();
+  }
+
+  Future<void> _setupFcm() async {
+    final fcmToken = await di.sl<NotificationService>().getFcmToken();
+    print('FCM Token: $fcmToken');
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      di.sl<NotificationService>().showNotification(
+        title: message.notification?.title ?? 'App Notification',
+        body: message.notification?.body ?? 'You have a new message',
+        payload: message.data.toString(),
+      );
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Notification opened: ${message.data}');
+      if (message.data['payload'] == 'otp_sent') {
+        _router.router.go(RouteConstants.verifyOtp, extra: {'verificationId': message.data['verificationId'], 'phone': message.data['phone']});
+      }
+    });
   }
 
   Future<void> _checkCachedUser() async {

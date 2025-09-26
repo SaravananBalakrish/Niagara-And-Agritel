@@ -20,7 +20,7 @@ void main() {
   const tPhone = "9999999999";
   const tPassword = "password123";
   const tName = "nameSaravanan";
-  final tUser = UserEntity(id: "1", mobile: tPhone, name: tName);
+  final tUser = UserEntity(id: "1", mobile: tPhone, name: tName, accessToken: '');
 
   test("should return User when login succeeds", () async {
     when(() => mockAuthRepository.loginWithPassword(tPhone, tPassword))

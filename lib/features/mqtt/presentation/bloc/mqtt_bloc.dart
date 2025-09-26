@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import '../../../../core/network/mqtt_service.dart';
+import '../../../../core/services/mqtt_service.dart';
 import 'mqtt_event.dart';
 import 'mqtt_state.dart';
 

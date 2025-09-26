@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart' as di;
+import '../../../../core/services/notification_service.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -11,13 +12,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SendOtp sendOtp;
   final VerifyOtp verifyOtp;
   final Logout logout;
+  final CheckPhoneNumber checkPhoneNumber;
+  final NotificationService _notificationService = di.sl<NotificationService>();
 
   AuthBloc({
     required this.loginWithPassword,
     required this.sendOtp,
     required this.verifyOtp,
     required this.logout,
+    required this.checkPhoneNumber
   }) : super(AuthInitial()) {
+
     on<LoginWithPasswordEvent>((event, emit) async {
       emit(AuthLoading());
       final result = await loginWithPassword(event.params);
@@ -25,7 +30,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)
             : AuthError(message: failure.message)),
-        (user) => emit(Authenticated(user)),
+        (user) {
+          emit(Authenticated(user));
+          /*_notificationService.showNotification(
+            title: 'Login Successful',
+            body: 'Welcome back, ${user.mobile}!',
+            payload: 'login_success',
+          );*/
+        },
       );
     });
 
@@ -39,13 +51,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(failure is AuthFailure
               ? AuthError(message: failure.message, code: failure.code)
               : AuthError(message: failure.message));
+          if (failure is AuthFailure && failure.code == 'too-many-requests') {
+            /*_notificationService.showNotification(
+              title: 'Too Many Attempts',
+              body: 'Please wait a few minutes before trying again.',
+              payload: 'too_many_requests',
+            );*/
+          }
         },
         (verificationId) {
-          print('SendOtpEvent succeeded: verificationId=$verificationId, phone=${event.params.phone}');
           emit(OtpSent(
             verificationId: verificationId,
             phone: event.params.phone,
+            countryCode: event.params.countryCode
           ));
+          _notificationService.showNotification(
+            title: 'OTP Sent',
+            body: 'An OTP has been sent to ${event.params.phone}',
+            payload: 'otp_sent',
+          );
         },
       );
     });
@@ -60,8 +84,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(failure is AuthFailure
               ? AuthError(message: failure.message, code: failure.code)
               : AuthError(message: failure.message));
+          if (failure is AuthFailure && failure.code == 'invalid-verification-code') {
+            _notificationService.showNotification(
+              title: 'Invalid OTP',
+              body: 'The OTP entered is invalid. Please try again.',
+              payload: 'invalid_otp',
+            );
+          }
         },
-        (user) => emit(Authenticated(user)),
+        (user) {
+          emit(Authenticated(user));
+          _notificationService.showNotification(
+            title: 'OTP Verified',
+            body: 'Welcome, ${user.mobile}! You are now logged in.',
+            payload: 'otp_verified',
+          );
+        },
       );
     });
 
@@ -72,7 +110,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)
             : AuthError(message: failure.message)),
-        (_) => emit(LoggedOut()),
+        (_) {
+          emit(LoggedOut());
+          _notificationService.showNotification(
+            title: 'Logged Out',
+            body: 'You have been logged out successfully.',
+            payload: 'logout',
+          );
+        },
       );
     });
 
@@ -81,9 +126,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         emit(Authenticated(cachedUser));
+      /*  _notificationService.showNotification(
+          title: 'Auto-Login',
+          body: 'Welcome back, ${cachedUser.mobile}!',
+          payload: 'auto_login',
+        );*/
       } else {
         emit(AuthInitial());
       }
+    });
+
+    on<CheckPhoneNumberEvent>((event, emit) async {
+      print('Processing CheckPhoneNumberEvent: phone=${event.params.phone}');
+      emit(AuthLoading());
+      final result = await checkPhoneNumber(event.params);
+      result.fold(
+            (failure) {
+          print('CheckPhoneNumberEvent failed: $failure');
+          emit(failure is AuthFailure
+              ? AuthError(message: failure.message, code: failure.code)
+              : AuthError(message: failure.message));
+          _notificationService.showNotification(
+            title: 'Error',
+            body: failure.message,
+            payload: 'check_phone_error',
+          );
+        },
+            (exists) {
+          emit(PhoneNumberChecked(exists: exists, phone: event.params.phone, countryCode: event.params.countryCode));
+          _notificationService.showNotification(
+            title: exists ? 'Phone Number Found' : 'Phone Number Not Found',
+            body: exists
+                ? 'Phone number ${event.params.phone} is registered.'
+                : 'Phone number ${event.params.phone} is not registered.',
+            payload: 'check_phone_result',
+          );
+        },
+      );
     });
   }
 }

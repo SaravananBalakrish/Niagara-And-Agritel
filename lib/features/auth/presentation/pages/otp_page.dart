@@ -13,11 +13,13 @@ import '../widgets/custom_button.dart';
 class OtpVerificationPage extends StatefulWidget {
   final String verificationId;
   final String phone;
+  final String countryCode;
 
   const OtpVerificationPage({
     super.key,
     required this.verificationId,
     required this.phone,
+    required this.countryCode,
   });
 
   @override
@@ -25,10 +27,17 @@ class OtpVerificationPage extends StatefulWidget {
 }
 
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
-  final _formKey = GlobalKey<FormState>();
+  late final GlobalKey<FormState> _formKey;
   final otpController = TextEditingController();
   String? errorMessage;
   bool isRateLimited = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _formKey = GlobalKey<FormState>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +261,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                               ? null
                               : () {
                             context.read<AuthBloc>().add(
-                              SendOtpEvent(PhoneParams(widget.phone)),
+                              SendOtpEvent(PhoneParams(widget.phone, widget.countryCode)),
                             );
                           },
                           child: Text(
@@ -293,7 +302,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                           CustomButton(
                             onPressed: () {
                               context.read<AuthBloc>().add(
-                                SendOtpEvent(PhoneParams(widget.phone)),
+                                SendOtpEvent(PhoneParams(widget.phone, widget.countryCode)),
                               );
                             },
                             text: 'Request New OTP',

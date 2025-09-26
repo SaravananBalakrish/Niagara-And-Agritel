@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/network/api_urls.dart';
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/api_urls.dart';
 import '../models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -13,6 +14,7 @@ abstract class AuthRemoteDataSource {
   Future<String> sendOtp(String phone);
   Future<void> logout();
   Future<UserModel> verifyOtp(String verificationId, String otp);
+  Future<bool> checkPhoneNumber(String phone, String countryCode);
 }
 
 // Helper class to hold the verification ID and confirmation (for cross-platform handling)
@@ -30,12 +32,46 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<UserModel> loginWithPassword(String mobileNumber, String password) async {
-    final response = await apiClient.post(ApiUrls.loginUrl, body: {
-      'mobile': mobileNumber,
-      'password': password,
-    });
-    return UserModel.fromJson(response);
+  @override
+  Future<UserModel> loginWithPassword(String phone, String password) async {
+    try {
+      // Split phone number if it includes country code
+      String countryCode = '+91';
+      String mobileNumber = phone;
+      if (phone.startsWith('+')) {
+        final firstDigitIndex = phone.indexOf(RegExp(r'[0-9]'));
+        if (firstDigitIndex >= 1 && firstDigitIndex < phone.length) {
+          countryCode = phone.substring(0, firstDigitIndex);
+          mobileNumber = phone.substring(firstDigitIndex);
+        }
+      }
+
+      // Fetch device token and IP address
+      String deviceToken = '';
+      String ipAddress = '';
+      try {
+        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+        ipAddress = '';
+        print('Device token: $deviceToken, IP address: $ipAddress');
+      } catch (e) {
+        print('Error fetching device info: $e');
+      }
+
+      final response = await apiClient.post(ApiUrls.loginUrl, body: {
+        'mobileNumber': mobileNumber,
+        'password': password,
+        'deviceToken': deviceToken,
+        'macAddress': ipAddress,
+      });
+      print('Login API response: $response');
+      return UserModel.fromJson(response);
+    } catch (e) {
+      print('Login error: $e');
+      throw AuthException(
+        statusCode: 'login-failed',
+        message: 'Login failed: $e',
+      );
+    }
   }
 
   @override
@@ -103,7 +139,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           message: 'User is null after OTP verification. Please try again.',
         );
       }
-      return UserModel.fromFirebaseUser(firebaseUser);
+      return UserModel(
+        id: firebaseUser.uid,
+        mobile: firebaseUser.phoneNumber ?? '',
+        name: '',
+        accessToken: '',
+      );
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -142,6 +183,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw AuthException(
         statusCode: 'unknown',
         message: 'An unexpected error occurred. Please try again.',
+      );
+    }
+  }
+
+  @override
+  Future<bool> checkPhoneNumber(String phone, String countryCode) async {
+    Map<String, dynamic> body = {
+      'mobileNumber': phone,
+      'countryCode': countryCode.substring(1),
+    };
+    try {
+      final response = await apiClient.post(ApiUrls.verifyUserUrl, body: body);
+      print("body :: $body");
+      print("response :: $response");
+      return response['code'] == 200;
+    } catch (e) {
+      print('Check phone number error: $e');
+      throw AuthException(
+        statusCode: 'check-phone-failed',
+        message: 'Failed to check phone number: $e',
       );
     }
   }

@@ -68,6 +68,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure('Logout failed: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> checkPhoneNumber(String phone, String countryCode) async {
+    try {
+      final exists = await remote.checkPhoneNumber(phone, countryCode);
+      return Right(exists);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(code: e.statusCode, message: e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to check phone number: $e'));
+    }
+  }
 }
 
 class AuthFailure extends Failure {

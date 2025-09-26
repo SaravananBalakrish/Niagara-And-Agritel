@@ -4,15 +4,17 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
-import '../network/api_client.dart';
-import '../network/mqtt_service.dart';
-import '../network/network_info.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../services/api_client.dart';
+import '../services/get_credentials.dart';
+import '../services/mqtt_service.dart';
+import '../services/network_info.dart';
+import '../services/notification_service.dart';
 import '../theme/theme_provider.dart';
 
 final GetIt sl = GetIt.instance;
@@ -33,7 +35,7 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   final actualPrefs = prefs ?? await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(actualPrefs);
 
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(Connectivity()));
+ sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(Connectivity()));
 
   sl.registerLazySingleton<MqttService>(
         () => MqttService(
@@ -67,6 +69,7 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => SendOtp(sl()));
   sl.registerLazySingleton(() => VerifyOtp(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
+  sl.registerLazySingleton(() => CheckPhoneNumber(sl()));
 
   // Bloc
   sl.registerLazySingleton(() => AuthBloc(
@@ -74,7 +77,12 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
     sendOtp: sl(),
     verifyOtp: sl(),
     logout: sl(),
+    checkPhoneNumber: sl()
   ));
+
+  sl.registerSingleton<NotificationService>(NotificationService());
+
+  sl.registerLazySingleton<SomeService>(() => SomeService());
 }
 
 // Reset all

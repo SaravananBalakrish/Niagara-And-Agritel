@@ -14,12 +14,14 @@ class MockLoginWithPassword extends Mock implements LoginWithPassword {}
 class MockSendOtp extends Mock implements SendOtp {}
 class MockVerifyOtp extends Mock implements VerifyOtp {}
 class MockLogout extends Mock implements Logout {}
+class MockCheckPhoneNumber extends Mock implements CheckPhoneNumber {}
 
 void main() {
   late AuthBloc authBloc;
   late MockLoginWithPassword mockLoginWithPassword;
   late MockSendOtp mockSendOtp;
   late MockVerifyOtp mockVerifyOtp;
+  late MockCheckPhoneNumber mockCheckPhoneNumber;
   late MockLogout mockLogout;
 
   setUp(() {
@@ -27,18 +29,20 @@ void main() {
     mockSendOtp = MockSendOtp();
     mockVerifyOtp = MockVerifyOtp();
     mockLogout = MockLogout();
+    mockCheckPhoneNumber = MockCheckPhoneNumber();
     authBloc = AuthBloc(
       loginWithPassword: mockLoginWithPassword,
       sendOtp: mockSendOtp,
       verifyOtp: mockVerifyOtp,
       logout: mockLogout,
+      checkPhoneNumber: mockCheckPhoneNumber
     );
   });
 
-  final tUser = UserEntity(id: '1', name: 'Test User', mobile: '1234567890');
+  final tUser = UserEntity(id: '1', name: 'Test User', mobile: '1234567890', accessToken: '');
   final tLoginParams = LoginParams(phone: '1234567890', password: 'password');
-  final tPhoneParams = PhoneParams('1234567890');
-  final tVerifyOtpParams = VerifyOtpParams(verificationId: '1234567890', otp: '123456');
+  final tPhoneParams = PhoneParams('1234567890', '+91');
+  final tVerifyOtpParams = VerifyOtpParams(verificationId: '1234567890', otp: '123456',);
   const tNoParams = NoParams();
 
   group('LoginWithPasswordEvent', () {
@@ -74,7 +78,7 @@ void main() {
         return authBloc;
       },
       act: (bloc) => bloc.add(SendOtpEvent(tPhoneParams)),
-      expect: () => [AuthLoading(), OtpSent(verificationId: '', phone: '')],
+      expect: () => [AuthLoading(), OtpSent(verificationId: '', phone: '', countryCode: '+91')],
     );
 
     blocTest<AuthBloc, AuthState>(
