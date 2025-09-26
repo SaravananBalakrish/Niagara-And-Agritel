@@ -67,3 +67,8 @@ class UnexpectedException implements Exception {
   String toString() => "UnexpectedException: $message";
 }
 
+class NetworkException implements Exception {
+  final String message;
+  NetworkException({required this.message});
+}
+

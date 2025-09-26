@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
@@ -83,10 +84,15 @@ class AppRouter {
             final params = state.extra is Map ? state.extra as Map : null;
             final verificationId = params?['verificationId'] ?? (authState is OtpSent ? authState.verificationId : '');
             final phone = params?['phone'] ?? (authState is OtpSent ? authState.phone : '');
+            final countryCode = params?['countryCode'] ?? (authState is OtpSent ? authState.countryCode : '');
 
-            if (verificationId.isEmpty || phone.isEmpty) {
+            if (verificationId.isEmpty || phone.isEmpty || countryCode.isEmpty) {
               print('Invalid OTP parameters, redirecting to login');
-              return const LoginPage();
+              // Use redirect instead of returning LoginPage directly
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                GoRouter.of(context).go(RouteConstants.login);
+              });
+              return const SizedBox(); // Return an empty widget to avoid rendering issues
             }
 
             return BlocProvider.value(
@@ -94,15 +100,14 @@ class AppRouter {
               child: OtpVerificationPage(
                 verificationId: verificationId,
                 phone: phone,
+                countryCode: countryCode,
               ),
             );
           },
         ),
         GoRoute(
           path: RouteConstants.dashboard,
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text("Dashboard Page")),
-          ),
+          builder: (context, state) => const DashboardPage(),
         ),
       ],
     );

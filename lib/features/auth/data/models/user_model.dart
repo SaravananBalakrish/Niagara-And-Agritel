@@ -8,6 +8,7 @@ class UserModel extends UserEntity {
     required super.id,
     required super.name,
     required super.mobile,
+    required super.accessToken,
   });
 
   /// Convert JSON from API into UserModel
@@ -16,6 +17,7 @@ class UserModel extends UserEntity {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       mobile: json['mobile'] ?? '',
+      accessToken: json['accessToken'] ?? '',
     );
   }
 
@@ -31,6 +33,7 @@ class UserModel extends UserEntity {
       'id': id,
       'name': name,
       'mobile': mobile,
+      'accessToken': accessToken,
     };
   }
 
@@ -45,7 +48,8 @@ class UserModel extends UserEntity {
     return UserModel(
         id: firebaseUser.uid,
         mobile: firebaseUser.phoneNumber ?? '',
-        name: ''
+        name: '',
+      accessToken: '',
       // Add other fields: email: firebaseUser.email, etc.
     );
   }

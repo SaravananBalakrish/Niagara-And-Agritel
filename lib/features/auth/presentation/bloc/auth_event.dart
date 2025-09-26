@@ -36,3 +36,11 @@ class LogoutEvent extends AuthEvent {
 }
 
 class CheckCachedUserEvent extends AuthEvent {}
+
+class CheckPhoneNumberEvent extends AuthEvent {
+  final PhoneParams params;
+  CheckPhoneNumberEvent(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}

@@ -35,7 +35,8 @@ class SendOtp extends UseCase<void, PhoneParams> {
 
 class PhoneParams {
   final String phone;
-  PhoneParams(this.phone);
+  final String countryCode;
+  PhoneParams(this.phone, this.countryCode);
 }
 
 /// Verify OTP use case
@@ -45,15 +46,16 @@ class VerifyOtp extends UseCase<UserEntity, VerifyOtpParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(VerifyOtpParams params) {
-    return repository.verifyOtp(params.verificationId, params.otp);
+    return repository.verifyOtp(params.phone, params.otp, params.verificationId);
   }
 }
 
 class VerifyOtpParams {
   final String verificationId;
+  final String phone;
   final String otp;
 
-  VerifyOtpParams({required this.verificationId, required this.otp});
+  VerifyOtpParams({required this.verificationId, required this.otp, required this.phone});
 }
 
 /// Logout use case
@@ -64,5 +66,16 @@ class Logout extends UseCase<void, NoParams> {
   @override
   Future<Either<Failure, void>> call(NoParams params) {
     return repository.logout();
+  }
+}
+
+/// Check Phone Number use case
+class CheckPhoneNumber extends UseCase<bool, PhoneParams> {
+  final AuthRepository repository;
+  CheckPhoneNumber(this.repository);
+
+  @override
+  Future<Either<Failure, bool>> call(PhoneParams params) {
+    return repository.checkPhoneNumber(params.phone, params.countryCode);
   }
 }

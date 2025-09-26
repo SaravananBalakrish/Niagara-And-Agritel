@@ -10,7 +10,6 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../widgets/custom_button.dart';
-import 'otp_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,6 +21,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
   String countryCode = '+91';
   String? errorMessage;
   bool isRateLimited = false;
@@ -48,6 +48,29 @@ class _LoginPageState extends State<LoginPage> {
             child: BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
                 print('BlocConsumer listener received state: $state');
+                if (state is PhoneNumberChecked) {
+                  if (state.exists) {
+                    context.read<AuthBloc>().add(SendOtpEvent(PhoneParams(state.phone, state.countryCode)));
+                   /* if (useOtpLogin) {
+                      // Proceed with OTP flow
+                      context.read<AuthBloc>().add(SendOtpEvent(PhoneParams(state.phone)));
+                    } else {
+                      // Proceed with password flow
+                      final loginParams = LoginParams(
+                        phone: state.phone,
+                        password: passwordController.text,
+                      );
+                      context.read<AuthBloc>().add(LoginWithPasswordEvent(loginParams));
+                    }*/
+                  } else {
+                    setState(() {
+                      errorMessage = 'Phone number not registered. Please sign up.';
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Phone number not registered. Please sign up.')),
+                    );
+                  }
+                }
                 if (state is OtpSent) {
                   print('Navigating to OTP screen: verificationId=${state.verificationId}, phone=${state.phone}');
                   setState(() {
@@ -235,23 +258,18 @@ class _LoginPageState extends State<LoginPage> {
                               : () {
                             if (_formKey.currentState!.validate()) {
                               context.read<AuthBloc>().add(
-                                SendOtpEvent(
-                                  PhoneParams('$countryCode${phoneController.text}'),
-                                ),
+                                CheckPhoneNumberEvent(PhoneParams(phoneController.text, countryCode)),
                               );
+                             /* context.read<AuthBloc>().add(
+                                SendOtpEvent(
+                                  PhoneParams(phoneController.text, countryCode),
+                                ),
+                              );*/
                             }
                           },
                           text: 'Send OTP',
                           isLoading: state is AuthLoading,
                         ),
-                        /*CustomButton(
-                                onPressed: () => context.pushReplacement(
-                                  RouteConstants.verifyOtp,
-                                  extra: {'verificationId': '', 'phone': '$countryCode${phoneController.text}'},
-                                ),
-                                text: 'Send OTP',
-                                isLoading: state is AuthLoading,
-                              ),*/
                         const SizedBox(height: 20),
                         TextButton(
                           onPressed: () {

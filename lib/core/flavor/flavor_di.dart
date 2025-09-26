@@ -1,6 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import '../network/api_client.dart';
+import '../services/api_client.dart';
 import 'flavor_config.dart';
 
 abstract class ExampleService {

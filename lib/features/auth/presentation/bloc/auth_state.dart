@@ -21,8 +21,9 @@ class Authenticated extends AuthState {
 class OtpSent extends AuthState {
   final String verificationId;
   final String phone;
+  final String countryCode;
 
-  OtpSent({required this.verificationId, required this.phone});
+  OtpSent({required this.verificationId, required this.phone, required this.countryCode});
 
   @override
   List<Object?> get props => [verificationId, phone];
@@ -41,3 +42,14 @@ class AuthError extends AuthState {
 }
 
 class LoggedOut extends AuthState {}
+
+class PhoneNumberChecked extends AuthState {
+  final bool exists;
+  final String phone;
+  final String countryCode;
+
+  PhoneNumberChecked({required this.exists, required this.phone, required this.countryCode});
+
+  @override
+  List<Object?> get props => [exists, phone];
+}
