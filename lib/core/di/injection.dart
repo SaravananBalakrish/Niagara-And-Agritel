@@ -2,6 +2,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
+import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
+import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -83,6 +88,12 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerSingleton<NotificationService>(NotificationService());
 
   sl.registerLazySingleton<SomeService>(() => SomeService());
+
+  // Dashboard Feature
+  sl.registerLazySingleton<DashboardRemoteDataSource>(() => DashboardRemoteDataSourceImpl(apiClient: sl()));
+  sl.registerLazySingleton<DashboardRepository>(() => DashboardRepositoryImpl(remote: sl()));
+  sl.registerLazySingleton(() => FetchDashboardGroups(sl()));
+  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl()));
 }
 
 // Reset all

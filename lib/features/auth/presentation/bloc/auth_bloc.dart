@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/services/notification_service.dart';
+import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -14,13 +16,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final Logout logout;
   final CheckPhoneNumber checkPhoneNumber;
   final NotificationService _notificationService = di.sl<NotificationService>();
+  final DashboardBloc _dashboardBloc = di.sl<DashboardBloc>();
 
   AuthBloc({
     required this.loginWithPassword,
     required this.sendOtp,
     required this.verifyOtp,
     required this.logout,
-    required this.checkPhoneNumber
+    required this.checkPhoneNumber,
   }) : super(AuthInitial()) {
 
     on<LoginWithPasswordEvent>((event, emit) async {
@@ -32,11 +35,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             : AuthError(message: failure.message)),
         (user) {
           emit(Authenticated(user));
-          /*_notificationService.showNotification(
+          _dashboardBloc.add(FetchDashboardGroupsEvent(user.id));
+          _notificationService.showNotification(
             title: 'Login Successful',
             body: 'Welcome back, ${user.mobile}!',
             payload: 'login_success',
-          );*/
+          );
         },
       );
     });
@@ -52,18 +56,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               ? AuthError(message: failure.message, code: failure.code)
               : AuthError(message: failure.message));
           if (failure is AuthFailure && failure.code == 'too-many-requests') {
-            /*_notificationService.showNotification(
+            _notificationService.showNotification(
               title: 'Too Many Attempts',
               body: 'Please wait a few minutes before trying again.',
               payload: 'too_many_requests',
-            );*/
+            );
           }
         },
         (verificationId) {
           emit(OtpSent(
             verificationId: verificationId,
             phone: event.params.phone,
-            countryCode: event.params.countryCode
+            countryCode: event.params.countryCode,
           ));
           _notificationService.showNotification(
             title: 'OTP Sent',
@@ -94,6 +98,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         },
         (user) {
           emit(Authenticated(user));
+          _dashboardBloc.add(FetchDashboardGroupsEvent(user.id));
           _notificationService.showNotification(
             title: 'OTP Verified',
             body: 'Welcome, ${user.mobile}! You are now logged in.',
@@ -126,11 +131,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         emit(Authenticated(cachedUser));
-      /*  _notificationService.showNotification(
+        _dashboardBloc.add(FetchDashboardGroupsEvent(cachedUser.id));
+        _notificationService.showNotification(
           title: 'Auto-Login',
           body: 'Welcome back, ${cachedUser.mobile}!',
           payload: 'auto_login',
-        );*/
+        );
       } else {
         emit(AuthInitial());
       }
@@ -141,7 +147,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoading());
       final result = await checkPhoneNumber(event.params);
       result.fold(
-            (failure) {
+        (failure) {
           print('CheckPhoneNumberEvent failed: $failure');
           emit(failure is AuthFailure
               ? AuthError(message: failure.message, code: failure.code)
@@ -152,7 +158,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             payload: 'check_phone_error',
           );
         },
-            (exists) {
+        (exists) {
           emit(PhoneNumberChecked(exists: exists, phone: event.params.phone, countryCode: event.params.countryCode));
           _notificationService.showNotification(
             title: exists ? 'Phone Number Found' : 'Phone Number Not Found',

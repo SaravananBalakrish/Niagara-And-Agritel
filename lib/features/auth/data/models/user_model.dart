@@ -13,10 +13,11 @@ class UserModel extends UserEntity {
 
   /// Convert JSON from API into UserModel
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    print("json in the UserModel from json ::: $json");
     return UserModel(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      mobile: json['mobile'] ?? '',
+      id: json['userId'] ?? '',
+      name: json['userName'] ?? '',
+      mobile: json['mobileNumber'] ?? '',
       accessToken: json['accessToken'] ?? '',
     );
   }
@@ -30,9 +31,9 @@ class UserModel extends UserEntity {
   /// Convert UserModel to JSON for storage or API
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'mobile': mobile,
+      'userId': id,
+      'userName': name,
+      'mobileNumber': mobile,
       'accessToken': accessToken,
     };
   }
@@ -43,7 +44,7 @@ class UserModel extends UserEntity {
   /// Convert to domain entity (already extends User, so this is trivial)
   UserEntity toEntity() => this;
 
-  // In user_model.dart
+ /* // In user_model.dart
   factory UserModel.fromFirebaseUser(User firebaseUser) {
     return UserModel(
         id: firebaseUser.uid,
@@ -52,5 +53,5 @@ class UserModel extends UserEntity {
       accessToken: '',
       // Add other fields: email: firebaseUser.email, etc.
     );
-  }
+  }*/
 }

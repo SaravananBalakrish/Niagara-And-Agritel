@@ -45,14 +45,6 @@ class _LoginPageState extends State<LoginPage> {
       print('Error fetching device token: $e');
       deviceToken = '';
     }
-    /*try {
-      final networkInfo = NetworkInfo();
-      ipAddress = await networkInfo.getWifiIP();
-      print('IP address: $ipAddress');
-    } catch (e) {
-      print('Error fetching IP address: $e');
-      ipAddress = '';
-    }*/
     setState(() {});
   }
 
@@ -115,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
+                  context.go(RouteConstants.dashboard);
                 }
                 if (state is AuthError) {
                   print('AuthError: code=${state.code}, message=${state.message}');
@@ -211,9 +204,7 @@ class _LoginPageState extends State<LoginPage> {
                               ).animate().fadeIn(duration: 800.ms),
                               const SizedBox(height: 12),
                               Text(
-                                useOtpLogin
-                                    ? 'Enter your phone number to receive an OTP'
-                                    : 'Enter your phone number and password to sign in',
+                                'Sign in to your account',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Colors.white70,

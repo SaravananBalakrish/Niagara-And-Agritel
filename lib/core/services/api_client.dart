@@ -27,8 +27,8 @@ class ApiClient {
       final user = await _authLocalDataSource.getCachedUser();
       final mergedHeaders = {
         'Content-Type': 'application/json',
-        if (user != null) 'User-Id': user.id,
-        // if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
+        if (user != null) 'User-Id': user.id.toString(),
+        if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
         ...?headers,
       };
 
@@ -52,8 +52,8 @@ class ApiClient {
       final user = await _authLocalDataSource.getCachedUser();
       final mergedHeaders = {
         'Content-Type': 'application/json',
-        if (user != null) 'User-Id': user.id,
-        // if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
+        if (user != null) 'User-Id': user.id.toString(),
+        if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
         ...?headers,
       };
 
@@ -69,7 +69,7 @@ class ApiClient {
     } on TimeoutException {
       throw TimeoutException("POST request to $endpoint timed out");
     } on UnauthorizedException {
-      if (endpoint != ApiUrls.loginUrl) {
+      if (endpoint != ApiUrls.loginWithPasswordUrl) {
         // Attempt to refresh Firebase token
         final firebaseUser = FirebaseAuth.instance.currentUser;
         if (firebaseUser != null) {
@@ -81,14 +81,14 @@ class ApiClient {
                 id: user.id,
                 name: user.name,
                 mobile: user.mobile,
-                accessToken: user.accessToken,
+                accessToken: newToken ?? '',
               );
               await _authLocalDataSource.cacheUser(updatedUser);
 
               // Retry the request
               final mergedHeaders = {
                 'Content-Type': 'application/json',
-                'User-Id': user.id,
+                'User-Id': user.id.toString(),
                 'Authorization': 'Bearer $newToken',
                 ...?headers,
               };

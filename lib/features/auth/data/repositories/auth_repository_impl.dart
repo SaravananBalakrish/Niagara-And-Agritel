@@ -44,9 +44,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> verifyOtp(String verificationId, String otp) async {
+  Future<Either<Failure, UserEntity>> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
-      final user = await remote.verifyOtp(verificationId, otp);
+      final user = await remote.verifyOtp(verificationId, otp, countryCode);
+      print("user in the verifyOtp :: $user");
       await local.cacheUser(user);
       return Right(user);
     } on AuthException catch (e) {

@@ -35,7 +35,7 @@ void main() {
     when(() => mockApiClient.post('/auth/verify-otp', body: any(named: 'body')))
         .thenAnswer((_) async => {'id': '1', 'name': 'Test', 'mobile': '9999999999'});
 
-    final result = await dataSource.verifyOtp('9999999999', '123456',);
+    final result = await dataSource.verifyOtp('9999999999', '123456', '+91');
 
     expect(result, isA<UserModel>());
     verify(() => mockApiClient.post('/auth/verify-otp', body: {'mobile': '9999999999', 'otp': '123456'})).called(1);

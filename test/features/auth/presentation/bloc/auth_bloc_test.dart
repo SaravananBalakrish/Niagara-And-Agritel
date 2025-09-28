@@ -39,10 +39,10 @@ void main() {
     );
   });
 
-  final tUser = UserEntity(id: '1', name: 'Test User', mobile: '1234567890', accessToken: '');
+  final tUser = UserEntity(id: 1, name: 'Test User', mobile: '1234567890', accessToken: '');
   final tLoginParams = LoginParams(phone: '1234567890', password: 'password');
   final tPhoneParams = PhoneParams('1234567890', '+91');
-  final tVerifyOtpParams = VerifyOtpParams(verificationId: '1234567890', otp: '123456',);
+  final tVerifyOtpParams = VerifyOtpParams(verificationId: '1234567890', otp: '123456', countryCode: '+91');
   const tNoParams = NoParams();
 
   group('LoginWithPasswordEvent', () {

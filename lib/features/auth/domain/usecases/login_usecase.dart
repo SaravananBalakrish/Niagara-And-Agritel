@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../entities/user_entity.dart';
@@ -15,11 +16,13 @@ class LoginWithPassword extends UseCase<UserEntity, LoginParams> {
   }
 }
 
-class LoginParams {
+class LoginParams extends Equatable {
   final String phone;
   final String password;
+  const LoginParams({required this.phone, required this.password});
 
-  LoginParams({required this.phone, required this.password});
+  @override
+  List<Object?> get props => [phone, password];
 }
 
 /// Send OTP use case
@@ -29,14 +32,18 @@ class SendOtp extends UseCase<void, PhoneParams> {
 
   @override
   Future<Either<Failure, String>> call(PhoneParams params) {
-    return repository.sendOtp(params.phone);
+    final fullPhone = params.phone.startsWith('+') ? params.phone : params.countryCode + params.phone;
+    return repository.sendOtp(fullPhone);
   }
 }
 
-class PhoneParams {
+class PhoneParams extends Equatable {
   final String phone;
   final String countryCode;
-  PhoneParams(this.phone, this.countryCode);
+  const PhoneParams(this.phone, this.countryCode);
+
+  @override
+  List<Object?> get props => [phone, countryCode];
 }
 
 /// Verify OTP use case
@@ -46,15 +53,18 @@ class VerifyOtp extends UseCase<UserEntity, VerifyOtpParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(VerifyOtpParams params) {
-    return repository.verifyOtp(params.verificationId, params.otp);
+    return repository.verifyOtp(params.verificationId, params.otp, params.countryCode);
   }
 }
 
-class VerifyOtpParams {
+class VerifyOtpParams extends Equatable {
   final String verificationId;
   final String otp;
+  final String countryCode;
 
-  VerifyOtpParams({required this.verificationId, required this.otp});
+  const VerifyOtpParams({required this.verificationId, required this.otp, required this.countryCode});
+  @override
+  List<Object?> get props => [verificationId, otp, countryCode];
 }
 
 /// Logout use case

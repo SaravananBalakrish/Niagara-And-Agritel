@@ -1,7 +1,8 @@
 class ApiUrls {
   static const String commonUrl = '/api/v1';
   static const String verifyUserUrl = '$commonUrl/verifyUser';
-  static const String loginUrl = '$commonUrl/signin';
+  static const String loginWithPasswordUrl = '$commonUrl/signin';
+  static const String loginWithOtpUrl = '$commonUrl/signin1';
   static const String dashboardForGroupUrl = '$commonUrl/controller/user/:userId/cluster';
   static const String dashboardUrl = '$commonUrl/user/:userId/cluster/:groupId/controller';
 }

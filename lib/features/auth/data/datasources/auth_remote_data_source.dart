@@ -13,7 +13,7 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithPassword(String phone, String password);
   Future<String> sendOtp(String phone);
   Future<void> logout();
-  Future<UserModel> verifyOtp(String verificationId, String otp);
+  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode);
   Future<bool> checkPhoneNumber(String phone, String countryCode);
 }
 
@@ -32,18 +32,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  @override
   Future<UserModel> loginWithPassword(String phone, String password) async {
     try {
       // Split phone number if it includes country code
-      String countryCode = '+91';
       String mobileNumber = phone;
       if (phone.startsWith('+')) {
-        final firstDigitIndex = phone.indexOf(RegExp(r'[0-9]'));
-        if (firstDigitIndex >= 1 && firstDigitIndex < phone.length) {
-          countryCode = phone.substring(0, firstDigitIndex);
-          mobileNumber = phone.substring(firstDigitIndex);
-        }
+        mobileNumber = phone.substring(phone.length - 10);
       }
 
       // Fetch device token and IP address
@@ -57,7 +51,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         print('Error fetching device info: $e');
       }
 
-      final response = await apiClient.post(ApiUrls.loginUrl, body: {
+      final response = await apiClient.post(ApiUrls.loginWithPasswordUrl, body: {
         'mobileNumber': mobileNumber,
         'password': password,
         'deviceToken': deviceToken,
@@ -76,9 +70,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<String> sendOtp(String phone) async {
-    if (!phone.startsWith('+')) {
-      phone = '+91$phone';
-    }
     try {
       await _firebaseAuth.setLanguageCode('en');
       if (kIsWeb) {
@@ -119,11 +110,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> verifyOtp(String verificationId, String otp) async {
+  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
       PhoneAuthCredential credential;
       if (kIsWeb) {
-        // Handle web-specific verification if needed (e.g., using confirmationResult.confirm)
         throw AuthException(
           statusCode: 'platform-error',
           message: 'Web OTP verification is not supported in this implementation.',
@@ -139,12 +129,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           message: 'User is null after OTP verification. Please try again.',
         );
       }
-      return UserModel(
-        id: firebaseUser.uid,
-        mobile: firebaseUser.phoneNumber ?? '',
-        name: '',
-        accessToken: '',
+
+      final idToken = await firebaseUser.getIdToken();
+
+      // Fetch device token and IP address
+      String deviceToken = '';
+      String ipAddress = '';
+      try {
+        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+        ipAddress = '';
+        print('Device token: $deviceToken, IP address: $ipAddress');
+      } catch (e) {
+        print('Error fetching device info: $e');
+      }
+
+      final mobileNumber = firebaseUser.phoneNumber!.substring(countryCode.length);
+
+      final response = await apiClient.post(
+        ApiUrls.loginWithOtpUrl,
+        headers: {'Authorization': 'Bearer $idToken'},
+        body: {
+          'mobileNumber': mobileNumber,
+          'password': '',
+          'deviceToken': deviceToken,
+          'macAddress': ipAddress,
+        },
       );
+      print('OTP Login API response: $response');
+      return UserModel.fromJson(response['data']['regDetails']);
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -178,8 +190,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: e.code,
         message: 'Firebase error: ${e.message ?? "An unknown error occurred."}',
       );
-    } catch (e) {
+    } catch (e, stactrace) {
       print('Verify OTP error: $e');
+      print('Verify OTP stactrace: $stactrace');
       throw AuthException(
         statusCode: 'unknown',
         message: 'An unexpected error occurred. Please try again.',
@@ -209,9 +222,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    // Modified: Use Firebase signOut (in addition to your API if needed)
     await _firebaseAuth.signOut();
-    // Optionally call your API logout if it has server-side session cleanup
-    // await apiClient.post('/auth/logout');
   }
 }
