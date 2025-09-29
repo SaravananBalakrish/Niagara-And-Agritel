@@ -39,7 +39,11 @@ void main() {
     );
   });
 
-  final tUser = UserEntity(id: 1, name: 'Test User', mobile: '1234567890', accessToken: '');
+  const tPhone = "9999999999";
+  const tName = "nameSaravanan";
+
+  final tUser = UserEntity(id: 1, mobile: tPhone, name: tName, deviceToken: '', userType: 0, mobCctv: '', webCctv: '', altPhoneNum: []);
+  final tUserDetails = RegisterDetailsEntity(userDetails: tUser, mqttIPAddress: '', mqttUserName: '', mqttPassword: '', groupDetails: []);
   final tLoginParams = LoginParams(phone: '1234567890', password: 'password');
   final tPhoneParams = PhoneParams('1234567890', '+91');
   final tVerifyOtpParams = VerifyOtpParams(verificationId: '1234567890', otp: '123456', countryCode: '+91');
@@ -50,11 +54,11 @@ void main() {
       'emits [AuthLoading, Authenticated] when LoginWithPasswordEvent is successful',
       build: () {
         when(() => mockLoginWithPassword(tLoginParams))
-            .thenAnswer((_) async => Right(tUser));
+            .thenAnswer((_) async => Right(tUserDetails));
         return authBloc;
       },
       act: (bloc) => bloc.add(LoginWithPasswordEvent(tLoginParams)),
-      expect: () => [AuthLoading(), Authenticated(tUser)],
+      expect: () => [AuthLoading(), Authenticated(tUserDetails)],
     );
 
     blocTest<AuthBloc, AuthState>(
@@ -98,11 +102,11 @@ void main() {
       'emits [AuthLoading, Authenticated] when VerifyOtpEvent is successful',
       build: () {
         when(() => mockVerifyOtp(tVerifyOtpParams))
-            .thenAnswer((_) async => Right(tUser));
+            .thenAnswer((_) async => Right(tUserDetails));
         return authBloc;
       },
       act: (bloc) => bloc.add(VerifyOtpEvent(tVerifyOtpParams)),
-      expect: () => [AuthLoading(), Authenticated(tUser)],
+      expect: () => [AuthLoading(), Authenticated(tUserDetails)],
     );
 
     blocTest<AuthBloc, AuthState>(

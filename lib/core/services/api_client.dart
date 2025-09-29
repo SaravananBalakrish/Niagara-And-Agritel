@@ -24,11 +24,11 @@ class ApiClient {
       if (!await _networkInfo.isConnected) {
         throw NetworkException(message: 'No internet connection');
       }
-      final user = await _authLocalDataSource.getCachedUser();
+      final user = await _authLocalDataSource.getCachedAuthData();
       final mergedHeaders = {
         'Content-Type': 'application/json',
-        if (user != null) 'User-Id': user.id.toString(),
-        if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
+        if (user != null) 'User-Id': '${user.userDetails.id}',
+        if (user != null) 'Authorization': 'Bearer ${user.userDetails.deviceToken}',
         ...?headers,
       };
 
@@ -49,11 +49,11 @@ class ApiClient {
         dynamic body,
       }) async {
     try {
-      final user = await _authLocalDataSource.getCachedUser();
+      final user = await _authLocalDataSource.getCachedAuthData();
       final mergedHeaders = {
         'Content-Type': 'application/json',
-        if (user != null) 'User-Id': user.id.toString(),
-        if (user != null && user.accessToken != null) 'Authorization': 'Bearer ${user.accessToken}',
+        if (user != null) 'User-Id': '${user.userDetails.id}',
+        if (user != null) 'Authorization': 'Bearer ${user.userDetails.deviceToken}',
         ...?headers,
       };
 
@@ -75,20 +75,16 @@ class ApiClient {
         if (firebaseUser != null) {
           try {
             final newToken = await firebaseUser.getIdToken(true); // Force refresh
-            final user = await _authLocalDataSource.getCachedUser();
+            final user = await _authLocalDataSource.getCachedAuthData();
             if (user != null) {
-              final updatedUser = UserModel(
-                id: user.id,
-                name: user.name,
-                mobile: user.mobile,
-                accessToken: newToken ?? '',
-              );
-              await _authLocalDataSource.cacheUser(updatedUser);
+              final updatedUser = RegisterDetailsModel.fromJson(user.toJson());
+              // final updatedUser = UserModel.fromJson(user.toJson());
+              await _authLocalDataSource.cacheAuthData(updatedUser);
 
               // Retry the request
               final mergedHeaders = {
                 'Content-Type': 'application/json',
-                'User-Id': user.id.toString(),
+                'User-Id': '${user.userDetails.id}',
                 'Authorization': 'Bearer $newToken',
                 ...?headers,
               };
@@ -104,7 +100,7 @@ class ApiClient {
               return _handleResponse(retryResponse);
             }
           } catch (e) {
-            await _authLocalDataSource.clearUser();
+            await _authLocalDataSource.clearAuthData();
             throw UnauthorizedException(message: "Token refresh failed: $e");
           }
         }
@@ -122,7 +118,7 @@ class ApiClient {
       return body != null ? jsonDecode(body) : null;
     } else if (statusCode == 401) {
       // Handle unauthorized access (e.g., token expired)
-      GetIt.instance<AuthLocalDataSource>().clearUser();
+      GetIt.instance<AuthLocalDataSource>().clearAuthData();
       throw UnauthorizedException(message: body ?? "Unauthorized");
     } else if (statusCode == 500) {
       throw ServerException(message: body ?? "Internal Server Error", statusCode: 500);

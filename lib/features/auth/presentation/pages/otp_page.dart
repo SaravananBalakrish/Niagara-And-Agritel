@@ -67,7 +67,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   });
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("Welcome ${state.user.mobile}"),
+                      content: Text("Welcome ${state.user.userDetails.mobile}"),
                       backgroundColor: Colors.green,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),

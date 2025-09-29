@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
 
 import 'core/di/injection.dart' as di;
@@ -66,6 +67,7 @@ class AppRouter {
         return null;
       },
       routes: [
+        //RouteConstants.signUp
         GoRoute(
           path: RouteConstants.login,
           builder: (context, state) {
@@ -74,6 +76,13 @@ class AppRouter {
               value: authBloc,
               child: const LoginPage(),
             );
+          },
+        ),
+        GoRoute(
+          path: RouteConstants.signUp,
+          builder: (context, state) {
+            print('Building LoginPage, AuthBloc state: ${authBloc.state}');
+            return const SignUpPage();
           },
         ),
         GoRoute(

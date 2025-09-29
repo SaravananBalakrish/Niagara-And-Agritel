@@ -28,24 +28,10 @@ class _LoginPageState extends State<LoginPage> {
   String? errorMessage;
   bool isRateLimited = false;
   bool useOtpLogin = false; // Toggle between OTP and password login
-  String? deviceToken;
-  String? ipAddress;
 
   @override
   void initState() {
     super.initState();
-    _fetchDeviceInfo();
-  }
-
-  Future<void> _fetchDeviceInfo() async {
-    try {
-      deviceToken = await FirebaseMessaging.instance.getToken();
-      print('Device token: $deviceToken');
-    } catch (e) {
-      print('Error fetching device token: $e');
-      deviceToken = '';
-    }
-    setState(() {});
   }
 
   @override
@@ -98,10 +84,10 @@ class _LoginPageState extends State<LoginPage> {
                   });
                 }
                 if (state is Authenticated) {
-                  print('Authenticated: ${state.user.mobile}');
+                  print('Authenticated: ${state.user.userDetails.mobile}');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("Welcome ${state.user.mobile}"),
+                      content: Text("Welcome ${state.user.userDetails.mobile}"),
                       backgroundColor: Colors.green,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),

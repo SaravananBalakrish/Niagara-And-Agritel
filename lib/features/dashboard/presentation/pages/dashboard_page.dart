@@ -1,7 +1,10 @@
 // features/auth/presentation/pages/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/routes.dart';
 
+import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -20,13 +23,14 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Welcome, ${state.user.name}!'),
-                  Text('User ID: ${state.user.id}'),
-                  Text('Mobile: ${state.user.mobile}'),
+                  Text('Welcome, ${state.user.userDetails.name}!'),
+                  Text('User ID: ${state.user.userDetails.id}'),
+                  Text('Mobile: ${state.user.userDetails.mobile}'),
                   // if (state.user.accessToken != null) Text('Token: ${state.user.accessToken!.substring(0, 10)}...'),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<AuthBloc>().add(LogoutEvent());
+                      context.push(RouteConstants.signUp);
+                      // context.read<AuthBloc>().add(LogoutEvent());
                     },
                     child: const Text('Logout'),
                   ),

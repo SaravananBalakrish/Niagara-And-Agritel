@@ -20,11 +20,12 @@ void main() {
   const tPhone = "9999999999";
   const tPassword = "password123";
   const tName = "nameSaravanan";
-  final tUser = UserEntity(id: 1, mobile: tPhone, name: tName, accessToken: '');
+  final tUser = UserEntity(id: 1, mobile: tPhone, name: tName, deviceToken: '', userType: 0, mobCctv: '', webCctv: '', altPhoneNum: []);
+  final tUserDetails = RegisterDetailsEntity(userDetails: tUser, mqttIPAddress: '', mqttUserName: '', mqttPassword: '', groupDetails: []);
 
   test("should return User when login succeeds", () async {
     when(() => mockAuthRepository.loginWithPassword(tPhone, tPassword))
-        .thenAnswer((_) async => Right(tUser));
+        .thenAnswer((_) async => Right(tUserDetails));
 
     final result = await useCase(LoginParams(phone: tPhone, password: tPassword));
 

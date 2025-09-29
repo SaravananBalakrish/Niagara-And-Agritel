@@ -5,13 +5,12 @@ import '../../../../core/usecases/usecase.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
-/// Login with password use case
-class LoginWithPassword extends UseCase<UserEntity, LoginParams> {
+class LoginWithPassword extends UseCase<RegisterDetailsEntity, LoginParams> {
   final AuthRepository repository;
   LoginWithPassword(this.repository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(LoginParams params) {
+  Future<Either<Failure, RegisterDetailsEntity>> call(LoginParams params) {
     return repository.loginWithPassword(params.phone, params.password);
   }
 }
@@ -25,8 +24,7 @@ class LoginParams extends Equatable {
   List<Object?> get props => [phone, password];
 }
 
-/// Send OTP use case
-class SendOtp extends UseCase<void, PhoneParams> {
+class SendOtp extends UseCase<String, PhoneParams> {
   final AuthRepository repository;
   SendOtp(this.repository);
 
@@ -46,13 +44,12 @@ class PhoneParams extends Equatable {
   List<Object?> get props => [phone, countryCode];
 }
 
-/// Verify OTP use case
-class VerifyOtp extends UseCase<UserEntity, VerifyOtpParams> {
+class VerifyOtp extends UseCase<RegisterDetailsEntity, VerifyOtpParams> {
   final AuthRepository repository;
   VerifyOtp(this.repository);
 
   @override
-  Future<Either<Failure, UserEntity>> call(VerifyOtpParams params) {
+  Future<Either<Failure, RegisterDetailsEntity>> call(VerifyOtpParams params) {
     return repository.verifyOtp(params.verificationId, params.otp, params.countryCode);
   }
 }

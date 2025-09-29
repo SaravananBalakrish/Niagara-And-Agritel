@@ -33,12 +33,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)
             : AuthError(message: failure.message)),
-        (user) {
-          emit(Authenticated(user));
-          _dashboardBloc.add(FetchDashboardGroupsEvent(user.id));
+        (authData) {
+          emit(Authenticated(authData));
+          _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
           _notificationService.showNotification(
             title: 'Login Successful',
-            body: 'Welcome back, ${user.mobile}!',
+            body: 'Welcome back, ${authData.userDetails.name}!',
             payload: 'login_success',
           );
         },
@@ -96,12 +96,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             );
           }
         },
-        (user) {
-          emit(Authenticated(user));
-          _dashboardBloc.add(FetchDashboardGroupsEvent(user.id));
+        (authData) {
+          emit(Authenticated(authData));
+          _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
           _notificationService.showNotification(
             title: 'OTP Verified',
-            body: 'Welcome, ${user.mobile}! You are now logged in.',
+            body: 'Welcome, ${authData.userDetails.name}! You are now logged in.',
             payload: 'otp_verified',
           );
         },
@@ -128,13 +128,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<CheckCachedUserEvent>((event, emit) async {
       final localDataSource = di.sl<AuthLocalDataSource>();
-      final cachedUser = await localDataSource.getCachedUser();
-      if (cachedUser != null) {
-        emit(Authenticated(cachedUser));
-        _dashboardBloc.add(FetchDashboardGroupsEvent(cachedUser.id));
+      final cachedAuthData = await localDataSource.getCachedAuthData();
+      if (cachedAuthData != null) {
+        emit(Authenticated(cachedAuthData));
+        _dashboardBloc.add(FetchDashboardGroupsEvent(cachedAuthData.userDetails.id));
         _notificationService.showNotification(
           title: 'Auto-Login',
-          body: 'Welcome back, ${cachedUser.mobile}!',
+          body: 'Welcome back, ${cachedAuthData.userDetails.name}!',
           payload: 'auto_login',
         );
       } else {

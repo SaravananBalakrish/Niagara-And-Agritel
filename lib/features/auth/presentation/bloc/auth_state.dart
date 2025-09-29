@@ -11,7 +11,7 @@ class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
 
 class Authenticated extends AuthState {
-  final UserEntity user;
+  final RegisterDetailsEntity user;
   Authenticated(this.user);
 
   @override

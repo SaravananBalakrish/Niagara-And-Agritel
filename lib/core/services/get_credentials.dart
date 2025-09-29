@@ -9,7 +9,7 @@ class SomeService {
   SomeService() : authLocalDataSource = GetIt.instance<AuthLocalDataSource>();
 
   Future<void> performAction() async {
-    final user = await authLocalDataSource.getCachedUser();
+    final user = await authLocalDataSource.getCachedAuthData();
     if (user != null) {
       // print('Performing action for user: ${user.id}, token: ${user.accessToken}');
       // Use user.id, user.accessToken, etc.

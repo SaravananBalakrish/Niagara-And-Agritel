@@ -19,11 +19,11 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remote, required this.local});
 
   @override
-  Future<Either<Failure, UserEntity>> loginWithPassword(String phone, String password) async {
+  Future<Either<Failure, RegisterDetailsEntity>> loginWithPassword(String phone, String password) async {
     try {
-      final user = await remote.loginWithPassword(phone, password);
-      await local.cacheUser(user);
-      return Right(user);
+      final authData = await remote.loginWithPassword(phone, password);
+      await local.cacheAuthData(authData);
+      return Right(authData);
     } on AuthException catch (e) {
       return Left(AuthFailure(code: e.statusCode, message: e.message));
     } catch (e) {
@@ -44,12 +44,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> verifyOtp(String verificationId, String otp, String countryCode) async {
+  Future<Either<Failure, RegisterDetailsEntity>> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
-      final user = await remote.verifyOtp(verificationId, otp, countryCode);
-      print("user in the verifyOtp :: $user");
-      await local.cacheUser(user);
-      return Right(user);
+      final authData = await remote.verifyOtp(verificationId, otp, countryCode);
+      // print("authData in verifyOtp :: $authData");
+      await local.cacheAuthData(authData);
+      return Right(authData);
     } on AuthException catch (e) {
       return Left(AuthFailure(code: e.statusCode, message: e.message));
     } catch (e) {
@@ -61,7 +61,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> logout() async {
     try {
       await remote.logout();
-      await local.clearUser();
+      await local.clearAuthData();
       return const Right(null);
     } on AuthException catch (e) {
       return Left(AuthFailure(code: e.statusCode, message: e.message));

@@ -10,14 +10,13 @@ import '../models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> loginWithPassword(String phone, String password);
+  Future<RegisterDetailsModel> loginWithPassword(String phone, String password);
   Future<String> sendOtp(String phone);
   Future<void> logout();
-  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode);
+  Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode);
   Future<bool> checkPhoneNumber(String phone, String countryCode);
 }
 
-// Helper class to hold the verification ID and confirmation (for cross-platform handling)
 class OtpVerificationResult {
   final String? verificationId;
   final ConfirmationResult? confirmationResult;
@@ -32,9 +31,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<UserModel> loginWithPassword(String phone, String password) async {
+  Future<RegisterDetailsModel> loginWithPassword(String phone, String password) async {
     try {
-      // Split phone number if it includes country code
       String mobileNumber = phone;
       if (phone.startsWith('+')) {
         mobileNumber = phone.substring(phone.length - 10);
@@ -58,7 +56,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'macAddress': ipAddress,
       });
       print('Login API response: $response');
-      return UserModel.fromJson(response);
+      if (response['code'] == 200) {
+        return RegisterDetailsModel.fromJson(response['data']);
+      } else {
+        throw AuthException(
+          statusCode: response['code'].toString(),
+          message: response['message'] ?? 'Login failed',
+        );
+      }
     } catch (e) {
       print('Login error: $e');
       throw AuthException(
@@ -110,7 +115,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode) async {
+  Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
       PhoneAuthCredential credential;
       if (kIsWeb) {
@@ -156,7 +161,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
       print('OTP Login API response: $response');
-      return UserModel.fromJson(response['data']['regDetails']);
+      if (response['code'] == 200) {
+        return RegisterDetailsModel.fromFirebaseUser(firebaseUser, response['data']);
+      } else {
+        throw AuthException(
+          statusCode: response['code'].toString(),
+          message: response['message'] ?? 'OTP verification failed',
+        );
+      }
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -190,9 +202,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: e.code,
         message: 'Firebase error: ${e.message ?? "An unknown error occurred."}',
       );
-    } catch (e, stactrace) {
+    } catch (e, stacktrace) {
       print('Verify OTP error: $e');
-      print('Verify OTP stactrace: $stactrace');
+      print('Verify OTP stacktrace: $stacktrace');
       throw AuthException(
         statusCode: 'unknown',
         message: 'An unexpected error occurred. Please try again.',

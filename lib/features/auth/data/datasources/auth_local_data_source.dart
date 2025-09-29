@@ -3,33 +3,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_model.dart';
 
 abstract class AuthLocalDataSource {
-  Future<void> cacheUser(UserModel user);
-  Future<UserModel?> getCachedUser();
-  Future<void> clearUser();
+  Future<void> cacheAuthData(RegisterDetailsModel authData);
+  Future<RegisterDetailsModel?> getCachedAuthData();
+  Future<void> clearAuthData();
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   final SharedPreferences prefs;
-  static const _userKey = 'CACHED_USER';
+  static const _authDataKey = 'CACHED_AUTH_DATA';
 
   AuthLocalDataSourceImpl({required this.prefs});
 
   @override
-  Future<void> cacheUser(UserModel user) async {
-    await prefs.setString(_userKey, jsonEncode(user.toJson()));
+  Future<void> cacheAuthData(RegisterDetailsModel authData) async {
+    await prefs.setString(_authDataKey, jsonEncode(authData.toJson()));
   }
 
   @override
-  Future<UserModel?> getCachedUser() async {
-    final jsonString = prefs.getString(_userKey);
+  Future<RegisterDetailsModel?> getCachedAuthData() async {
+    final jsonString = prefs.getString(_authDataKey);
     if (jsonString != null) {
-      return UserModel.fromJson(jsonDecode(jsonString));
+      return RegisterDetailsModel.fromJson(jsonDecode(jsonString));
     }
     return null;
   }
 
   @override
-  Future<void> clearUser() async {
-    await prefs.remove(_userKey);
+  Future<void> clearAuthData() async {
+    await prefs.remove(_authDataKey);
   }
 }
