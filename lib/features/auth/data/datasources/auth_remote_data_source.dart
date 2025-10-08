@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/network/api_urls.dart';
+import '../../../../core/services/api_client.dart';
+import '../../../../core/services/api_urls.dart';
 import '../models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,7 +13,8 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> loginWithPassword(String phone, String password);
   Future<String> sendOtp(String phone);
   Future<void> logout();
-  Future<UserModel> verifyOtp(String verificationId, String otp);
+  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode);
+  Future<bool> checkPhoneNumber(String phone, String countryCode);
 }
 
 // Helper class to hold the verification ID and confirmation (for cross-platform handling)
@@ -30,19 +32,44 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<UserModel> loginWithPassword(String mobileNumber, String password) async {
-    final response = await apiClient.post(ApiUrls.loginUrl, body: {
-      'mobile': mobileNumber,
-      'password': password,
-    });
-    return UserModel.fromJson(response);
+  Future<UserModel> loginWithPassword(String phone, String password) async {
+    try {
+      // Split phone number if it includes country code
+      String mobileNumber = phone;
+      if (phone.startsWith('+')) {
+        mobileNumber = phone.substring(phone.length - 10);
+      }
+
+      // Fetch device token and IP address
+      String deviceToken = '';
+      String ipAddress = '';
+      try {
+        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+        ipAddress = '';
+        print('Device token: $deviceToken, IP address: $ipAddress');
+      } catch (e) {
+        print('Error fetching device info: $e');
+      }
+
+      final response = await apiClient.post(ApiUrls.loginWithPasswordUrl, body: {
+        'mobileNumber': mobileNumber,
+        'password': password,
+        'deviceToken': deviceToken,
+        'macAddress': ipAddress,
+      });
+      print('Login API response: $response');
+      return UserModel.fromJson(response);
+    } catch (e) {
+      print('Login error: $e');
+      throw AuthException(
+        statusCode: 'login-failed',
+        message: 'Login failed: $e',
+      );
+    }
   }
 
   @override
   Future<String> sendOtp(String phone) async {
-    if (!phone.startsWith('+')) {
-      phone = '+91$phone';
-    }
     try {
       await _firebaseAuth.setLanguageCode('en');
       if (kIsWeb) {
@@ -83,11 +110,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> verifyOtp(String verificationId, String otp) async {
+  Future<UserModel> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
       PhoneAuthCredential credential;
       if (kIsWeb) {
-        // Handle web-specific verification if needed (e.g., using confirmationResult.confirm)
         throw AuthException(
           statusCode: 'platform-error',
           message: 'Web OTP verification is not supported in this implementation.',
@@ -103,7 +129,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           message: 'User is null after OTP verification. Please try again.',
         );
       }
-      return UserModel.fromFirebaseUser(firebaseUser);
+
+      final idToken = await firebaseUser.getIdToken();
+
+      // Fetch device token and IP address
+      String deviceToken = '';
+      String ipAddress = '';
+      try {
+        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+        ipAddress = '';
+        print('Device token: $deviceToken, IP address: $ipAddress');
+      } catch (e) {
+        print('Error fetching device info: $e');
+      }
+
+      final mobileNumber = firebaseUser.phoneNumber!.substring(countryCode.length);
+
+      final response = await apiClient.post(
+        ApiUrls.loginWithOtpUrl,
+        headers: {'Authorization': 'Bearer $idToken'},
+        body: {
+          'mobileNumber': mobileNumber,
+          'password': '',
+          'deviceToken': deviceToken,
+          'macAddress': ipAddress,
+        },
+      );
+      print('OTP Login API response: $response');
+      return UserModel.fromJson(response['data']['regDetails']);
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -137,8 +190,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: e.code,
         message: 'Firebase error: ${e.message ?? "An unknown error occurred."}',
       );
-    } catch (e) {
+    } catch (e, stactrace) {
       print('Verify OTP error: $e');
+      print('Verify OTP stactrace: $stactrace');
       throw AuthException(
         statusCode: 'unknown',
         message: 'An unexpected error occurred. Please try again.',
@@ -147,10 +201,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<bool> checkPhoneNumber(String phone, String countryCode) async {
+    Map<String, dynamic> body = {
+      'mobileNumber': phone,
+      'countryCode': countryCode.substring(1),
+    };
+    try {
+      final response = await apiClient.post(ApiUrls.verifyUserUrl, body: body);
+      print("body :: $body");
+      print("response :: $response");
+      return response['code'] == 200;
+    } catch (e) {
+      print('Check phone number error: $e');
+      throw AuthException(
+        statusCode: 'check-phone-failed',
+        message: 'Failed to check phone number: $e',
+      );
+    }
+  }
+
+  @override
   Future<void> logout() async {
-    // Modified: Use Firebase signOut (in addition to your API if needed)
     await _firebaseAuth.signOut();
-    // Optionally call your API logout if it has server-side session cleanup
-    // await apiClient.post('/auth/logout');
   }
 }

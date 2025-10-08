@@ -44,9 +44,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> verifyOtp(String verificationId, String otp) async {
+  Future<Either<Failure, UserEntity>> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
-      final user = await remote.verifyOtp(verificationId, otp);
+      final user = await remote.verifyOtp(verificationId, otp, countryCode);
+      print("user in the verifyOtp :: $user");
       await local.cacheUser(user);
       return Right(user);
     } on AuthException catch (e) {
@@ -66,6 +67,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(AuthFailure(code: e.statusCode, message: e.message));
     } catch (e) {
       return Left(ServerFailure('Logout failed: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> checkPhoneNumber(String phone, String countryCode) async {
+    try {
+      final exists = await remote.checkPhoneNumber(phone, countryCode);
+      return Right(exists);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(code: e.statusCode, message: e.message));
+    } catch (e) {
+      return Left(ServerFailure('Failed to check phone number: $e'));
     }
   }
 }
