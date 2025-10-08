@@ -14,6 +14,8 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
+import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
+import 'features/my_device/presentation/pages/my_device_page.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -33,10 +35,10 @@ class GoRouterRefreshStream extends ChangeNotifier {
 class AppRouter {
   late final GoRouter router;
   final AuthBloc authBloc; // Add AuthBloc parameter
-
+//
   AppRouter({required this.authBloc}) {
     router = GoRouter(
-      initialLocation: RouteConstants.login,
+      initialLocation: RouteConstants.myDevicePage,
       debugLogDiagnostics: true,
       refreshListenable: GoRouterRefreshStream(authBloc.stream), // Use provided authBloc
       redirect: (context, state) {
@@ -49,12 +51,14 @@ class AppRouter {
         if (isOtpSent && state.matchedLocation != RouteConstants.verifyOtp) {
           print('Redirecting to OTP screen: ${RouteConstants.verifyOtp}');
           return RouteConstants.verifyOtp;
+          return RouteConstants.dealerDashboard;
         }
         if (isLoggedIn &&
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
           return RouteConstants.dashboard;
+          return RouteConstants.dealerDashboard;
         }
         if (!isLoggedIn &&
             !isOtpSent &&
@@ -62,6 +66,7 @@ class AppRouter {
             state.matchedLocation != RouteConstants.verifyOtp) {
           print('Redirecting to login: ${RouteConstants.login}');
           return RouteConstants.login;
+          return RouteConstants.dealerDashboard;
         }
         print('No redirect needed');
         return null;
@@ -123,6 +128,14 @@ class AppRouter {
               child: const DashboardPage(),
             );
           },
+        ),
+        GoRoute(
+          path: RouteConstants.dealerDashboard,
+          builder: (context, state) => DealerDashboardPage(dealerId: '1'),
+        ),
+        GoRoute(
+          path: RouteConstants.myDevicePage,
+          builder: (context, state) => MyDevicePage(),
         ),
       ],
     );

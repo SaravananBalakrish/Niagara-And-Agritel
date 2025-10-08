@@ -29,7 +29,8 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file("C:/Users/Saravanan/.android/debug.keystore")
+            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
+//            storeFile file("C:/Users/Saravanan/.android/debug.keystore")
             storePassword "android" // Use the password you set
             keyAlias "androiddebugkey"
             keyPassword "android" // Use the same password
@@ -62,7 +63,8 @@ android {
 
     defaultConfig {
         applicationId = "com.niagaraautomations.niagara"
-        minSdk = flutter.minSdkVersion
+//        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

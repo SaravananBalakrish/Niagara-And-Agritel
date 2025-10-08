@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+
 class Helpers {
   /// Convert dynamic response safely
   static T? cast<T>(dynamic x) => x is T ? x : null;
@@ -31,4 +32,5 @@ class Helpers {
     }
     throw lastError;
   }
+
 }
