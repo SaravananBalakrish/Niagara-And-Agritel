@@ -21,17 +21,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
+  late final GlobalKey<FormState> _formKey;
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   String countryCode = '+91';
   String? errorMessage;
   bool isRateLimited = false;
-  bool useOtpLogin = false; // Toggle between OTP and password login
+  bool useOtpLogin = false;
 
   @override
   void initState() {
     super.initState();
+    _formKey = GlobalKey<FormState>();
   }
 
   @override

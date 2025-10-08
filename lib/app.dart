@@ -6,6 +6,7 @@ import 'core/di/injection.dart' as di;
 import 'core/services/notification_service.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/utils/route_constants.dart';
+import 'features/auth/domain/usecases/login_usecase.dart';
 import 'routes.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -85,7 +86,15 @@ class _RootAppState extends State<RootApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _themeProvider),
-        BlocProvider.value(value: _authBloc),
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(
+            loginWithPassword: di.sl<LoginWithPassword>(),
+            sendOtp: di.sl<SendOtp>(),
+            verifyOtp: di.sl<VerifyOtp>(),
+            logout: di.sl<Logout>(),
+            checkPhoneNumber: di.sl<CheckPhoneNumber>()
+          )..add(CheckCachedUserEvent()),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

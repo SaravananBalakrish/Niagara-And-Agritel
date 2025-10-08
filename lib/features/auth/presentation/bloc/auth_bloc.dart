@@ -1,8 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/services/notification_service.dart';
-import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../../dashboard/presentation/bloc/dashboard_event.dart';
+import '../../../../core/usecases/usecase.dart';
 import '../../data/datasources/auth_local_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/usecases/login_usecase.dart';
@@ -16,7 +15,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final Logout logout;
   final CheckPhoneNumber checkPhoneNumber;
   final NotificationService _notificationService = di.sl<NotificationService>();
-  final DashboardBloc _dashboardBloc = di.sl<DashboardBloc>();
+  // Remove: final DashboardBloc _dashboardBloc = di.sl<DashboardBloc>(); // No longer needed
 
   AuthBloc({
     required this.loginWithPassword,
@@ -35,7 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             : AuthError(message: failure.message)),
         (authData) {
           emit(Authenticated(authData));
-          _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
+          // Remove: _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
           _notificationService.showNotification(
             title: 'Login Successful',
             body: 'Welcome back, ${authData.userDetails.name}!',
@@ -50,7 +49,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthLoading());
       final result = await sendOtp(event.params);
       result.fold(
-        (failure) {
+            (failure) {
           print('SendOtpEvent failed: $failure');
           emit(failure is AuthFailure
               ? AuthError(message: failure.message, code: failure.code)
@@ -63,7 +62,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             );
           }
         },
-        (verificationId) {
+            (verificationId) {
           emit(OtpSent(
             verificationId: verificationId,
             phone: event.params.phone,
@@ -78,6 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
     });
 
+    // Similar changes for VerifyOtpEvent:
     on<VerifyOtpEvent>((event, emit) async {
       print('Processing VerifyOtpEvent: verificationId=${event.params.verificationId}, otp=${event.params.otp}');
       emit(AuthLoading());
@@ -98,7 +98,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         },
         (authData) {
           emit(Authenticated(authData));
-          _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
+          // Remove: _dashboardBloc.add(FetchDashboardGroupsEvent(authData.userDetails.id));
           _notificationService.showNotification(
             title: 'OTP Verified',
             body: 'Welcome, ${authData.userDetails.name}! You are now logged in.',
@@ -131,7 +131,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cachedAuthData = await localDataSource.getCachedAuthData();
       if (cachedAuthData != null) {
         emit(Authenticated(cachedAuthData));
-        _dashboardBloc.add(FetchDashboardGroupsEvent(cachedAuthData.userDetails.id));
+        // Remove: _dashboardBloc.add(FetchDashboardGroupsEvent(cachedAuthData.userDetails.id));
         _notificationService.showNotification(
           title: 'Auto-Login',
           body: 'Welcome back, ${cachedAuthData.userDetails.name}!',

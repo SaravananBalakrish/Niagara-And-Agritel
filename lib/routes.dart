@@ -69,6 +69,7 @@ class AppRouter {
       routes: [
         //RouteConstants.signUp
         GoRoute(
+          name: 'login',
           path: RouteConstants.login,
           builder: (context, state) {
             print('Building LoginPage, AuthBloc state: ${authBloc.state}');
@@ -79,6 +80,7 @@ class AppRouter {
           },
         ),
         GoRoute(
+          name: 'signUp',
           path: RouteConstants.signUp,
           builder: (context, state) {
             print('Building LoginPage, AuthBloc state: ${authBloc.state}');
@@ -86,6 +88,7 @@ class AppRouter {
           },
         ),
         GoRoute(
+          name: 'verifyOtp',
           path: RouteConstants.verifyOtp,
           builder: (context, state) {
             print('Building OtpVerificationPage, AuthBloc state: ${authBloc.state}');
@@ -111,8 +114,15 @@ class AppRouter {
           },
         ),
         GoRoute(
+          name: 'dashboard',
           path: RouteConstants.dashboard,
-          builder: (context, state) => const DashboardPage(),
+          builder: (context, state) {
+            print('Building DashboardPage, AuthBloc state: ${authBloc.state}');  // Add for debug
+            return BlocProvider.value(
+              value: authBloc,
+              child: const DashboardPage(),
+            );
+          },
         ),
       ],
     );

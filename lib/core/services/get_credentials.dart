@@ -1,7 +1,6 @@
 // core/services/some_service.dart
 import 'package:get_it/get_it.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
-import '../../features/auth/data/models/user_model.dart';
 
 class SomeService {
   final AuthLocalDataSource authLocalDataSource;

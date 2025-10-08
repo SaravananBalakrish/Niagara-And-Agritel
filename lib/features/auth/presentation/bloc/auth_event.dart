@@ -32,7 +32,7 @@ class VerifyOtpEvent extends AuthEvent {
 }
 
 class LogoutEvent extends AuthEvent {
-  final NoParams params = const NoParams(); // always same
+  final NoParams params = const NoParams();
 }
 
 class CheckCachedUserEvent extends AuthEvent {}
