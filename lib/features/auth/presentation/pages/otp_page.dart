@@ -64,7 +64,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
-                  context.go(RouteConstants.dashboard);
+                  // context.go(RouteConstants.dashboard);
+                  context.go(RouteConstants.dealerDashboard);
                 }
                 if (state is AuthError) {
                   setState(() {

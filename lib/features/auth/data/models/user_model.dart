@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../domain/entities/user_entity.dart';
 import 'dart:convert';
 

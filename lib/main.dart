@@ -2,7 +2,6 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'core/flavor/flavor_config.dart';
 import 'app.dart';
 import 'firebase_options.dart';
@@ -17,7 +16,11 @@ Future<void> main() async {
   /*await FirebaseAppCheck.instance.activate(
     androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
     appleProvider: AppleProvider.deviceCheck,
-  );*/
+  );
+
+
+
+  */
   try {
     print("🔍 App Check: Activating with provider ${kDebugMode ? 'debug' : 'playIntegrity'}");
     await FirebaseAppCheck.instance.activate(
