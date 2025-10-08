@@ -1,6 +1,6 @@
 
 
-import '../../../../core/network/api_client.dart';
+import '../../../../core/services/api_client.dart';
 import '../../domain/entites/dealer.dart';
 import '../../domain/repositories/dealer_repository.dart';
 import '../models/dealer_model.dart';
