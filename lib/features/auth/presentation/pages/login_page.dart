@@ -94,7 +94,8 @@ class _LoginPageState extends State<LoginPage> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
-                  context.go(RouteConstants.dashboard);
+                  // context.go(RouteConstants.dashboard);
+                  context.go(RouteConstants.dealerDashboard);
                 }
                 if (state is AuthError) {
                   print('AuthError: code=${state.code}, message=${state.message}');

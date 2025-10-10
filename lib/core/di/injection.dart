@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
+import '../../features/dashboard/domain/usecases/fetch_controllers_usecase.dart';
 import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../flavor/flavor_config.dart';
@@ -93,7 +94,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton<DashboardRemoteDataSource>(() => DashboardRemoteDataSourceImpl(apiClient: sl()));
   sl.registerLazySingleton<DashboardRepository>(() => DashboardRepositoryImpl(remote: sl()));
   sl.registerLazySingleton(() => FetchDashboardGroups(sl()));
-  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl()));
+  sl.registerLazySingleton(() => FetchControllers(sl()));
+  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl()));
 }
 
 // Reset all

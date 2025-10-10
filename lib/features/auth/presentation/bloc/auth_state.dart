@@ -33,7 +33,7 @@ class OtpVerified extends AuthState {}
 
 class AuthError extends AuthState {
   final String message;
-  final String? code; // Added to capture specific error codes
+  final String? code;
 
   AuthError({required this.message, this.code});
 

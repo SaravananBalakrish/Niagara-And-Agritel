@@ -7,7 +7,7 @@ class MyDeviceInitial extends MyDeviceState {}
 class MyDeviceLoading extends MyDeviceState {}
 
 class MyDeviceLoaded extends MyDeviceState {
-  final List<ControllerEntity> controllers;
+  final List<MyDeviceControllerEntity> controllers;
   MyDeviceLoaded(this.controllers);
 }
 

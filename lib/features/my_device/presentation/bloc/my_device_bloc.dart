@@ -15,7 +15,7 @@ class MyDeviceBloc extends Bloc<MyDeviceEvent, MyDeviceState> {
 
     // mock data
     final controllers = [
-      ControllerEntity(
+      MyDeviceControllerEntity(
         id: "1",
         name: "Niagara Testing Unit",
         mqttConnected: true,

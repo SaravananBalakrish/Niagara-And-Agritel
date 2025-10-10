@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../../dashboard/data/models/group_model.dart';
 import '../../domain/entities/user_entity.dart';
 
 class RegisterDetailsModel extends RegisterDetailsEntity {
@@ -164,38 +165,6 @@ class UserModel extends UserEntity{
       state: state,
       email: email,
       altPhoneNum: altPhoneNum,
-    );
-  }
-}
-
-class GroupDetails extends GroupDetailsEntity{
-  GroupDetails({
-    required super.userGroupId,
-    required super.userId,
-    required super.groupName,
-  });
-
-  factory GroupDetails.fromJson(Map<String, dynamic> json) {
-    return GroupDetails(
-      userGroupId: json['userGroupId'] as int? ?? 0,
-      userId: json['userId'] as int? ?? 0,
-      groupName: json['groupName'] as String? ?? '',
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userGroupId': userGroupId,
-      'userId': userId,
-      'groupName': groupName,
-    };
-  }
-
-  GroupDetailsEntity toEntity() {
-    return GroupDetailsEntity(
-      userGroupId: userGroupId,
-      userId: userId,
-      groupName: groupName,
     );
   }
 }

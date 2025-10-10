@@ -57,7 +57,7 @@ class AppRouter {
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
-          return RouteConstants.dashboard;
+          // return RouteConstants.dashboard;
           return RouteConstants.dealerDashboard;
         }
         if (!isLoggedIn &&
@@ -131,7 +131,7 @@ class AppRouter {
         ),
         GoRoute(
           path: RouteConstants.dealerDashboard,
-          builder: (context, state) => DealerDashboardPage(dealerId: '1'),
+          builder: (context, state) => DealerDashboardPage(),
         ),
         GoRoute(
           path: RouteConstants.myDevicePage,

@@ -1,4 +1,4 @@
-class ControllerEntity {
+class MyDeviceControllerEntity {
   final String id;
   final String name;
   final bool mqttConnected;
@@ -18,7 +18,7 @@ class ControllerEntity {
   final String setTime, remainingTime;
   final int tabIndex;
 
-  ControllerEntity({
+  MyDeviceControllerEntity({
     required this.id,
     required this.name,
     required this.mqttConnected,

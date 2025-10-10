@@ -1,4 +1,6 @@
 // Domain entity for user details
+import '../../../dashboard/domain/entities/group_entity.dart';
+
 class UserEntity {
   final int id;
   final String name;
@@ -53,18 +55,5 @@ class RegisterDetailsEntity {
     required this.mqttUserName,
     required this.mqttPassword,
     required this.groupDetails,
-  });
-}
-
-// Domain entity for group details
-class GroupDetailsEntity {
-  final int userGroupId;
-  final int userId;
-  final String groupName;
-
-  const GroupDetailsEntity({
-    required this.userGroupId,
-    required this.userId,
-    required this.groupName,
   });
 }

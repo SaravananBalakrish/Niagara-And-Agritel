@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/group_entity.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
 
 abstract class DashboardState extends Equatable {
   @override
@@ -10,11 +12,34 @@ class DashboardInitial extends DashboardState {}
 class DashboardLoading extends DashboardState {}
 
 class DashboardGroupsLoaded extends DashboardState {
-  final dynamic groups;
-  DashboardGroupsLoaded({required this.groups});
+  final List<GroupDetailsEntity> groups;
+  final Map<int, List<ControllerEntity>> groupControllers;
+  final int? selectedGroupId;
+  final int? selectedControllerIndex;
+
+  DashboardGroupsLoaded({
+    required this.groups,
+    this.groupControllers = const {},
+    this.selectedGroupId,
+    this.selectedControllerIndex,
+  });
 
   @override
-  List<Object?> get props => [groups];
+  List<Object?> get props => [groups, groupControllers, selectedGroupId, selectedControllerIndex];
+
+  DashboardGroupsLoaded copyWith({
+    List<GroupDetailsEntity>? groups,
+    Map<int, List<ControllerEntity>>? groupControllers,
+    int? selectedGroupId,
+    int? selectedControllerIndex,
+  }) {
+    return DashboardGroupsLoaded(
+      groups: groups ?? this.groups,
+      groupControllers: groupControllers ?? this.groupControllers,
+      selectedGroupId: selectedGroupId ?? this.selectedGroupId,
+      selectedControllerIndex: selectedControllerIndex ?? this.selectedControllerIndex,
+    );
+  }
 }
 
 class DashboardError extends DashboardState {
