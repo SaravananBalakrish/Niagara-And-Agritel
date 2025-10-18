@@ -88,10 +88,10 @@ class DashboardPage extends StatelessWidget {
                           width: 140,
                           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          alignment: Alignment.center,
+                           alignment: Alignment.center,
                           child: Image.asset(
                             "assets/images/common/niagara/niagara_logo_small.png",
                           ),
@@ -249,7 +249,9 @@ class DashboardPage extends StatelessWidget {
                                   PressureSection(
                                       prsIn: selectedController.liveMessage.prsIn,
                                       prsOut: selectedController.liveMessage.prsOut,
-                                      activeZone: selectedController.zoneNo),
+                                      activeZone: selectedController.zoneNo,
+                                      fertlizer: '',
+                                  ),
                                   const SizedBox(height: 8),
                                   TimerSection(
                                       setTime: selectedController.setFlow,
