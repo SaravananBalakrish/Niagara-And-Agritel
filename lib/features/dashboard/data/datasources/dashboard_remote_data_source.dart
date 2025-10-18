@@ -1,6 +1,5 @@
 import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/group_model.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/controller_model.dart';
-
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/services/api_urls.dart';

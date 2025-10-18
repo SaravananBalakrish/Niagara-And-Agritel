@@ -6,14 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
-
-import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
+import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
 import 'features/my_device/presentation/pages/my_device_page.dart';
 
@@ -57,7 +55,7 @@ class AppRouter {
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
-          // return RouteConstants.dashboard;
+          return RouteConstants.dashboard;
           return RouteConstants.dealerDashboard;
         }
         if (!isLoggedIn &&

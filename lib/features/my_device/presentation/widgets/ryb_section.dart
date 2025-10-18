@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 
 class RYBSection extends StatelessWidget {
-  final int r, y, b;
-  final double c1, c2, c3;
+  final String r, y, b;
+  final String c1, c2, c3;
 
   const RYBSection({
     super.key,
@@ -16,19 +17,32 @@ class RYBSection extends StatelessWidget {
 
   Widget _buildBox(Color color, String line1, String line2, String line3) {
     return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          children: [
-            Text(line1, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(line2,style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(line3,style: const TextStyle(fontWeight: FontWeight.bold)),
-          ],
+      child: GlassCard(
+        padding: const EdgeInsets.all(2),
+        margin: const EdgeInsets.all(2),
+        child: Container(
+             child: Column(
+            children: [
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                   Icon(Icons.power,color: color),
+                  Text(line1, style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
+                ],
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(Icons.account_tree_rounded,color: color),
+                  Text(line2,style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
+                ],
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(Icons.ac_unit,color: color),
+                  Text(line3,style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -38,9 +52,9 @@ class RYBSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _buildBox(Colors.red.shade300, "RY $r V", "R $r V", "C1 $c1 A"),
-        _buildBox(Colors.yellow.shade300, "YB $y V", "Y $y V", "C2 $c2 A"),
-        _buildBox(Colors.blue.shade300, "BR $b V", "B $b V", "C3 $c3 A"),
+        _buildBox(Colors.red, "RY $r V", "R $r V", "C1 $c1 A"),
+        _buildBox(Colors.yellow, "YB $y V", "Y $y V", "C2 $c2 A"),
+        _buildBox(Colors.blueAccent, "BR $b V", "B $b V", "C3 $c3 A"),
       ],
     );
   }

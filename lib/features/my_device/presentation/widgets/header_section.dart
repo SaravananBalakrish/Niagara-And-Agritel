@@ -13,7 +13,7 @@ class HeaderSection extends StatelessWidget {
         const Icon(Icons.call, color: Colors.blue),
         Expanded(
           child: Center(
-            child: Text(ctrlName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            child: Text(ctrlName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white)),
           ),
         ),
         Icon(

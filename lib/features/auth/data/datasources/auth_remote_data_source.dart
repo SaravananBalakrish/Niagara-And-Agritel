@@ -49,7 +49,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         print('Error fetching device info: $e');
       }
 
-      final response = await apiClient.post(ApiUrls.loginWithPasswordUrl, body: {
+      final response = await apiClient.post(ApiUrls.loginWithOtpUrl, body: {
         'mobileNumber': mobileNumber,
         'password': password,
         'deviceToken': deviceToken,

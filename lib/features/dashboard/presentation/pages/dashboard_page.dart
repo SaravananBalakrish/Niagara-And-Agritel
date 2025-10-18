@@ -3,12 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
+import '../../../my_device/presentation/widgets/actions_section.dart';
+import '../../../my_device/presentation/widgets/ctrl_display.dart';
+import '../../../my_device/presentation/widgets/header_section.dart';
+import '../../../my_device/presentation/widgets/motor_valve_section.dart';
+import '../../../my_device/presentation/widgets/pressure_section.dart';
+import '../../../my_device/presentation/widgets/ryb_section.dart';
+import '../../../my_device/presentation/widgets/sync_section.dart';
+import '../../../my_device/presentation/widgets/timer_section.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
 
@@ -74,7 +83,7 @@ class DashboardPage extends StatelessWidget {
                     print("selectedController :: $selectedController");
 
                     return Scaffold(
-                      appBar: AppBar(
+                       appBar: AppBar(
                         title: Container(
                           width: 140,
                           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -169,38 +178,103 @@ class DashboardPage extends StatelessWidget {
                         ),
                       ),
                       body: selectedController == null
-                          ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(height: 16),
-                            Text("Select a controller..."),
-                          ],
+                          ?  Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Theme.of(context).colorScheme.primaryContainer,
+                                Colors.black87,
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text("Select a controller..."),
+                            ],
+                          ),
                         ),
                       )
                           : SingleChildScrollView(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('$selectedController'),
-                            IconButton(
-                              icon: const Icon(Icons.copy, size: 20),
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: selectedController.toString()));
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Copied to clipboard'),
-                                      duration: Duration(seconds: 1),
-                                    ),
-                                  );
-                                }
-                              },
-                              tooltip: 'Copy to clipboard',
+                         child: Container(
+                           decoration: BoxDecoration(
+                             gradient: LinearGradient(
+                               begin: Alignment.topCenter,
+                               end: Alignment.bottomRight,
+                               colors: [
+                                 Theme.of(context).colorScheme.primaryContainer,
+                                 Colors.black87,
+                               ],
+                             ),
+                           ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child:    GlassCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  HeaderSection(
+                                      ctrlName: selectedController.deviceName,
+                                      isMqttConnected: selectedController.ctrlStatusFlag == '1'),
+                                  const SizedBox(height: 8),
+                                  SyncSection(
+                                      liveSync: selectedController.livesyncTime, smsSync: selectedController.msgDesc),
+                               const SizedBox(height: 8),
+                                  GlassCard(
+                                    child: CtrlDisplay(
+                                        signal: 50,
+                                        battery: 50,
+                                        status: selectedController.status,
+                                        vrb: 456,
+                                        amp: 200),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  RYBSection(
+                                      r: selectedController.liveMessage.rVoltage,
+                                      y: selectedController.liveMessage.yVoltage,
+                                      b: selectedController.liveMessage.bVoltage,
+                                      c1:selectedController.liveMessage.rCurrent,
+                                      c2: selectedController.liveMessage.yCurrent,
+                                      c3: selectedController.liveMessage.bCurrent,),
+                                  const SizedBox(height: 8),
+                              
+                                  MotorValveSection(
+                                      motorOn: selectedController.liveMessage.motorOnOff == "1", valveOn:  selectedController.liveMessage.valveOnOff == "1"),
+                                  const SizedBox(height: 8),
+                                  PressureSection(
+                                      prsIn: selectedController.liveMessage.prsIn,
+                                      prsOut: selectedController.liveMessage.prsOut,
+                                      activeZone: selectedController.zoneNo),
+                                  const SizedBox(height: 8),
+                                  TimerSection(
+                                      setTime: selectedController.setFlow,
+                                      remainingTime: selectedController.remFlow),
+                                  const SizedBox(height: 8),
+                                  const ActionsSection(),
+                                  // IconButton(
+                                  //   icon: const Icon(Icons.copy, size: 20),
+                                  //   onPressed: () {
+                                  //     Clipboard.setData(ClipboardData(text: selectedController.toString()));
+                                  //     if (context.mounted) {
+                                  //       ScaffoldMessenger.of(context).showSnackBar(
+                                  //         const SnackBar(
+                                  //           content: Text('Copied to clipboard'),
+                                  //           duration: Duration(seconds: 1),
+                                  //         ),
+                                  //       );
+                                  //     }
+                                  //   },
+                                  //   tooltip: 'Copy to clipboard',
+                                  // ),
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -236,8 +310,7 @@ class DashboardPage extends StatelessWidget {
   }
 }
 
-/*
-class MyDevicePage extends StatelessWidget {
+/*class MyDevicePage extends StatelessWidget {
   const MyDevicePage({super.key});
 
   @override

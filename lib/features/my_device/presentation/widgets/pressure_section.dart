@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 
 class PressureSection extends StatelessWidget {
-  final double prsIn;
-  final double prsOut;
+  final String prsIn;
+  final String prsOut;
   final String activeZone;
 
   const PressureSection({
@@ -14,12 +15,12 @@ class PressureSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return  Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text("Prs IN: $prsIn"),
-        Text(activeZone, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text("Prs OUT: $prsOut"),
+        Text("Prs IN: $prsIn",style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
+        Text(activeZone, style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.green)),
+        Text("Prs OUT: $prsOut",style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),
       ],
     );
   }

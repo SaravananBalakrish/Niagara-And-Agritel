@@ -21,9 +21,9 @@ class CtrlDisplay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Color(0xFFC1F629),
+        // color: Color(0xFFC1F629),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all()
+        // border: Border.all()
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -32,16 +32,16 @@ class CtrlDisplay extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(children: [
-                const Icon(Icons.signal_cellular_alt),
-                Text("$signal%"),
+                const Icon(Icons.signal_cellular_alt,color: Color(0xFFC1F629)),
+                Text("$signal%",style: TextStyle(color: Color(0xFFC1F629),fontWeight: FontWeight.bold),),
               ]),
                Column(children: [
-              Text(status, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text("VRB: $vrb  AMP: $amp"),
+              Text(status, style: const TextStyle(fontWeight: FontWeight.bold,color: Color(0xFFC1F629))),
+              Text("VRB: $vrb  AMP: $amp",style: TextStyle(color: Color(0xFFC1F629),fontWeight: FontWeight.bold),),
               ]),
               Column(children: [
-                const Icon(Icons.battery_full),
-                Text("$battery%"),
+                const Icon(Icons.battery_full, color: Color(0xFFC1F629),),
+                Text("$battery%",style: TextStyle(color: Color(0xFFC1F629),fontWeight: FontWeight.bold),),
               ]),
             ],
           ),

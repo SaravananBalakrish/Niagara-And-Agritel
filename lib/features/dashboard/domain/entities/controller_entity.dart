@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
+
+import 'livemessage_entity.dart';
 
 class ProgramEntity extends Equatable {
   final int programId;
@@ -27,7 +31,7 @@ class ControllerEntity extends Equatable {
   final String status1;
   final String msgcode;
   final String ctrlLatestMsg;
-  final String liveMessage;
+  final LiveMessageEntity liveMessage;
   final String relaystatus;
   final String operationMode;
   final String gprsMode;
@@ -147,3 +151,4 @@ class ControllerEntity extends Equatable {
     flowRate,
   ];
 }
+
