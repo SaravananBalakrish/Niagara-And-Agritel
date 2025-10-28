@@ -1,3 +1,5 @@
+import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/live_message_model.dart';
+
 import '../../domain/entities/controller_entity.dart';
 import 'dart:convert'; // Add this import for jsonDecode
 
@@ -64,6 +66,8 @@ class ControllerModel extends ControllerEntity {
 
   factory ControllerModel.fromJson(Map<String, dynamic> json) {
 
+    print("liveMessage :: ${json['liveMessage']}");
+
     List<ProgramModel> parsedProgramList;
     final programListRaw = json['programList'];
     if (programListRaw is String) {
@@ -83,6 +87,8 @@ class ControllerModel extends ControllerEntity {
     } else {
       parsedProgramList = const [];
     }
+    
+    
 
     return ControllerModel(
       userDeviceId: json['userDeviceId'],
@@ -96,7 +102,7 @@ class ControllerModel extends ControllerEntity {
       status1: json['status1'],
       msgcode: json['msgcode'],
       ctrlLatestMsg: json['ctrlLatestMsg'],
-      liveMessage: json['liveMessage'],
+      liveMessage: LiveMessageModel.fromLiveMessage(json['liveMessage']),
       relaystatus: json['relaystatus'],
       operationMode: json['operationMode'],
       gprsMode: json['gprsMode'],

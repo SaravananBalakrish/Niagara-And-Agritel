@@ -1,7 +1,9 @@
+// lib/features/dashboard/presentation/pages/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -9,6 +11,15 @@ import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
+import '../../../my_device/presentation/widgets/actions_section.dart';
+import '../../../my_device/presentation/widgets/ctrl_display.dart';
+import '../../../my_device/presentation/widgets/header_section.dart';
+import '../../../my_device/presentation/widgets/latestmsg_section.dart';
+import '../../../my_device/presentation/widgets/motor_valve_section.dart';
+import '../../../my_device/presentation/widgets/pressure_section.dart';
+import '../../../my_device/presentation/widgets/ryb_section.dart';
+import '../../../my_device/presentation/widgets/sync_section.dart';
+import '../../../my_device/presentation/widgets/timer_section.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
 
@@ -77,15 +88,15 @@ class DashboardPage extends StatelessWidget {
                     print("selectedController :: $selectedController");
 
                     return Scaffold(
-                      appBar: AppBar(
+                       appBar: AppBar(
                         title: Container(
                           width: 140,
                           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(6),
                           ),
-                          alignment: Alignment.center,
+                           alignment: Alignment.center,
                           child: Image.asset(
                             NiagaraCommonImages.logoSmall,
                           ),
@@ -183,29 +194,121 @@ class DashboardPage extends StatelessWidget {
                           ],
                         ),
                       )
-                          : SingleChildScrollView(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('$selectedController'),
-                            IconButton(
-                              icon: const Icon(Icons.copy, size: 20),
-                              onPressed: () {
-                                Clipboard.setData(ClipboardData(text: selectedController.toString()));
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Copied to clipboard'),
-                                      duration: Duration(seconds: 1),
-                                    ),
-                                  );
-                                }
-                              },
-                              tooltip: 'Copy to clipboard',
+                          : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final width = constraints.maxWidth;
+                          final height = constraints.maxHeight;
+
+                          int modelCheck = ([1, 5, ].contains(selectedController?.modelId)) ? 300 : 120;
+                          print("modelCheck:$modelCheck");
+                           double scale(double size) => size * (width / modelCheck);
+
+                          return Container(
+                            width: width,
+                            height: height,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Theme.of(context).colorScheme.primaryContainer,
+                                  Colors.black87,
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
+                            child: selectedController == null
+                                ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const CircularProgressIndicator(),
+                                  SizedBox(height: scale(16)),
+                                  Text(
+                                    "Select a controller...",
+                                    style: TextStyle(
+                                      fontSize: scale(14),
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                                : SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.all(scale(2)),
+                                child: GlassCard(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      HeaderSection(
+                                        ctrlName: selectedController.deviceName,
+                                        isMqttConnected:
+                                        selectedController.ctrlStatusFlag == '1',
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      SyncSection(
+                                        liveSync: selectedController.livesyncTime,
+                                        smsSync: selectedController.msgDesc,
+                                        model: selectedController.modelId,
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      GlassCard(
+                                        child: CtrlDisplay(
+                                          signal: 50,
+                                          battery: 50,
+                                          status: selectedController.status,
+                                          vrb: 456,
+                                          amp: 200,
+                                        ),
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      RYBSection(
+                                        r: selectedController.liveMessage.rVoltage,
+                                        y: selectedController.liveMessage.yVoltage,
+                                        b: selectedController.liveMessage.bVoltage,
+                                        c1: selectedController.liveMessage.rCurrent,
+                                        c2: selectedController.liveMessage.yCurrent,
+                                        c3: selectedController.liveMessage.bCurrent,
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      MotorValveSection(
+                                        motorOn: selectedController.liveMessage.motorOnOff,
+                                        motorOn2: selectedController.liveMessage.valveOnOff,
+                                        valveOn: selectedController.liveMessage.valveOnOff,
+                                        model: selectedController.modelId,
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      if ([1, 5].contains(selectedController.modelId))
+                                        Column(
+                                          children: [
+                                            PressureSection(
+                                              prsIn: selectedController.liveMessage.prsIn,
+                                              prsOut: selectedController.liveMessage.prsOut,
+                                              activeZone: selectedController.zoneNo,
+                                              fertlizer: '',
+                                            ),
+                                            SizedBox(height: scale(8)),
+                                            TimerSection(
+                                              setTime: selectedController.setFlow,
+                                              remainingTime: selectedController.remFlow,
+                                            ),
+
+                                          ],
+                                        ),
+                                      LatestMsgSection(
+                                        msg: ([1, 5].contains(selectedController.modelId))
+                                            ? selectedController.msgDesc
+                                            : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
+                                      ),
+                                      SizedBox(height: scale(8)),
+                                      ActionsSection(model: selectedController.modelId),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   } else if (dashboardState is DashboardLoading) {
