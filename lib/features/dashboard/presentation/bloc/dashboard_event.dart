@@ -37,3 +37,7 @@ class SelectControllerEvent extends DashboardEvent {
   @override
   List<Object?> get props => [controllerIndex];
 }
+
+class ResetDashboardSelectionEvent extends DashboardEvent {
+  @override List<Object?> get props => [];
+}

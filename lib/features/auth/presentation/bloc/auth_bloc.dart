@@ -14,6 +14,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final VerifyOtp verifyOtp;
   final Logout logout;
   final CheckPhoneNumber checkPhoneNumber;
+  final SignUp signUp;
+  final UpdateProfile updateProfile;
   final NotificationService _notificationService = di.sl<NotificationService>();
   // Remove: final DashboardBloc _dashboardBloc = di.sl<DashboardBloc>(); // No longer needed
 
@@ -23,6 +25,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.verifyOtp,
     required this.logout,
     required this.checkPhoneNumber,
+    required this.signUp,
+    required this.updateProfile,
   }) : super(AuthInitial()) {
 
     on<LoginWithPasswordEvent>((event, emit) async {
@@ -131,12 +135,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cachedAuthData = await localDataSource.getCachedAuthData();
       if (cachedAuthData != null) {
         emit(Authenticated(cachedAuthData));
-        // Remove: _dashboardBloc.add(FetchDashboardGroupsEvent(cachedAuthData.userDetails.id));
-        _notificationService.showNotification(
+       /* _notificationService.showNotification(
           title: 'Auto-Login',
           body: 'Welcome back, ${cachedAuthData.userDetails.name}!',
           payload: 'auto_login',
-        );
+        );*/
       } else {
         emit(AuthInitial());
       }
@@ -166,6 +169,42 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 ? 'Phone number ${event.params.phone} is registered.'
                 : 'Phone number ${event.params.phone} is not registered.',
             payload: 'check_phone_result',
+          );
+        },
+      );
+    });
+
+    on<SignUpEvent>((event, emit) async {
+      emit(AuthLoading());
+      final result = await signUp(event.params);
+      result.fold(
+            (failure) => emit(failure is AuthFailure
+            ? AuthError(message: failure.message, code: failure.code)
+            : AuthError(message: failure.message)),
+            (authData) {
+          emit(Authenticated(authData));
+          _notificationService.showNotification(
+            title: 'Sign Up Successful',
+            body: 'Welcome, ${authData.userDetails.name}!',
+            payload: 'signup_success',
+          );
+        },
+      );
+    });
+
+    on<UpdateProfileEvent>((event, emit) async {
+      emit(AuthLoading());
+      final result = await updateProfile(event.params);
+      result.fold(
+            (failure) => emit(failure is AuthFailure
+            ? AuthError(message: failure.message, code: failure.code)
+            : AuthError(message: failure.message)),
+            (authData) {
+          emit(Authenticated(authData)); // Re-emit updated auth state
+          _notificationService.showNotification(
+            title: 'Profile Updated',
+            body: 'Your profile has been updated successfully.',
+            payload: 'profile_updated',
           );
         },
       );

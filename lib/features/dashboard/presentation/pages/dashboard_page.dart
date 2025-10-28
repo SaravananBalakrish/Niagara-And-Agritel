@@ -1,8 +1,8 @@
-// lib/features/dashboard/presentation/pages/dashboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -17,22 +17,27 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final bloc = di.GetIt.instance.get<DashboardBloc>();
-        final authState = context.read<AuthBloc>().state;
-        if (authState is Authenticated) {
-          if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
-            bloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
-          }
+    final bloc = di.GetIt.instance.get<DashboardBloc>();
+    final authState = context.read<AuthBloc>().state;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!bloc.isClosed && authState is Authenticated) {
+        if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
+          bloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
         }
-        return bloc;
-      },
+        bloc.add(ResetDashboardSelectionEvent());
+      }
+    });
+
+    return BlocProvider.value(
+      value: bloc,
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is Authenticated) {
             final dashboardBloc = context.read<DashboardBloc>();
-            if (dashboardBloc.state is! DashboardLoading && dashboardBloc.state is! DashboardGroupsLoaded) {
+            if (!dashboardBloc.isClosed &&
+                dashboardBloc.state is! DashboardLoading &&
+                dashboardBloc.state is! DashboardGroupsLoaded) {
               dashboardBloc.add(FetchDashboardGroupsEvent(state.user.userDetails.id));
             }
           } else if (state is LoggedOut) {
@@ -45,10 +50,8 @@ class DashboardPage extends StatelessWidget {
               return BlocBuilder<DashboardBloc, DashboardState>(
                 builder: (context, dashboardState) {
                   if (dashboardState is DashboardGroupsLoaded) {
-                    // Assume bloc handles initial selection; if not, dispatch here once
                     final bloc = context.read<DashboardBloc>();
                     if (dashboardState.selectedGroupId == null && dashboardState.groups.isNotEmpty) {
-                      // Dispatch once to select first group
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (!bloc.isClosed) {
                           bloc.add(SelectGroupEvent(dashboardState.groups[0].userGroupId));
@@ -84,7 +87,7 @@ class DashboardPage extends StatelessWidget {
                           ),
                           alignment: Alignment.center,
                           child: Image.asset(
-                            "assets/images/common/niagara/niagara_logo_small.png",
+                            NiagaraCommonImages.logoSmall,
                           ),
                         ),
                         bottom: PreferredSize(
@@ -93,35 +96,40 @@ class DashboardPage extends StatelessWidget {
                             color: Theme.of(context).appBarTheme.backgroundColor,
                             child: Row(
                               children: [
-                                PopupMenuButton<int>(
-                                  icon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        selectedGroup.groupName,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                if(dashboardState.groups.isNotEmpty)
+                                  if(dashboardState.groups.length > 1)
+                                    PopupMenuButton<int>(
+                                      icon: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            selectedGroup.groupName,
+                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                          ),
+                                          const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                        ],
                                       ),
-                                      const Icon(Icons.arrow_drop_down, color: Colors.white),
-                                    ],
-                                  ),
-                                  onSelected: (groupId) {
-                                    final bloc = context.read<DashboardBloc>();
-                                    if (!bloc.isClosed) {
-                                      final userId = selectedGroup.userId;
-                                      if (!dashboardState.groupControllers.containsKey(groupId)) {
-                                        bloc.add(FetchControllersEvent(userId, groupId));
-                                      }
-                                      bloc.add(SelectGroupEvent(groupId));
-                                    }
-                                  },
-                                  itemBuilder: (context) => dashboardState.groups.map((group) => PopupMenuItem<int>(
-                                    value: group.userGroupId,
-                                    child: Text(group.groupName),
-                                  )).toList(),
-                                ),
-                                Container(width: 1, height: 20, color: Colors.white54,),
+                                      onSelected: (groupId) {
+                                        final bloc = context.read<DashboardBloc>();
+                                        if (!bloc.isClosed) {
+                                          final userId = selectedGroup.userId;
+                                          if (!dashboardState.groupControllers.containsKey(groupId)) {
+                                            bloc.add(FetchControllersEvent(userId, groupId));
+                                          }
+                                          bloc.add(SelectGroupEvent(groupId));
+                                        }
+                                      },
+                                      itemBuilder: (context) => dashboardState.groups.map((group) => PopupMenuItem<int>(
+                                        value: group.userGroupId,
+                                        child: Text(group.groupName),
+                                      )).toList(),
+                                    )
+                                  else
+                                    Text(dashboardState.groups[0].groupName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                if(dashboardState.groups.length > 1)
+                                  Container(width: 1, height: 20, color: Colors.white54,),
                                 if (controllers.isNotEmpty)
-                                  if (controllers.isNotEmpty)
+                                  if(controllers.length > 1)
                                     PopupMenuButton<int>(
                                       enabled: controllers.isNotEmpty,
                                       icon: Row(
@@ -145,24 +153,20 @@ class DashboardPage extends StatelessWidget {
                                           .map<PopupMenuEntry<int>>((entry) {
                                         final index = entry.key;
                                         final ctrl = entry.value;
-                                        final isSelected = index == effectiveIndex; // Highlight current
                                         return PopupMenuItem<int>(
                                           value: index,
-                                          child: Row(
-                                            children: [
-                                              Text(ctrl.deviceName),
-                                              if (isSelected) const Icon(Icons.check, size: 16, color: Colors.green),
-                                            ],
-                                          ),
+                                          child: Text(ctrl.deviceName),
                                         );
                                       }).toList()
-                                          : <PopupMenuEntry<int>>[
+                                          : [
                                         const PopupMenuItem<int>(
                                           enabled: false,
                                           child: Text('No controllers available'),
                                         )
                                       ],
-                                    ),
+                                    )
+                                  else
+                                    Text(controllers[0].deviceName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
                               ],
                             ),
                           ),

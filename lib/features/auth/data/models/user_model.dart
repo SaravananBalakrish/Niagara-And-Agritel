@@ -36,10 +36,7 @@ class RegisterDetailsModel extends RegisterDetailsEntity {
       mqttIPAddress: json['mqttIPAddress'] as String? ?? '',
       mqttUserName: json['mqttUserName'] as String? ?? '',
       mqttPassword: json['mqttPassword'] as String? ?? '',
-      groupDetails: (json['groupDetails'] as List<dynamic>?)
-          ?.map((item) => GroupDetails.fromJson(item as Map<String, dynamic>))
-          .toList() ??
-          [],
+      groupDetails: (json['groupDetails'] as List<dynamic>?)?.map((item) => GroupDetails.fromJson(item as Map<String, dynamic>)).toList() ?? [],
     );
   }
 

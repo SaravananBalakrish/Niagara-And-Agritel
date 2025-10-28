@@ -15,6 +15,8 @@ class MockSendOtp extends Mock implements SendOtp {}
 class MockVerifyOtp extends Mock implements VerifyOtp {}
 class MockLogout extends Mock implements Logout {}
 class MockCheckPhoneNumber extends Mock implements CheckPhoneNumber {}
+class MockSignUp extends Mock implements SignUp {}
+class MockUpdateProfile extends Mock implements UpdateProfile {}
 
 void main() {
   late AuthBloc authBloc;
@@ -23,6 +25,8 @@ void main() {
   late MockVerifyOtp mockVerifyOtp;
   late MockCheckPhoneNumber mockCheckPhoneNumber;
   late MockLogout mockLogout;
+  late MockSignUp mockSignUp;
+  late MockUpdateProfile mockUpdateProfile;
 
   setUp(() {
     mockLoginWithPassword = MockLoginWithPassword();
@@ -30,12 +34,16 @@ void main() {
     mockVerifyOtp = MockVerifyOtp();
     mockLogout = MockLogout();
     mockCheckPhoneNumber = MockCheckPhoneNumber();
+    mockSignUp = MockSignUp();
+    mockUpdateProfile = MockUpdateProfile();
     authBloc = AuthBloc(
       loginWithPassword: mockLoginWithPassword,
       sendOtp: mockSendOtp,
       verifyOtp: mockVerifyOtp,
       logout: mockLogout,
-      checkPhoneNumber: mockCheckPhoneNumber
+      checkPhoneNumber: mockCheckPhoneNumber,
+      signUp: mockSignUp,
+      updateProfile: mockUpdateProfile,
     );
   });
 

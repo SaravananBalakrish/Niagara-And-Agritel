@@ -1,4 +1,3 @@
-// lib/core/widgets/app_drawer.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -25,22 +24,15 @@ class AppDrawer extends StatelessWidget {
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
               String userName = 'Guest';
-              String? userEmail;
-              int? userId;
+              String? mobile;
 
               if (authState is Authenticated) {
                 userName = authState.user.userDetails.name;
-                userEmail = authState.user.userDetails.email;
-                userId = authState.user.userDetails.id;
-                final dashboardBloc = context.read<DashboardBloc>();
-                if (dashboardBloc.state is! DashboardLoading && dashboardBloc.state is! DashboardGroupsLoaded) {
-                  dashboardBloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
-                }
-                // context.read<DashboardBloc>().add(FetchDashboardGroupsEvent(userId));
-                // Trigger fetching groups only once using BlocListener in parent
+                mobile = authState.user.userDetails.mobile;
               }
 
               return UserAccountsDrawerHeader(
+                currentAccountPictureSize: const Size(double.maxFinite, 70),
                 accountName: Text(
                   userName,
                   style: theme.textTheme.titleLarge?.copyWith(
@@ -48,24 +40,58 @@ class AppDrawer extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                onDetailsPressed: () {
-                  context.push(RouteConstants.signUp);
-                },
                 accountEmail: Text(
-                  userEmail ?? 'No email',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+                  mobile != null && mobile.isNotEmpty ? mobile : '+91 123456789',
+                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
                 ),
-                currentAccountPicture: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    userName.isNotEmpty ? userName[0].toUpperCase() : 'G',
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: theme.primaryColor,
+                currentAccountPicture: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        CircleAvatar(
+                          radius: 35,
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          child: Text(
+                            userName.isNotEmpty ? userName[0].toUpperCase() : 'G',
+                            style: TextStyle(
+                              fontSize: 22,  // Adjusted for smaller radius
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.3),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        context.push(RouteConstants.editProfile);
+                      },
+                      icon: const Icon(Icons.edit, size: 16, color: Colors.white70),
+                      label: const Text(
+                        'Edit Profile',
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        foregroundColor: Colors.white70,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
@@ -75,14 +101,14 @@ class AppDrawer extends StatelessWidget {
             context,
             icon: Icons.home,
             title: 'Home',
-            route: RouteConstants.dashboard,
+            route: RouteConstants.dealerDashboard,
           ),
           // Groups (Dynamic Content)
           _buildDrawerItem(
             context,
             icon: Icons.group_work,
             title: 'Groups',
-            route: RouteConstants.dashboard,
+            route: RouteConstants.groups,
           ),
           const Divider(),
           // Sub Users
@@ -90,14 +116,14 @@ class AppDrawer extends StatelessWidget {
             context,
             icon: Icons.group,
             title: 'Sub Users',
-            // route: RouteConstants.subUsers, // Add this route
+            route: RouteConstants.subUsers,
           ),
           // Chat
           _buildDrawerItem(
             context,
             icon: Icons.chat,
             title: 'Chat',
-            // route: RouteConstants.chat, // Add this route
+            route: RouteConstants.chat,
           ),
           // Reminder
           _buildDrawerItem(
@@ -117,7 +143,8 @@ class AppDrawer extends StatelessWidget {
                   title: 'Logout',
                   onTap: () {
                     context.read<AuthBloc>().add(LogoutEvent());
-                    Navigator.pop(context);
+                    context.go(RouteConstants.login);
+                    // context.pop();
                   },
                 );
               }

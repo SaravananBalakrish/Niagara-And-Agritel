@@ -94,5 +94,15 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         }
       }
     });
+
+    on<ResetDashboardSelectionEvent>((event, emit) async {
+      if (state is DashboardGroupsLoaded) {
+        final currentState = state as DashboardGroupsLoaded;
+        emit(currentState.copyWith(
+          selectedGroupId: null,
+          selectedControllerIndex: null,
+        ));
+      }
+    });
   }
 }

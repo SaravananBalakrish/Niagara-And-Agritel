@@ -1,4 +1,3 @@
-// features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,129 +27,51 @@ class DealerDashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final bloc = di.GetIt.instance.get<DashboardBloc>();
-        final authState = context.read<AuthBloc>().state;
-        if (authState is Authenticated) {
-          // Trigger fetch on bloc creation if authenticated
-          if (bloc.state is! DashboardLoading &&
-              bloc.state is! DashboardGroupsLoaded) {
-            bloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
-          }
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is LoggedOut) {
+          context.go(RouteConstants.login);
         }
-        return bloc;
       },
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
-          title: const Text('Home', style: TextStyle(fontWeight: FontWeight.w600)),
-          flexibleSpace: _buildAppBarBackground(),
-        ),
-        drawer: const AppDrawer(),
-        body: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is Authenticated) {
-              final dashboardBloc = context.read<DashboardBloc>();
-              if (dashboardBloc.state is! DashboardLoading && dashboardBloc.state is! DashboardGroupsLoaded) {
-                dashboardBloc.add(FetchDashboardGroupsEvent(state.user.userDetails.id));
-              }
-            } else if (state is LoggedOut) {
-              context.go(RouteConstants.login);
-            }
-          },
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, authState) {
-              if (authState is Authenticated) {
-                return BlocBuilder<DashboardBloc, DashboardState>(
-                  builder: (context, dashboardState) {
-                    if (dashboardState is DashboardGroupsLoaded) {
-                      return Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Theme.of(context).colorScheme.primaryContainer,
-                                  Colors.black87,
-                                ],
-                              ),
-                            ),
-                          ),
-                          Positioned.fill(child: _buildBackgroundDecorations()),
-                          SafeArea(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: GridView.builder(
-                                itemCount: _tabs.length,
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1.2,
-                                ),
-                                itemBuilder: (context, index) {
-                                  final tab = _tabs[index];
-                                  final label = tab['label'] as String;
-                                  final route = tab['route'] as String;
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, authState) {
+          if (authState is Authenticated) {
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: GridView.builder(
+                  itemCount: _tabs.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.2,
+                  ),
+                  itemBuilder: (context, index) {
+                    final tab = _tabs[index];
+                    final label = tab['label'] as String;
+                    final route = tab['route'] as String;
 
-                                  return _glossyCard(
-                                    context,
-                                    icon: tab['icon'] as IconData,
-                                    label: label,
-                                    onTap: () {
-                                      context.push(route);
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    } else if (dashboardState is DashboardLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (dashboardState is DashboardError) {
-                      return Center(child: Text('Error: ${dashboardState.message}'));
-                    }
-                    return const SizedBox.shrink();  // Fallback
+                    return _glossyCard(
+                      context,
+                      icon: tab['icon'] as IconData,
+                      label: label,
+                      onTap: () {
+                        context.push(route);
+                      },
+                    );
                   },
-                );
-              } else if (authState is AuthLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (authState is AuthError) {
-                return Center(child: Column(children: [Text('Error: ${authState.message}'), ElevatedButton(onPressed: () => context.read<AuthBloc>().add(CheckCachedUserEvent()), child: Text('Retry'))]));
-              } else {
-                return const Center(child: Text('Please log in'));
-              }
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAppBarBackground() {
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withOpacity(0.06),
-                Colors.white.withOpacity(0.02)
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+                ),
+              ),
+            );
+          } else if (authState is AuthLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (authState is AuthError) {
+            return Center(child: Column(children: [Text('Error: ${authState.message}'), ElevatedButton(onPressed: () => context.read<AuthBloc>().add(CheckCachedUserEvent()), child: Text('Retry'))]));
+          } else {
+            return const Center(child: Text('Please log in'));
+          }
+        },
       ),
     );
   }
@@ -201,41 +122,6 @@ class DealerDashboardPage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildBackgroundDecorations() {
-    return Stack(
-      children: [
-        Positioned(
-          top: -80,
-          left: -60,
-          child: Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [Colors.white.withOpacity(0.06), Colors.transparent],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: -100,
-          right: -80,
-          child: Container(
-            width: 320,
-            height: 320,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [Colors.white.withOpacity(0.04), Colors.transparent],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

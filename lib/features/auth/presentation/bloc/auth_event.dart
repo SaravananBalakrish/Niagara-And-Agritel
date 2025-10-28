@@ -44,3 +44,19 @@ class CheckPhoneNumberEvent extends AuthEvent {
   @override
   List<Object?> get props => [params];
 }
+
+class SignUpEvent extends AuthEvent {
+  final SignUpParams params;
+  SignUpEvent(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}
+
+class UpdateProfileEvent extends AuthEvent {
+  final UpdateProfileParams params;
+  UpdateProfileEvent(this.params);
+
+  @override
+  List<Object?> get props => [params];
+}

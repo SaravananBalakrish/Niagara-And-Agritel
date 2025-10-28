@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/usecases/login_usecase.dart';
 import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
 
@@ -79,6 +80,32 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(AuthFailure(code: e.statusCode, message: e.message));
     } catch (e) {
       return Left(ServerFailure('Failed to check phone number: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, RegisterDetailsEntity>> signUp(SignUpParams params) async {
+    try {
+      final authData = await remote.signUp(params);
+      await local.cacheAuthData(authData); // Cache after successful sign-up
+      return Right(authData);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(code: e.statusCode, message: e.message));
+    } catch (e) {
+      return Left(ServerFailure('Sign up failed: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, RegisterDetailsEntity>> updateProfile(UpdateProfileParams params) async {
+    try {
+      final authData = await remote.updateProfile(params);
+      await local.cacheAuthData(authData);
+      return Right(authData);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(code: e.statusCode, message: e.message));
+    } catch (e) {
+      return Left(ServerFailure('Update failed: $e'));
     }
   }
 }

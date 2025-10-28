@@ -1,19 +1,25 @@
 
 
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/chat.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/groups.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/sub_users.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
+import 'core/widgets/app_drawer.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
+import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
 import 'features/my_device/presentation/pages/my_device_page.dart';
 
@@ -34,15 +40,15 @@ class GoRouterRefreshStream extends ChangeNotifier {
 
 class AppRouter {
   late final GoRouter router;
-  final AuthBloc authBloc; // Add AuthBloc parameter
-//
+  final AuthBloc authBloc;
+
   AppRouter({required this.authBloc}) {
     router = GoRouter(
-      initialLocation: RouteConstants.myDevicePage,
+      initialLocation: RouteConstants.login,
       debugLogDiagnostics: true,
-      refreshListenable: GoRouterRefreshStream(authBloc.stream), // Use provided authBloc
+      refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (context, state) {
-        final authState = authBloc.state; // Use provided authBloc
+        final authState = authBloc.state;
         final isLoggedIn = authState is Authenticated;
         final isOtpSent = authState is OtpSent;
 
@@ -57,7 +63,7 @@ class AppRouter {
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
-          // return RouteConstants.dashboard;
+          return RouteConstants.dashboard;
           return RouteConstants.dealerDashboard;
         }
         if (!isLoggedIn &&
@@ -72,7 +78,6 @@ class AppRouter {
         return null;
       },
       routes: [
-        //RouteConstants.signUp
         GoRoute(
           name: 'login',
           path: RouteConstants.login,
@@ -88,8 +93,30 @@ class AppRouter {
           name: 'signUp',
           path: RouteConstants.signUp,
           builder: (context, state) {
-            print('Building LoginPage, AuthBloc state: ${authBloc.state}');
-            return const SignUpPage();
+            print('Building SignUpPage, AuthBloc state: ${authBloc.state}');
+            return BlocProvider.value(
+              value: authBloc,
+              child: UserProfileForm(
+                isEdit: false,
+              ),
+            );
+          },
+        ),
+        GoRoute(
+          name: 'editProfile',
+          path: RouteConstants.editProfile,
+          builder: (context, state) {
+            print('Building EditProfile, AuthBloc state: ${authBloc.state}');
+            final authState = authBloc.state;
+            final initialData = authState is Authenticated ? authState.user.userDetails : null;
+            return BlocProvider.value(
+              value: authBloc,
+              child: UserProfileForm(
+                key: const ValueKey('editProfile'),
+                isEdit: true,
+                initialData: initialData,
+              ),
+            );
           },
         ),
         GoRoute(
@@ -130,12 +157,151 @@ class AppRouter {
           },
         ),
         GoRoute(
-          path: RouteConstants.dealerDashboard,
-          builder: (context, state) => DealerDashboardPage(),
-        ),
-        GoRoute(
           path: RouteConstants.myDevicePage,
           builder: (context, state) => MyDevicePage(),
+        ),
+        ShellRoute(
+          builder: (context, state, child) {
+            final location = state.matchedLocation;
+            String title = 'Dealer Dashboard';
+            if (location == RouteConstants.groups) {
+              title = 'Groups';
+            } else if (location == RouteConstants.subUsers) {
+              title = 'Sub Users';
+            } else if (location == RouteConstants.chat) {
+              title = 'Chat';
+            }
+            return BlocProvider<DashboardBloc>(
+              create: (_) => di.sl<DashboardBloc>(),
+              child: Scaffold(
+                extendBodyBehindAppBar: true,
+                appBar: AppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  centerTitle: true,
+                  title: Text(title),
+                  flexibleSpace: _buildAppBarBackground(),
+                ),
+                drawer: const AppDrawer(),
+                body: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Theme.of(context).colorScheme.primaryContainer,
+                            Colors.black87,
+                          ],
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(child: _buildBackgroundDecorations()),
+                    child
+                  ],
+                ),
+              ),
+            );
+          },
+          routes: [
+            GoRoute(
+              name: 'dealerDashboard',
+              path: RouteConstants.dealerDashboard,
+              builder: (context, state) {
+                return BlocProvider.value(
+                  value: authBloc,
+                  child: const DealerDashboardPage(),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'groups',
+              path: RouteConstants.groups,
+              builder: (context, state) {
+                return BlocProvider.value(
+                  value: authBloc,
+                  child: const Groups(),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'subUsers',
+              path: RouteConstants.subUsers,
+              builder: (context, state) {
+                return BlocProvider.value(
+                  value: authBloc,
+                  child: const SubUsers(),
+                );
+              },
+            ),
+            GoRoute(
+              name: 'chat',
+              path: RouteConstants.chat,
+              builder: (context, state) {
+                return BlocProvider.value(
+                  value: authBloc,
+                  child: const Chat(),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildAppBarBackground() {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.06),
+                Colors.white.withOpacity(0.02)
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildBackgroundDecorations() {
+    return Stack(
+      children: [
+        Positioned(
+          top: -80,
+          left: -60,
+          child: Container(
+            width: 240,
+            height: 240,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [Colors.white.withOpacity(0.06), Colors.transparent],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -100,
+          right: -80,
+          child: Container(
+            width: 320,
+            height: 320,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [Colors.white.withOpacity(0.04), Colors.transparent],
+              ),
+            ),
+          ),
         ),
       ],
     );

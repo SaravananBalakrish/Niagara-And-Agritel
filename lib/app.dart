@@ -92,7 +92,9 @@ class _RootAppState extends State<RootApp> {
             sendOtp: di.sl<SendOtp>(),
             verifyOtp: di.sl<VerifyOtp>(),
             logout: di.sl<Logout>(),
-            checkPhoneNumber: di.sl<CheckPhoneNumber>()
+            checkPhoneNumber: di.sl<CheckPhoneNumber>(),
+            signUp: di.sl<SignUp>(),
+            updateProfile: di.sl<UpdateProfile>(),
           )..add(CheckCachedUserEvent()),
         ),
       ],

@@ -63,8 +63,8 @@ android {
 
     defaultConfig {
         applicationId = "com.niagaraautomations.niagara"
-//        minSdk = flutter.minSdkVersion
-        minSdkVersion = flutter.minSdkVersion
+        minSdk = flutter.minSdkVersion
+//        minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

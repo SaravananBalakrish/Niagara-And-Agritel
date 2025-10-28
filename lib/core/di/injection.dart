@@ -76,6 +76,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => VerifyOtp(sl()));
   sl.registerLazySingleton(() => Logout(sl()));
   sl.registerLazySingleton(() => CheckPhoneNumber(sl()));
+  sl.registerLazySingleton(() => SignUp(sl()));
+  sl.registerLazySingleton(() => UpdateProfile(sl()));
 
   // Bloc
   sl.registerLazySingleton(() => AuthBloc(
@@ -83,7 +85,9 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
     sendOtp: sl(),
     verifyOtp: sl(),
     logout: sl(),
-    checkPhoneNumber: sl()
+    checkPhoneNumber: sl(),
+    signUp: sl(),
+    updateProfile: sl(),
   ));
 
   sl.registerSingleton<NotificationService>(NotificationService());

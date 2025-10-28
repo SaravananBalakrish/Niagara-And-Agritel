@@ -1,0 +1,359 @@
+APi for Niagara Smart drip:
+
+Base URL :
+
+//dev
+public static String baseUrl = "http://192.168.1.134:8080/api/v1/";
+
+dev report
+public static String reportUrl = "http://192.168.1.134:8086/report/";
+
+// Prod
+public static String baseUrl = "http://3.1.62.165:8080/api/v1/";
+
+// prod report
+ public static String reportUrl = "http://3.1.62.165:8086/report/";
+
+
+    @GET("/maps/api/geocode/json?")
+    Call<ResponseBody> getAddress(@Query("latlng") String latlng, @Query("key") String apiKey, @Query("sensor") String sensor);
+
+    @POST("user")
+    Call<ResponseBody> addRegister(@Body RequestBody body);
+
+    @POST("signin")
+    Call<ResponseBody> signIn(@Body RequestBody body);
+
+    @PUT("signout")
+    Call<ResponseBody> logOut(@Body RequestBody body);
+
+    @GET("tracecode/{deviceId}/?type=ctrl")
+    Call<ResponseBody> deviceTrace(@Path("deviceId") String deviceId);
+
+    @POST("verifysim")
+    Call<ResponseBody> simVerification(@Body RequestBody body);
+
+    @POST("controller")
+    Call<ResponseBody> smsVerification(@Body RequestBody body);
+
+    @PUT("forgotpassword")
+    Call<ResponseBody> forgotPassword(@Body RequestBody body);
+
+    @GET("user/{userId}")
+    Call<ResponseBody> getProfile(@Path("userId") String userId);
+
+    @PUT("user")
+    Call<ResponseBody> updateRegister(@Body RequestBody body);
+
+    @GET("dealer/{userId}/category/{categoryId}")
+    Call<ResponseBody> getSellingUnit(@Path("userId") String userId, @Path("categoryId") String categoryId);
+
+    @POST("dealer/sales")
+    Call<ResponseBody> SellingUnit(@Body RequestBody body);
+
+    @GET("dealer/{userId}/tracecode/{deviceId}")
+    Call<ResponseBody> deviceTraceDealer(@Path("userId") String userId, @Path("deviceId") String deviceId);
+
+    @GET("dealer/{userId}/product/{deviceId}/details")
+    Call<ResponseBody> getDealerDetails(@Path("userId") String userId, @Path("deviceId") String deviceId);
+
+    @POST("dealer/controller")
+    Call<ResponseBody> addController(@Body RequestBody body);
+
+    @GET("dealer/{userId}/customer")
+    Call<ResponseBody> getDealerCustomerDetails(@Path("userId") String userId);
+
+    @GET("dealer/{dealerId}/user/{userId}/controller")
+    Call<ResponseBody> getDealerCustomerDeviceDetails(@Path("dealerId") String dealerId, @Path("userId") String userId);
+
+    @GET("user/{mobileno}/details")
+    Call<ResponseBody> getSubUSer(@Path("mobileno") String mobileno);
+
+    @GET("user/{userId}/controller/list")
+    Call<ResponseBody> getControllerList(@Path("userId") String userId);
+
+    @GET("user/{userId}/shareuser/{mSubUserCode}/details")
+    Call<ResponseBody> getSubUserDetails(@Path("userId") String userId, @Path("mSubUserCode") String mSubUserCode);
+
+    @POST("user/share/controller")
+    Call<ResponseBody> addSubUser(@Body RequestBody body);
+
+    @GET("user/{userId}/shareuser/list")
+    Call<ResponseBody> getSubUserList(@Path("userId") String userId);
+
+    @PUT("user/{userId}/shareuser/{shareUserId}")
+    Call<ResponseBody> deleteSubUserDetails(@Path("userId") String userId, @Path("shareUserId") String shareUserId, @Body RequestBody body);
+
+    @PUT("user/share/controller")
+    Call<ResponseBody> updateSubUserDetails(@Body RequestBody body);
+
+    @GET("user/{userId}/cluster")
+    Call<ResponseBody> getGroupValues(@Path("userId") String userId);
+
+    @POST("user/{userId}/cluster")
+    Call<ResponseBody> addGroupValues(@Path("userId") String userId, @Body RequestBody body);
+
+    @PUT("user/{userId}/cluster")
+    Call<ResponseBody> updateGroupValues(@Path("userId") String userId, @Body RequestBody body);
+
+    @DELETE("user/{userId}/cluster/{groupId}")
+    Call<ResponseBody> deleteGroupValues(@Path("userId") String userId, @Path("groupId") String groupId);
+
+    @GET("user/{userId}/invitee/list")
+    Call<ResponseBody> getCusterSharedDevice(@Path("userId") String userId);
+
+    @GET("user/{userId}/share/{shareId}/controller")
+    Call<ResponseBody> getCusterSharedDeviceListItem(@Path("userId") String userId, @Path("shareId") String shareId);
+
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/power/graph?")
+    Call<ResponseBody> getPowerData(@Path("userId") String userId, @Path("subuserId") String subuserId,
+                                    @Path("controllerId") String controllerId, @Query("fromDate") String fromDate);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/zone/graph?")
+    Call<ResponseBody> getValveData(@Path("userId") String userId, @Path("subuserId") String subuserId,
+                                    @Path("controllerId") String controllerId, @Query("fromDate") String fromDate, @Query("programName") String programName);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/manualstatus")
+    Call<ResponseBody> getOnOffStatus(@Path("userId") String userId, @Path("subuserId") String subUserId, @Path("userDeviceId") String shareId,
+                                      @Body RequestBody body);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/manualstatus1")
+    Call<ResponseBody> getOnOffStatus1(@Path("userId") String userId, @Path("subuserId") String subUserId, @Path("userDeviceId") String shareId,
+                                       @Body RequestBody body);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/relaystatus")
+    Call<ResponseBody> getOnOffStatusRelay(@Path("userId") String userId, @Path("subuserId") String subUserId, @Path("userDeviceId") String shareId,
+                                           @Body RequestBody body);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{controllerId}/message")
+    Call<ResponseBody> updateNotification(@Path("userId") String userId, @Path("subuserId") String subUserId, @Path("controllerId") String
+            controllerId, @Body RequestBody body);
+
+    @GET("controller/user/{userId}")
+    Call<ResponseBody> getMyDevicesWithoutGroupList(@Path("userId") String userId);
+
+    @GET("controller/user/{userId}/cluster")
+    Call<ResponseBody> getMyDevicesWithGroupList(@Path("userId") String userId);
+
+    @GET("user/{userId}/cluster/{groupId}/controller")
+    Call<ResponseBody> getMyDevicesWithGroupItemList(@Path("userId") String userId, @Path("groupId") String groupId);
+
+    @GET("{categorylist}")
+    Call<ResponseBody> getSellingDevices(@Path("categorylist") String categorylist);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/view")
+    Call<ResponseBody> getViewControllerCustomerDetails(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("userDeviceId")
+            String userDeviceId);
+
+    @DELETE("user/{userId}/controller/{userDeviceId}")
+    Call<ResponseBody> deleteViewControllerCustomerDetails(@Path("userId") String userId, @Path("userDeviceId") String userDeviceId);
+
+    @PUT("controller")
+    Call<ResponseBody> updateController(@Body RequestBody body);
+
+    @GET("user/{userId}/controller/{controllerId}/program")
+    Call<ResponseBody> getProgramList(@Path("userId") String userId, @Path("controllerId") String controllerId);
+
+    @GET("user/{userId}/controller/{controllerId}/program/{programId}/node")
+    Call<ResponseBody> getProgramsNodes(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("programId") String
+            programId);
+
+    @POST("user/{userId}/controller/{controllerId}/program/{programId}/zone")
+    Call<ResponseBody> addZoneNodes(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("programId") String programId,
+                                    @Body RequestBody body);
+
+    @PUT("user/{userId}/controller/{controllerId}/program/{programId}/zone")
+    Call<ResponseBody> updateZoneNodes(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("programId") String
+            programId, @Body RequestBody body);
+
+    @DELETE("user/{userId}/controller/{controllerId}/program/{programId}/zone/{zoneId}?")
+    Call<ResponseBody> resetZoneNodes(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("programId") String
+            programId, @Path("zoneId") String zoneId, @Query("s1") String s1, @Query("s2") String s2);
+
+    @GET("user/{userId}/controller/{controllerId}/program/{programId}/zone/{zoneNumber}")
+    Call<ResponseBody> getZoneDetails(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("programId") String
+            programId, @Path("zoneNumber") String zoneNumber);
+
+    @GET("tracecode/{deviceId}?type=node")
+    Call<ResponseBody> nodeTrace(@Path("deviceId") String deviceId);
+
+    @POST("node")
+    Call<ResponseBody> addNode(@Body RequestBody body);
+
+    @GET("user/{userId}/node/{nodeId}")
+    Call<ResponseBody> getNodeDetails(@Path("userId") String userId, @Path("nodeId") String nodeId);
+
+    @PUT("user/{userId}/controller/{controllerId}/node/{nodeId}")
+    Call<ResponseBody> updateMappedNodeUpdate(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("nodeId") String
+            nodeId, @Body RequestBody body);
+
+    @PUT("user/{userId}/node/{nodeId}")
+    Call<ResponseBody> updateNodeUpdate(@Path("userId") String userId, @Path("nodeId") String nodeId, @Body RequestBody body);
+
+    @DELETE("user/{userId}/node/{nodeId}")
+    Call<ResponseBody> deleteNodeDetails(@Path("userId") String userId, @Path("nodeId") String nodeId);
+
+    @GET("user/{userId}/controller/{controllerId}/nodeUnMapList")
+    Call<ResponseBody> getNodeList(@Path("userId") String userId, @Path("controllerId") String controllerId);
+
+    @POST("user/{userId}/subuser/{subuserId}/controller/{controllerId}/view/messages/")
+    Call<ResponseBody> viewStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId,
+                                  @Body RequestBody body);
+
+    @POST("user/{userId}/subuser/{subuserId}/controller/{controllerId}/view/resend/messages/")
+    Call<ResponseBody> viewResendStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String
+            controllerId, @Body RequestBody body);
+
+    @GET("user/{userId}/controller/{controllerId}/node/{nodeId}")
+    Call<ResponseBody> getSingleNodeNodeList(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("nodeId") String nodeId);
+
+    @POST("user/{userId}/controller/{controllerId}/node")
+    Call<ResponseBody> addMappedNodeList(@Path("userId") String userId, @Path("controllerId") String controllerId, @Body RequestBody body);
+
+
+    @DELETE("user/{userId}/controller/{controllerId}/node/{nodeId}?")
+    Call<ResponseBody> unMappedNodeDetails(@Path("userId") String userId, @Path("controllerId") String controllerId, @Path("nodeId") String nodeId,
+                                           @Query("sentSms") String sentSms);
+
+    @GET("user/{userId}/node")
+    Call<ResponseBody> getNode(@Path("userId") String userId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/nodelist")
+    Call<ResponseBody> getNodeList(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/call/{call}/livestatus")
+    Call<LiveResponse> getLiveStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId, @Path("call") String call);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/livestatus/stop")
+    Call<ResponseBody> stopLiveStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/zonelistv2")
+    Call<ResponseBody> getZoneList(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/commonsettings")
+    Call<ResponseBody> getCommonSetting(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String
+            controllerId);
+
+    @POST("user/{userId}/subuser/{subuserId}/controller/{controllerId}/commonsettings")
+    Call<ResponseBody> putCommonSetting(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String
+            controllerId, @Body RequestBody body);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{controllerId}/commonsettings")
+    Call<ResponseBody> resetCommonSetting(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String
+            controllerId, @Body RequestBody body);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/menu/{menuId}/settings")
+    Call<ResponseBody> getSettingsMenu(@Path("userId") String userId, @Path("subuserId") String shareUserId, @Path("controllerId") String
+            controllerId, @Path("menuId") int menuId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/message")
+    Call<ResponseBody> getNotificationSettings(@Path("userId") String userId, @Path("subuserId") String shareUserId, @Path("controllerId") String
+            controllerId);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/menu/{referenceId}/settings/{menuId}")
+    Call<ResponseBody> getFinalMenu(@Path("userId") String userId, @Path("subuserId") String shareUserId, @Path("controllerId") String
+            controllerId, @Path("referenceId") int referenceId, @Path("menuId") int menuId);
+
+    @POST("user/{userId}/subuser/{subuserId}/controller/{controllerId}/menu/{referenceId}/settings")
+    Call<ResponseBody> addViewType4(@Path("userId") String userId, @Path("subuserId") String shareId, @Path("controllerId") String controllerId,
+                                    @Path("referenceId") int menuId, @Body RequestBody body);
+
+    @POST("user/{userId}/subuser/{shareUserId}/controller/{controllerId}/menu/{menuId}/hidemenu")
+    Call<ResponseBody> menuHide(@Path("userId") String userId, @Path("shareUserId") String shareUserId, @Path("controllerId") String controllerId,
+                                @Path("menuId") int menuId, @Body RequestBody body);
+
+    @PUT("user/{userId}/subuser/{shareUserId}/controller/{controllerId}/menu/{menuId}/hidemenu")
+    Call<ResponseBody> menuUnHide(@Path("userId") String userId, @Path("shareUserId") String shareUserId, @Path("controllerId") String
+            controllerId, @Path("menuId") int menuId, @Body RequestBody body);
+
+    @GET("user/{userId}/mobileNumber/{mobileNumber}/type/{userType}/username")
+    Call<ResponseBody> getMobileNumberTrace(@Path("userId") String userId, @Path("mobileNumber") String mobileNumber, @Path("userType") String
+            userType);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/dndstatus")
+    Call<ResponseBody> getDNDStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("userDeviceId") String shareId, @Body
+            RequestBody body);
+
+    @GET("user/{userId}/controller/{controllerId}/programs")
+    Call<ResponseBody> getProgramNameList(@Path("userId") String userId, @Path("controllerId") String controllerId);
+
+    @PUT("user/{userId}/subuser/{subuserId}/replace")
+    Call<ResponseBody> replaceController(@Path("userId") String userId, @Path("subuserId") String subuserId, @Body RequestBody body);
+
+    @PUT("productrep")
+    Call<ResponseBody> replaceController1(@Body RequestBody body);
+
+
+    @GET("user/{userId}/subuser/{shareUserId}/controller/{controllerId}/zoneset/{programId}")
+    Call<ResponseBody> getZoneSet(@Path("userId") String userId, @Path("shareUserId") String shareUserId, @Path("controllerId") String
+            controllerId, @Path("programId") String programId);
+
+    @POST("user/{userId}/subuser/{shareUserId}/servicerequest/")
+    Call<ResponseBody> createService(@Path("userId") String userId, @Path("shareUserId") String shareUserId, @Body RequestBody body);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{deviceId}/deviceId/{userDeviceId}/replace")
+    Call<ResponseBody> deviceReplaceTraceDealer(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("deviceId") String
+            deviceId, @Path("userDeviceId") String userDeviceId);
+
+    @GET("productrep/traceProductnew/{traceId}")
+    Call<ResponseBody> deviceReplaceTraceDealer1(@Path("traceId") String traceId);
+
+    @PUT("user/{userId}/dealer/servicerequest/")
+    Call<ResponseBody> updateService(@Path("userId") String userId, @Body RequestBody body);
+
+    @GET("user/{userId}/servicerequest")
+    Call<ResponseBody> getServiceRequestList(@Path("userId") String userId);
+
+    /// CHAT ////
+    @GET("user/{userId}/dealer/list")
+    Call<ResponseBody> getDealerChatListApi(@Path("userId") String userId);
+
+    @GET("user/{userId}/fromUser/{fromUserId}/chat/{chatFlag}")
+    Call<ResponseBody> getChatListApi(@Path("userId") String userId, @Path("fromUserId") String fromUserId, @Path("chatFlag") String chatFlag);
+
+
+    @POST("user/{userId}/dealer/{dealerId}/message")
+    Call<ResponseBody> sendChatMessagApi(@Path("userId") String userId, @Path("dealerId") String dealerId, @Body RequestBody body);
+
+    @GET("user/{userId}/receiver/{dealerId}/chat")
+    Call<ResponseBody> getChatMessageApi(@Path("userId") String userId, @Path("dealerId") String dealerId);
+
+    @GET("admin/{userId}/dealer/list")
+    Call<ResponseBody> getDealerListApi(@Path("userId") String userId);
+
+    @PUT("user/{userId}/subuser/{subuserId}/controller/{userDeviceId}/mode")
+    Call<ResponseBody> getOperationStatus(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("userDeviceId") String shareId,
+                                          @Body RequestBody body);
+
+    @GET("user/{userId}/dealer/call")
+    Call<ResponseBody> getDealerCallListApi(@Path("userId") String userId);
+
+    @POST("user/{userId}/subuser/{subUserId}/controller/messages/")
+    Call<ResponseBody> addFaultSms(@Path("userId") String userId, @Path("subUserId") String subUser, @Body RequestBody body);
+
+    @GET("user/{userId}/subuser/{subUserId}/controller/{controllerId}/messages/")
+    Call<ResponseBody> getFaultMessageList(@Path("userId") String userId, @Path("subUserId") String subUser, @Path("controllerId") String
+            controllerId);
+
+    @GET("/")
+    Call<ResponseBody> getTrace();
+
+    @POST("controller/messages/")
+    Call<ResponseBody> addMqttSms(@Body RequestBody body);
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}")
+    Call<ResponseBody> getLiveUpdate(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId);
+
+    @PUT("user/{userId}/subuser/{subuserId}/program")
+    Call<ResponseBody> updateProgramName(@Path("userId") String userId, @Path("subuserId") String subuserId,
+                                         @Body RequestBody body);
+
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/valve/status")
+    Call<ResponseBody> getNodesList(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId);
+
+
+    @GET("user/{userId}/subuser/{subuserId}/controller/{controllerId}/program/{programId}/node")
+    Call<ResponseBody> getValveList(@Path("userId") String userId, @Path("subuserId") String subuserId, @Path("controllerId") String controllerId, @Path("programId") String programId);
+

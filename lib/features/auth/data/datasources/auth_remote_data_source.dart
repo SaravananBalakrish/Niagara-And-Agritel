@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/services/api_urls.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/login_usecase.dart';
 import '../models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -15,13 +17,8 @@ abstract class AuthRemoteDataSource {
   Future<void> logout();
   Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode);
   Future<bool> checkPhoneNumber(String phone, String countryCode);
-}
-
-class OtpVerificationResult {
-  final String? verificationId;
-  final ConfirmationResult? confirmationResult;
-
-  OtpVerificationResult({this.verificationId, this.confirmationResult});
+  Future<RegisterDetailsModel> signUp(SignUpParams params);
+  Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -229,6 +226,68 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         statusCode: 'check-phone-failed',
         message: 'Failed to check phone number: $e',
       );
+    }
+  }
+
+  @override
+  Future<RegisterDetailsModel> signUp(SignUpParams params) async {
+    try {
+      // Fetch device token and IP (reuse from login)
+      String deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+      String ipAddress = ''; // Implement IP fetch if needed
+
+      final response = await apiClient.post(ApiUrls.signUp, body: {
+        'mobileNumber': params.mobile,
+        'name': params.name,
+        'userType': params.userType ?? '',
+        'addressOne': params.addressOne ?? '',
+        'addressTwo': params.addressTwo ?? '',
+        'town': params.town ?? '',
+        'village': params.village ?? '',
+        'country': params.country ?? '',
+        'state': params.state ?? '',
+        'city': params.city ?? '',
+        'postalCode': params.postalCode ?? '',
+        'altPhone': params.altPhone ?? '',
+        'email': params.email ?? '',
+        'password': params.password ?? '', // Hash if needed on backend
+        'deviceToken': deviceToken,
+        'macAddress': ipAddress,
+      });
+      if (response['code'] == 200) {
+        return RegisterDetailsModel.fromJson(response['data']);
+      } else {
+        throw AuthException(
+          statusCode: response['code'].toString(),
+          message: response['message'] ?? 'Sign up failed',
+        );
+      }
+    } catch (e) {
+      throw AuthException(statusCode: 'signup-failed', message: 'Sign up failed: $e');
+    }
+  }
+
+  @override
+  Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params) async {
+    try {
+      // Get auth token from Firebase or local
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      final idToken = await firebaseUser?.getIdToken() ?? '';
+
+      final response = await apiClient.post(ApiUrls.editProfile,
+          headers: {'Authorization': 'Bearer $idToken'},
+          body: {
+            'userId': params.id,
+            'name': params.name,
+            // Map other fields...
+          });
+      if (response['code'] == 200) {
+        return RegisterDetailsModel.fromJson(response['data']);
+      } else {
+        throw AuthException(statusCode: response['code'].toString(), message: response['message'] ?? 'Update failed');
+      }
+    } catch (e) {
+      throw AuthException(statusCode: 'update-failed', message: 'Update failed: $e');
     }
   }
 
