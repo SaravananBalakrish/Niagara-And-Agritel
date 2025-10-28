@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 
 class ActionsSection extends StatelessWidget {
-  const ActionsSection({super.key});
+  final int model;
+  const ActionsSection({super.key, required this.model});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return ([1, 5].contains(model)) ? Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
         children: [
@@ -47,10 +48,41 @@ class ActionsSection extends StatelessWidget {
           ),
         ],
       ),
+    ) : Padding(padding: const EdgeInsets.symmetric(horizontal: 5),
+    child: Row(
+    children: [
+    Expanded(
+    child: MenuButton(
+    icon: Icons.settings,
+    title: "Pump\nSettings",
+    onTap: () {},
+    ),
+    ),
+    Expanded(
+    child: MenuButton(
+    icon: Icons.insert_chart,
+    title: "Power\nGraph",
+    onTap: () {},
+    ),
+    ),
+    Expanded(
+    child: MenuButton(
+    icon: Icons.email,
+    title: "Message",
+    onTap: () {},
+    ),
+    ),
+    Expanded(
+    child: MenuButton(
+    icon: Icons.error_sharp,
+    title: "Fault\nMessage",
+    onTap: () {},
+    ),
+    ),
+    ],
+    ),
     );
   }
-
-
 }
 
 

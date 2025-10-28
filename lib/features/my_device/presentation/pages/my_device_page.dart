@@ -69,47 +69,47 @@ class MyDevicePage extends StatelessWidget {
                           return SingleChildScrollView(
                             padding: const EdgeInsets.all(12),
                             child: Container(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                                children: [
-                                  HeaderSection(
-                                      ctrlName: ctrl.name,
-                                      isMqttConnected: ctrl.mqttConnected),
-                                  const SizedBox(height: 8),
-                                  SyncSection(
-                                      liveSync: ctrl.liveSync, smsSync: ctrl.smsSync),
-                                  const SizedBox(height: 8),
-                                  CtrlDisplay(
-                                      signal: ctrl.signal,
-                                      battery: ctrl.battery,
-                                      status: ctrl.status,
-                                      vrb: ctrl.vrb,
-                                      amp: ctrl.amp),
-                                  const SizedBox(height: 8),
-                                  // RYBSection(
-                                  //   r: selectedController.liveMessage.rVoltage,
-                                  //   y: selectedController.liveMessage.yVoltage,
-                                  //   b: selectedController.liveMessage.bVoltage,
-                                  //   c1:selectedController.liveMessage.rCurrent,
-                                  //   c2: selectedController.liveMessage.yCurrent,
-                                  //   c3: selectedController.liveMessage.bCurrent,),
-                                  const SizedBox(height: 8),
-                                  MotorValveSection(
-                                      motorOn: ctrl.motorOn, valveOn: ctrl.valveOn),
-                                  const SizedBox(height: 8),
-                                  // PressureSection(
-                                  //     prsIn: ctrl.prsIn,
-                                  //     prsOut: ctrl.prsOut,
-                                  //     activeZone: ctrl.activeZone),
-                                  const SizedBox(height: 8),
-                                  TimerSection(
-                                      setTime: ctrl.setTime,
-                                      remainingTime: ctrl.remainingTime),
-                                  const SizedBox(height: 8),
-                                  const ActionsSection(),
-                                ],
-                              ),
+                              // child: Column(
+                              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              //
+                              //   children: [
+                              //     HeaderSection(
+                              //         ctrlName: ctrl.name,
+                              //         isMqttConnected: ctrl.mqttConnected),
+                              //     const SizedBox(height: 8),
+                              //     SyncSection(
+                              //         liveSync: ctrl.liveSync, smsSync: ctrl.smsSync),
+                              //     const SizedBox(height: 8),
+                              //     CtrlDisplay(
+                              //         signal: ctrl.signal,
+                              //         battery: ctrl.battery,
+                              //         status: ctrl.status,
+                              //         vrb: ctrl.vrb,
+                              //         amp: ctrl.amp),
+                              //     const SizedBox(height: 8),
+                              //     // RYBSection(
+                              //     //   r: selectedController.liveMessage.rVoltage,
+                              //     //   y: selectedController.liveMessage.yVoltage,
+                              //     //   b: selectedController.liveMessage.bVoltage,
+                              //     //   c1:selectedController.liveMessage.rCurrent,
+                              //     //   c2: selectedController.liveMessage.yCurrent,
+                              //     //   c3: selectedController.liveMessage.bCurrent,),
+                              //     const SizedBox(height: 8),
+                              //     // MotorValveSection(
+                              //     //     motorOn: ctrl.motorOn, valveOn: ctrl.valveOn),
+                              //     const SizedBox(height: 8),
+                              //     // PressureSection(
+                              //     //     prsIn: ctrl.prsIn,
+                              //     //     prsOut: ctrl.prsOut,
+                              //     //     activeZone: ctrl.activeZone),
+                              //     const SizedBox(height: 8),
+                              //     TimerSection(
+                              //         setTime: ctrl.setTime,
+                              //         remainingTime: ctrl.remainingTime),
+                              //     const SizedBox(height: 8),
+                              //     const ActionsSection(),
+                              //   ],
+                              // ),
                             ),
                           );
                         },

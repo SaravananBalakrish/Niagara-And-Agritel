@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MotorValveSection extends StatelessWidget {
-  final bool motorOn;
-  final bool valveOn;
+  final String motorOn;
+  final String motorOn2;
+  final String valveOn;
+  final int model;
 
-  const MotorValveSection({super.key, required this.motorOn, required this.valveOn});
+  const MotorValveSection({super.key, required this.motorOn, required this.valveOn, required this.model, required this.motorOn2});
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +16,9 @@ class MotorValveSection extends StatelessWidget {
       children: [
         // 🔹 Motor image
         Image.asset(
-          !motorOn
+          motorOn == "0"
               ? 'assets/images/common/ui_motor.gif' // motor ON
-              : motorOn
+              : motorOn == "1"
               ? 'assets/images/common/live_motor_off.png' // motor OFF
               : 'assets/images/common/ui_motor_yellow.png', // no status
           width: 60,
@@ -53,25 +55,33 @@ class MotorValveSection extends StatelessWidget {
                 side: const BorderSide(color: Colors.grey, width: 4),
                  elevation: 5,
               ),
-
-
-              child: const Text("OFF"),
+               child: const Text("OFF"),
             ),
           ],
         ),
 
         // 🔹 Valve image
+       ( model == 1 || model == 5) ?
         Image.asset(
-          !valveOn
+          valveOn == "0"
               ? 'assets/images/common/valve_open.gif' // valve open
-              : valveOn
+              : valveOn == "1"
               ? 'assets/images/common/valve_stop.png' // valve stop
               : 'assets/images/common/valve_no_communication.png', // no communication
           width: 60,
           height: 60,
-        ),
+        ) :  ( model == 27) ?       Image.asset(
+         motorOn2 == "0"
+             ? 'assets/images/common/ui_motor.gif' // motor ON
+             : motorOn2 == "1"
+             ? 'assets/images/common/live_motor_off.png' // motor OFF
+             : 'assets/images/common/ui_motor_yellow.png', // no status
+         width: 60,
+         height: 60,
+       ) : Container(),
       ],
     );
   }
 }
+
 

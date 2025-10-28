@@ -4,8 +4,9 @@ import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
 class SyncSection extends StatelessWidget {
   final String liveSync;
   final String smsSync;
+  final int model;
 
-  const SyncSection({super.key, required this.liveSync, required this.smsSync});
+  const SyncSection({super.key, required this.liveSync, required this.smsSync, required this.model});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class SyncSection extends StatelessWidget {
             Text(liveSync, style: const TextStyle(fontSize: 12,color: Colors.white)),
           ],
         ),
-        ProgramButton(programTitle: 'Program 1'),
+        ([1, 5].contains(model)) ? ProgramButton(programTitle: 'Program 1') : Container(),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [

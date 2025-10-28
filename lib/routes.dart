@@ -11,6 +11,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
+import 'features/controllerLive/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
 import 'features/my_device/presentation/pages/my_device_page.dart';
@@ -123,7 +124,7 @@ class AppRouter {
             print('Building DashboardPage, AuthBloc state: ${authBloc.state}');  // Add for debug
             return BlocProvider.value(
               value: authBloc,
-              child: const DashboardPage(),
+              child: const CtrlLivePage(),
             );
           },
         ),
