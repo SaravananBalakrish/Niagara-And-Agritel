@@ -32,6 +32,7 @@ class ApiClient {
         ...?headers,
       };
 
+      print("mergedHeaders :: $mergedHeaders :: ");
       final response = await client
           .get(Uri.parse('$baseUrl$endpoint'), headers: mergedHeaders)
           .timeout(const Duration(seconds: 15));
@@ -57,6 +58,7 @@ class ApiClient {
         ...?headers,
       };
 
+      print("mergedHeaders :: $mergedHeaders");
       final response = await client
           .post(
         Uri.parse('$baseUrl$endpoint'),

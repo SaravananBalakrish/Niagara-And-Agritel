@@ -156,10 +156,6 @@ class AppRouter {
             );
           },
         ),
-        GoRoute(
-          path: RouteConstants.myDevicePage,
-          builder: (context, state) => MyDevicePage(),
-        ),
         ShellRoute(
           builder: (context, state, child) {
             final location = state.matchedLocation;

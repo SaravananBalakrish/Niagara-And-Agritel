@@ -9,16 +9,18 @@ class GlassyWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Base glassy gradient background
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomRight,
-              colors: [
-                Theme.of(context).colorScheme.primaryContainer,
-                Theme.of(context).colorScheme.surfaceVariant,
-              ],
+        // Base glassy gradient background - now positioned to fill the stack
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primaryContainer,
+                  Colors.black87,
+                ],
+              ),
             ),
           ),
         ),
@@ -26,8 +28,8 @@ class GlassyWrapper extends StatelessWidget {
         Positioned.fill(
           child: _buildBackgroundDecorations(context),
         ),
-        // Child content (your pages)
-        child ?? const SizedBox(),
+        // Child content (your pages) - now positioned to fill and respect bounds
+        if (child != null) Positioned.fill(child: child!),
       ],
     );
   }

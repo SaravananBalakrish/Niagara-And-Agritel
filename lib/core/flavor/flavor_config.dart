@@ -4,8 +4,8 @@ enum Flavor { niagara, agritel }
 
 class FlavorValues {
   final String displayName;
-  final String apiBaseUrl; // keep for future use
-  final String themeKey; // key used by Theme factory
+  final String apiBaseUrl;
+  final String themeKey;
   final bool showFlavorBanner;
 
   const FlavorValues({
@@ -57,7 +57,7 @@ class FlavorConfig {
       case Flavor.niagara:
         return const FlavorValues(
           displayName: 'Niagara',
-          apiBaseUrl: "http://3.1.62.165:8080",
+          apiBaseUrl: "http://3.1.62.165:8080/api/v1/",
           themeKey: 'niagara',
           showFlavorBanner: true,
         );

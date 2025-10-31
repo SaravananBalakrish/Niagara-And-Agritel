@@ -217,8 +217,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     };
     try {
       final response = await apiClient.post(ApiUrls.verifyUserUrl, body: body);
-      print("body :: $body");
-      print("response :: $response");
+   /*   print("body :: $body");
+      print("response :: $response");*/
       return response['code'] == 200;
     } catch (e) {
       print('Check phone number error: $e');
@@ -271,15 +271,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params) async {
     try {
       // Get auth token from Firebase or local
-      final firebaseUser = FirebaseAuth.instance.currentUser;
-      final idToken = await firebaseUser?.getIdToken() ?? '';
 
       final response = await apiClient.post(ApiUrls.editProfile,
-          headers: {'Authorization': 'Bearer $idToken'},
           body: {
             'userId': params.id,
             'name': params.name,
-            // Map other fields...
+            "addressOne": params.addressOne,
+            "mobile": params.mobile,
+            "userType": params.userType,
+            "addressTwo": params.addressTwo,
+            "town": params.town,
+            "village": params.village,
+            "country": params.country,
+            "state": params.state,
+            "city": params.city,
+            "postalCode": params.postalCode,
+            "altPhone": params.altPhone,
+            "email": params.email,
+            "password": params.password,
           });
       if (response['code'] == 200) {
         return RegisterDetailsModel.fromJson(response['data']);

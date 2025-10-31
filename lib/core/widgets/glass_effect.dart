@@ -10,14 +10,14 @@ class GlassCard extends StatelessWidget {
   final double opacity;
 
   const GlassCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
     this.borderRadius = 16,
     this.blur = 10,
     this.opacity = 0.15,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

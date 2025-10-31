@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:niagara_smart_drip_irrigation/common_widget/glass_effect.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 
 class RYBSection extends StatelessWidget {
   final String r, y, b;
