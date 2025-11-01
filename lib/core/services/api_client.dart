@@ -59,7 +59,7 @@ class ApiClient {
       final user = await _authLocalDataSource.getCachedAuthData();
       final mergedHeaders = {
         'Content-Type': 'application/json',
-        if (user != null) 'User-Id': '${user.userDetails.id}',
+        if (user != null) 'userId': '${user.userDetails.id}',
         if (user != null) 'Authorization': 'Bearer ${user.userDetails.deviceToken}',
         ...?headers,
       };

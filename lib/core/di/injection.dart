@@ -8,6 +8,7 @@ import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
 import '../../features/dashboard/domain/usecases/fetch_controllers_usecase.dart';
 import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../features/mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -45,11 +46,16 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
 
   sl.registerLazySingleton<MqttService>(
         () => MqttService(
-      broker: 'broker.hivemq.com',
+      broker: FlavorConfig.instance.values.broker,
       port: 1883,
       clientIdentifier: 'flutter_client_${DateTime.now().millisecondsSinceEpoch}',
+      userName: FlavorConfig.instance.values.userName,
+      password: FlavorConfig.instance.values.password,
     ),
   );
+
+  //Register MqttBloc after MqttService
+  sl.registerLazySingleton<MqttBloc>(() => MqttBloc(mqttService: sl<MqttService>()));
 
   // Flavor-specific services
   registerFlavorDependencies(sl);
@@ -99,7 +105,7 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton<DashboardRepository>(() => DashboardRepositoryImpl(remote: sl()));
   sl.registerLazySingleton(() => FetchDashboardGroups(sl()));
   sl.registerLazySingleton(() => FetchControllers(sl()));
-  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl()));
+  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl(), mqttBloc: sl()));
 }
 
 // Reset all

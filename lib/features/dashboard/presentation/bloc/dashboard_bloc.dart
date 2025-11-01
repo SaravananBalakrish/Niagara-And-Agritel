@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../my_device/domain/entities/controller_entity.dart';
+import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
+import '../../../mqtt/presentation/bloc/mqtt_event.dart';
 import '../../domain/entities/controller_entity.dart';
 import '../../domain/usecases/fetch_controllers_usecase.dart';
 import '../../domain/usecases/fetch_dashboard_groups_usecase.dart';
@@ -9,8 +10,15 @@ import 'dashboard_state.dart';
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final FetchDashboardGroups fetchDashboardGroups;
   final FetchControllers fetchControllers;
+  final MqttBloc mqttBloc;
 
-  DashboardBloc({required this.fetchDashboardGroups, required this.fetchControllers}) : super(DashboardInitial()) {
+  DashboardBloc({
+    required this.fetchDashboardGroups,
+    required this.fetchControllers,
+    required this.mqttBloc,
+  }) : super(DashboardInitial()) {
+    final String publishTopic = "tweet-response";
+    final String subscribeTopic = "get-tweet-response";
     on<FetchDashboardGroupsEvent>((event, emit) async {
       emit(DashboardLoading());
       final result = await fetchDashboardGroups(DashboardGroupsParams(event.userId));
@@ -37,6 +45,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           (failure) => emit(DashboardError(message: failure.message)),
           (controllers) {
             updatedControllers[event.groupId] = controllers;
+            // Subscribe to the first controller's topic after successful fetch
+            if (controllers.isNotEmpty) {
+              mqttBloc.add(SubscribeMqttEvent('$subscribeTopic/${controllers[0].deviceId}'));
+            }
             emit(DashboardGroupsLoaded(
               groups: currentState.groups,
               groupControllers: updatedControllers,
@@ -66,6 +78,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
             (controllers) {
               final updatedControllers = Map<int, List<ControllerEntity>>.from(newState.groupControllers);
               updatedControllers[event.groupId] = controllers;
+              // Subscribe to the first controller's topic after successful fetch
+              if (controllers.isNotEmpty) {
+                mqttBloc.add(SubscribeMqttEvent('tweet/${controllers[0].deviceId}'));
+              }
               // Optionally auto-select first controller here
               final updatedState = newState.copyWith(
                 groupControllers: updatedControllers,
@@ -77,6 +93,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         } else {
           // If already loaded, auto-select first
           final controllers = currentState.groupControllers[event.groupId] ?? [];
+          // Subscribe to the first controller's topic
+          if (controllers.isNotEmpty) {
+            mqttBloc.add(SubscribeMqttEvent('tweet/${controllers[0].deviceId}'));
+          }
           final updatedState = newState.copyWith(
             selectedControllerIndex: controllers.isNotEmpty ? 0 : null,
           );
@@ -90,6 +110,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         final currentState = state as DashboardGroupsLoaded;
         if (currentState.selectedGroupId != null &&
             (currentState.groupControllers[currentState.selectedGroupId!]?.length ?? 0) > event.controllerIndex) {
+          final controllers = currentState.groupControllers[currentState.selectedGroupId!] ?? [];
+          final selectedController = controllers[event.controllerIndex];
+          // Subscribe to the selected controller's topic
+          mqttBloc.add(SubscribeMqttEvent('$subscribeTopic/${selectedController.deviceId}'));
           emit(currentState.copyWith(selectedControllerIndex: event.controllerIndex));
         }
       }

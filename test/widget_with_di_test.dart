@@ -46,7 +46,7 @@ void main() {
     // Arrange
     await tester.pumpWidget(
       MaterialApp(
-        home: const RootApp(),
+        home: RootApp(authBloc: mockAuthBloc,),
       ),
     );
 

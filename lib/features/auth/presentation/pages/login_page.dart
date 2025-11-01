@@ -86,14 +86,14 @@ class _LoginPageState extends State<LoginPage> {
                 }
                 if (state is Authenticated) {
                   print('Authenticated: ${state.user.userDetails.mobile}');
-                  ScaffoldMessenger.of(context).showSnackBar(
+                 /* ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text("Welcome ${state.user.userDetails.mobile}"),
+                      content: Text("Welcome ${state.user.userDetails.name}"),
                       backgroundColor: Colors.green,
                       behavior: SnackBarBehavior.floating,
                       margin: const EdgeInsets.all(16),
                     ),
-                  );
+                  );*/
                   // context.go(RouteConstants.dashboard);
                   context.go(RouteConstants.dealerDashboard);
                 }

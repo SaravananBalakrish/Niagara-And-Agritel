@@ -5,12 +5,18 @@ enum Flavor { niagara, agritel }
 class FlavorValues {
   final String displayName;
   final String apiBaseUrl;
+  final String broker;
+  final String userName;
+  final String password;
   final String themeKey;
   final bool showFlavorBanner;
 
   const FlavorValues({
     required this.displayName,
     required this.apiBaseUrl,
+    required this.broker,
+    required this.userName,
+    required this.password,
     required this.themeKey,
     this.showFlavorBanner = false,
   });
@@ -58,6 +64,9 @@ class FlavorConfig {
         return const FlavorValues(
           displayName: 'Niagara',
           apiBaseUrl: "http://3.1.62.165:8080/api/v1/",
+          broker: "3.0.229.165",
+          userName: "niagara",
+          password: "niagara@123",
           themeKey: 'niagara',
           showFlavorBanner: true,
         );
@@ -65,6 +74,9 @@ class FlavorConfig {
         return const FlavorValues(
           displayName: 'AgriTel',
           apiBaseUrl: 'https://api.example.com',
+          broker: 'https://api.example.com',
+          userName: 'https://api.example.com',
+          password: 'https://api.example.com',
           themeKey: 'agritel',
           showFlavorBanner: true,
         );

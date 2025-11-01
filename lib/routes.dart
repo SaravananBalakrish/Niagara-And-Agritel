@@ -63,7 +63,7 @@ class AppRouter {
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
-          return RouteConstants.dashboard;
+          return RouteConstants.dealerDashboard;
           return RouteConstants.dealerDashboard;
         }
         if (!isLoggedIn &&
@@ -246,7 +246,7 @@ class AppRouter {
       ],
     );
   }
-  
+
   Widget _buildAppBarBackground() {
     return ClipRRect(
       child: BackdropFilter(

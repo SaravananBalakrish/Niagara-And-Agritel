@@ -18,19 +18,25 @@ Future<void> main() async {
     appleProvider: AppleProvider.deviceCheck,
   );*/
   try {
-    print("🔍 App Check: Activating with provider ${kDebugMode ? 'debug' : 'playIntegrity'}");
+    // print("🔍 App Check: Activating with provider ${kDebugMode ? 'debug' : 'playIntegrity'}");
     await FirebaseAppCheck.instance.activate(
       androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
       appleProvider: AppleProvider.deviceCheck,
     );
     final token = await FirebaseAppCheck.instance.getToken(true);
     if (token != null) {
-      print("✅ App Check Token: $token");
+      if (kDebugMode) {
+        print("✅ App Check Token: $token");
+      }
     } else {
-      print("❌ No App Check Token received");
+      if (kDebugMode) {
+        print("❌ No App Check Token received");
+      }
     }
   } catch (e, stackTrace) {
-    print("⚠️ Detailed AppCheck error: $e\nStackTrace: $stackTrace");
+    if (kDebugMode) {
+      print("⚠️ Detailed AppCheck error: $e\nStackTrace: $stackTrace");
+    }
   }
 
   FlavorConfig.setupFromDartDefine();
