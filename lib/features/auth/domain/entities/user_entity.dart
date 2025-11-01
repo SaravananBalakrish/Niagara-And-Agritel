@@ -6,7 +6,7 @@ class UserEntity {
   final String name;
   final String mobile;
   final int userType;
-  final String deviceToken;
+  String? deviceToken;
   final String mobCctv;
   final String webCctv;
   final String? addressOne;
@@ -20,7 +20,7 @@ class UserEntity {
   final String? email;
   final List<String> altPhoneNum;
 
-  const UserEntity({
+  UserEntity({
     required this.id,
     required this.name,
     required this.mobile,

@@ -10,7 +10,7 @@ class ApiUrls {
   static const String forgotPassword = 'forgotpassword';
   static const String getProfile = 'user/:userId';
   static const String editProfile = 'user';
-  static const String verifyUserUrl = 'verifysim';
+  static const String verifyUserUrl = 'verifyUser';
 
   //TODO: DEALER URLs
   static const String getSellingUnit = 'dealer/:userId/category/:categoryId';

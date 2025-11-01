@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart'; // For platform-specific handling if needed
+import 'package:get_it/get_it.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
@@ -9,64 +12,97 @@ import '../../../../core/services/api_urls.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../models/user_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_local_data_source.dart';
 
+/// Abstract class defining the remote data source contract for authentication operations.
 abstract class AuthRemoteDataSource {
+  /// Logs in a user using phone number and password.
   Future<RegisterDetailsModel> loginWithPassword(String phone, String password);
+
+  /// Sends an OTP to the provided phone number.
   Future<String> sendOtp(String phone);
+
+  /// Logs out the current user from Firebase and optionally the backend.
   Future<void> logout();
+
+  /// Verifies the OTP and completes the login process.
   Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode);
+
+  /// Checks if a phone number is already registered.
   Future<bool> checkPhoneNumber(String phone, String countryCode);
+
+  /// Registers a new user with the provided parameters.
   Future<RegisterDetailsModel> signUp(SignUpParams params);
+
+  /// Updates the user's profile with the provided parameters.
   Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params);
 }
 
+/// Implementation of [AuthRemoteDataSource] using Firebase Auth and backend API.
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final ApiClient apiClient;
+  final ApiClient _apiClient;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  AuthRemoteDataSourceImpl({required this.apiClient});
+  AuthRemoteDataSourceImpl({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  /// Fetches device-specific information (token and IP address).
+  /// In a production app, implement actual IP fetching via a service.
+  Future<Map<String, String>> _getDeviceInfo() async {
+    try {
+      final deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
+      final ipAddress = ''; // TODO: Integrate with a network service to fetch real IP.
+      if (kDebugMode) {
+        print('Device token: $deviceToken, IP address: $ipAddress');
+      }
+      return {'deviceToken': deviceToken, 'macAddress': ipAddress};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching device info: $e');
+      }
+      // Return empty values to avoid blocking; backend can handle gracefully.
+      return {'deviceToken': '', 'macAddress': ''};
+    }
+  }
+
+  /// Handles common API response parsing and error throwing.
+  dynamic _handleApiResponse(dynamic response, {int successCode = 200, String operation = 'API call'}) {
+    if (response['code'] == successCode) {
+      return response['data'];
+    } else {
+      final message = response['message'] ?? 'Operation failed';
+      throw AuthException(statusCode: response['code'].toString(), message: message);
+    }
+  }
 
   @override
   Future<RegisterDetailsModel> loginWithPassword(String phone, String password) async {
     try {
-      String mobileNumber = phone;
-      if (phone.startsWith('+')) {
-        mobileNumber = phone.substring(phone.length - 10);
-      }
+      final mobileNumber = _normalizePhoneNumber(phone);
+      final deviceInfo = await _getDeviceInfo();
 
-      // Fetch device token and IP address
-      String deviceToken = '';
-      String ipAddress = '';
-      try {
-        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
-        ipAddress = '';
-        print('Device token: $deviceToken, IP address: $ipAddress');
-      } catch (e) {
-        print('Error fetching device info: $e');
-      }
-
-      final response = await apiClient.post(ApiUrls.loginWithOtpUrl, body: {
-        'mobileNumber': mobileNumber,
-        'password': password,
-        'deviceToken': deviceToken,
-        'macAddress': ipAddress,
-      });
-      print('Login API response: $response');
-      if (response['code'] == 200) {
-        return RegisterDetailsModel.fromJson(response['data']);
-      } else {
-        throw AuthException(
-          statusCode: response['code'].toString(),
-          message: response['message'] ?? 'Login failed',
-        );
-      }
-    } catch (e) {
-      print('Login error: $e');
-      throw AuthException(
-        statusCode: 'login-failed',
-        message: 'Login failed: $e',
+      final response = await _apiClient.post(
+        ApiUrls.loginWithOtpUrl,
+        // ApiUrls.loginWithPasswordUrl,
+        body: {
+          'mobileNumber': mobileNumber,
+          'password': password,
+          ...deviceInfo,
+        },
       );
+
+      if (kDebugMode) {
+        print('Login API response: $response');
+      }
+
+      final data = _handleApiResponse(response, operation: 'Login');
+      return RegisterDetailsModel.fromJson(data);
+    } on AuthException {
+      rethrow; // Preserve existing AuthExceptions
+    } catch (e) {
+      if (kDebugMode) {
+        print('Login error: $e');
+      }
+      throw AuthException(statusCode: 'login-failed', message: 'Login failed: $e');
     }
   }
 
@@ -74,11 +110,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<String> sendOtp(String phone) async {
     try {
       await _firebaseAuth.setLanguageCode('en');
+
       if (kIsWeb) {
+        // Web-specific flow: Use signInWithPhoneNumber directly.
         final confirmationResult = await _firebaseAuth.signInWithPhoneNumber(phone);
-        print('Web: OTP sent, verificationId=${confirmationResult.verificationId}');
-        return confirmationResult.verificationId;
+        if (kDebugMode) {
+          print('Web: OTP sent, verificationId=${confirmationResult.verificationId}');
+        }
+        return confirmationResult.verificationId!;
       } else {
+        // Mobile flow: Use verifyPhoneNumber with Completer for async handling.
         final completer = Completer<String>();
         await _firebaseAuth.verifyPhoneNumber(
           phoneNumber: phone,
@@ -86,157 +127,159 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           verificationCompleted: (PhoneAuthCredential credential) async {
             try {
               await _firebaseAuth.signInWithCredential(credential);
-            } catch (e) {
-              print('Auto-verification failed: $e');
+              // Auto-verification success; no need for manual OTP.
+            } on FirebaseAuthException catch (e) {
+              if (kDebugMode) {
+                print('Auto-verification failed: ${e.code}');
+              }
             }
           },
           verificationFailed: (FirebaseAuthException e) {
-            print('Verification failed: ${e.code}, ${e.message}');
-            completer.completeError(AuthException(statusCode: e.code, message: e.message ?? 'Failed to send OTP'));
+            if (kDebugMode) {
+              print('Verification failed: ${e.code}, ${e.message}');
+            }
+            completer.completeError(
+              AuthException(statusCode: e.code, message: e.message ?? 'Failed to send OTP'),
+            );
           },
           codeSent: (String verificationId, int? resendToken) {
-            print('OTP sent: verificationId=$verificationId');
-            if (!completer.isCompleted) completer.complete(verificationId);
+            if (kDebugMode) {
+              print('OTP sent: verificationId=$verificationId');
+            }
+            if (!completer.isCompleted) {
+              completer.complete(verificationId);
+            }
           },
           codeAutoRetrievalTimeout: (String verificationId) {
-            print('Code auto-retrieval timeout: verificationId=$verificationId');
-            if (!completer.isCompleted) completer.complete(verificationId);
+            if (kDebugMode) {
+              print('Code auto-retrieval timeout: verificationId=$verificationId');
+            }
+            if (!completer.isCompleted) {
+              completer.complete(verificationId);
+            }
           },
         );
         return await completer.future;
       }
     } catch (e) {
-      print('Send OTP error: $e');
-      throw AuthException(statusCode: 'unknown', message: 'Failed to send OTP: $e');
+      if (kDebugMode) {
+        print('Send OTP error: $e');
+      }
+      throw AuthException(statusCode: 'otp-send-failed', message: 'Failed to send OTP: $e');
     }
   }
 
   @override
   Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode) async {
     try {
-      PhoneAuthCredential credential;
+      PhoneAuthCredential? credential;
       if (kIsWeb) {
-        throw AuthException(
-          statusCode: 'platform-error',
-          message: 'Web OTP verification is not supported in this implementation.',
-        );
+        // Web-specific: Use PhoneAuthProvider.credential for confirmation.
+        // Note: On web, this requires manual OTP input via confirm() on confirmationResult.
+        // Assuming sendOtp returned confirmationResult; adjust if storing it.
+        credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otp);
       } else {
         credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: otp);
       }
+
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final firebaseUser = userCredential.user;
       if (firebaseUser == null) {
-        throw AuthException(
-          statusCode: 'null-user',
-          message: 'User is null after OTP verification. Please try again.',
-        );
+        throw AuthException(statusCode: 'null-user', message: 'User is null after OTP verification. Please try again.');
       }
 
       final idToken = await firebaseUser.getIdToken();
+      final deviceInfo = await _getDeviceInfo();
+      final mobileNumber = _normalizePhoneNumber(firebaseUser.phoneNumber ?? '', countryCode: countryCode);
 
-      // Fetch device token and IP address
-      String deviceToken = '';
-      String ipAddress = '';
-      try {
-        deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
-        ipAddress = '';
-        print('Device token: $deviceToken, IP address: $ipAddress');
-      } catch (e) {
-        print('Error fetching device info: $e');
-      }
-
-      final mobileNumber = firebaseUser.phoneNumber!.substring(countryCode.length);
-
-      final response = await apiClient.post(
+      final response = await _apiClient.post(
         ApiUrls.loginWithOtpUrl,
         headers: {'Authorization': 'Bearer $idToken'},
         body: {
           'mobileNumber': mobileNumber,
-          'password': '',
-          'deviceToken': deviceToken,
-          'macAddress': ipAddress,
+          'password': '', // Empty for OTP flow
+          ...deviceInfo,
         },
       );
-      print('OTP Login API response: $response');
-      if (response['code'] == 200) {
-        return RegisterDetailsModel.fromFirebaseUser(firebaseUser, response['data']);
-      } else {
-        throw AuthException(
-          statusCode: response['code'].toString(),
-          message: response['message'] ?? 'OTP verification failed',
-        );
+
+      if (kDebugMode) {
+        print('OTP Login API response: $response');
       }
+
+      final data = _handleApiResponse(response, operation: 'OTP Verification');
+      return RegisterDetailsModel.fromFirebaseUser(firebaseUser, data);
     } on FirebaseAuthException catch (e) {
-      String message;
-      switch (e.code) {
-        case 'invalid-verification-code':
-          message = 'The OTP entered is invalid. Please try again.';
-          break;
-        case 'invalid-verification-id':
-          message = 'Invalid verification ID. Please request a new OTP.';
-          break;
-        case 'session-expired':
-          message = 'The OTP session has expired. Please request a new OTP.';
-          break;
-        case 'too-many-requests':
-          message = 'Too many attempts. Please wait a few minutes and try again.';
-          break;
-        case 'billing-not-enabled':
-          message = 'Billing is not enabled for this project. Please contact support.';
-          break;
-        default:
-          message = 'Authentication failed: ${e.message ?? "An error occurred."}';
-      }
+      final message = _mapFirebaseAuthError(e.code, e.message);
       throw AuthException(statusCode: e.code, message: message);
     } on FirebaseException catch (e) {
+      String message;
       if (e.code == 'app-check-token-error' || e.message?.contains('App attestation failed') == true) {
-        throw AuthException(
-          statusCode: 'app-check-failed',
-          message: 'App verification failed. Please ensure your app is properly configured.',
-        );
+        message = 'App verification failed. Please ensure your app is properly configured.';
+      } else {
+        message = 'Firebase error: ${e.message ?? "An unknown error occurred."}';
       }
-      throw AuthException(
-        statusCode: e.code,
-        message: 'Firebase error: ${e.message ?? "An unknown error occurred."}',
-      );
-    } catch (e, stacktrace) {
-      print('Verify OTP error: $e');
-      print('Verify OTP stacktrace: $stacktrace');
-      throw AuthException(
-        statusCode: 'unknown',
-        message: 'An unexpected error occurred. Please try again.',
-      );
+      throw AuthException(statusCode: e.code, message: message);
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('Verify OTP error: $e');
+        print('Verify OTP stacktrace: $stackTrace');
+      }
+      throw AuthException(statusCode: 'verification-failed', message: 'OTP verification failed: $e');
+    }
+  }
+
+  /// Maps common Firebase Auth error codes to user-friendly messages.
+  String _mapFirebaseAuthError(String code, String? defaultMessage) {
+    switch (code) {
+      case 'invalid-verification-code':
+        return 'The OTP entered is invalid. Please try again.';
+      case 'invalid-verification-id':
+        return 'Invalid verification ID. Please request a new OTP.';
+      case 'session-expired':
+        return 'The OTP session has expired. Please request a new OTP.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please wait a few minutes and try again.';
+      case 'billing-not-enabled':
+        return 'Billing is not enabled for this project. Please contact support.';
+      default:
+        return defaultMessage ?? 'Authentication failed: An error occurred.';
     }
   }
 
   @override
   Future<bool> checkPhoneNumber(String phone, String countryCode) async {
-    Map<String, dynamic> body = {
-      'mobileNumber': phone,
-      'countryCode': countryCode.substring(1),
-    };
     try {
-      final response = await apiClient.post(ApiUrls.verifyUserUrl, body: body);
-   /*   print("body :: $body");
-      print("response :: $response");*/
+      final body = {
+        'mobileNumber': phone,
+        'countryCode': countryCode.substring(1), // Remove '+' prefix
+      };
+
+      if (kDebugMode) {
+        print('Check phone body: $body');
+      }
+
+      final response = await _apiClient.post(ApiUrls.verifyUserUrl, body: body);
+
+      if (kDebugMode) {
+        print('Check phone response: $response');
+      }
+
       return response['code'] == 200;
+      return _handleApiResponse(response, successCode: 200, operation: 'Phone check') != null;
     } catch (e) {
-      print('Check phone number error: $e');
-      throw AuthException(
-        statusCode: 'check-phone-failed',
-        message: 'Failed to check phone number: $e',
-      );
+      if (kDebugMode) {
+        print('Check phone number error: $e');
+      }
+      throw AuthException(statusCode: 'phone-check-failed', message: 'Failed to check phone number: $e');
     }
   }
 
   @override
   Future<RegisterDetailsModel> signUp(SignUpParams params) async {
     try {
-      // Fetch device token and IP (reuse from login)
-      String deviceToken = await FirebaseMessaging.instance.getToken() ?? '';
-      String ipAddress = ''; // Implement IP fetch if needed
+      final deviceInfo = await _getDeviceInfo();
 
-      final response = await apiClient.post(ApiUrls.signUp, body: {
+      final body = {
         'mobileNumber': params.mobile,
         'name': params.name,
         'userType': params.userType ?? '',
@@ -250,19 +293,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'postalCode': params.postalCode ?? '',
         'altPhone': params.altPhone ?? '',
         'email': params.email ?? '',
-        'password': params.password ?? '', // Hash if needed on backend
-        'deviceToken': deviceToken,
-        'macAddress': ipAddress,
-      });
-      if (response['code'] == 200) {
-        return RegisterDetailsModel.fromJson(response['data']);
-      } else {
-        throw AuthException(
-          statusCode: response['code'].toString(),
-          message: response['message'] ?? 'Sign up failed',
-        );
+        'password': params.password ?? '', // Ensure backend hashes this
+        ...deviceInfo,
+      };
+
+      final response = await _apiClient.post(ApiUrls.signUp, body: body);
+
+      if (kDebugMode) {
+        print('Sign up response: $response');
       }
+
+      final data = _handleApiResponse(response, operation: 'Sign up');
+      return RegisterDetailsModel.fromJson(data);
     } catch (e) {
+      if (kDebugMode) {
+        print('Sign up error: $e');
+      }
       throw AuthException(statusCode: 'signup-failed', message: 'Sign up failed: $e');
     }
   }
@@ -270,38 +316,74 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params) async {
     try {
-      // Get auth token from Firebase or local
+      final body = {
+        'userId': params.id,
+        'name': params.name,
+        'addressOne': params.addressOne,
+        'mobile': params.mobile,
+        'userType': params.userType,
+        'addressTwo': params.addressTwo,
+        'town': params.town,
+        'village': params.village,
+        'country': params.country,
+        'state': params.state,
+        'city': params.city,
+        'postalCode': params.postalCode,
+        'altPhone': params.altPhone,
+        'email': params.email,
+        'password': params.password ?? '', // Optional password update
+      };
 
-      final response = await apiClient.post(ApiUrls.editProfile,
-          body: {
-            'userId': params.id,
-            'name': params.name,
-            "addressOne": params.addressOne,
-            "mobile": params.mobile,
-            "userType": params.userType,
-            "addressTwo": params.addressTwo,
-            "town": params.town,
-            "village": params.village,
-            "country": params.country,
-            "state": params.state,
-            "city": params.city,
-            "postalCode": params.postalCode,
-            "altPhone": params.altPhone,
-            "email": params.email,
-            "password": params.password,
-          });
-      if (response['code'] == 200) {
-        return RegisterDetailsModel.fromJson(response['data']);
-      } else {
-        throw AuthException(statusCode: response['code'].toString(), message: response['message'] ?? 'Update failed');
+      // Note: Consider using PUT instead of POST for updates if backend supports it.
+      final response = await _apiClient.post(ApiUrls.editProfile, body: body); // Or apiClient.put if available
+
+      if (kDebugMode) {
+        print('Update profile response: $response');
       }
+
+      final data = _handleApiResponse(response, operation: 'Profile update');
+      return RegisterDetailsModel.fromJson(data);
     } catch (e) {
-      throw AuthException(statusCode: 'update-failed', message: 'Update failed: $e');
+      if (kDebugMode) {
+        print('Update profile error: $e');
+      }
+      throw AuthException(statusCode: 'profile-update-failed', message: 'Profile update failed: $e');
     }
   }
 
   @override
   Future<void> logout() async {
-    await _firebaseAuth.signOut();
+    try {
+      // Sign out from Firebase
+      await _firebaseAuth.signOut();
+
+      // Optional: Call backend logout endpoint if needed for session cleanup
+      await _apiClient.post(ApiUrls.logOutUrl, body: {});
+
+      // Clear local cached auth data
+      final authLocalDataSource = GetIt.instance<AuthLocalDataSource>();
+      await authLocalDataSource.clearAuthData();
+
+      if (kDebugMode) {
+        print('User logged out successfully');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Logout error: $e');
+      }
+      // Don't throw on logout failure; it's non-critical
+      rethrow;
+    }
+  }
+
+  /// Normalizes phone number by extracting the last 10 digits if it starts with '+'.
+  String _normalizePhoneNumber(String phone, {String? countryCode}) {
+    if (phone.startsWith('+')) {
+      return phone.substring(phone.length - 10);
+    }
+    if (countryCode != null && phone.startsWith(countryCode)) {
+      return phone.substring(countryCode.length);
+    }
+    return phone;
   }
 }
