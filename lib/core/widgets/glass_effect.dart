@@ -8,6 +8,7 @@ class GlassCard extends StatelessWidget {
   final double borderRadius;
   final double blur;
   final double opacity;
+  final double elevation;
 
   const GlassCard({
     super.key,
@@ -17,6 +18,7 @@ class GlassCard extends StatelessWidget {
     this.borderRadius = 16,
     this.blur = 10,
     this.opacity = 0.15,
+    this.elevation = 4.0
   });
 
   @override

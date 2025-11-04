@@ -1,10 +1,13 @@
 // lib/features/dashboard/presentation/pages/dashboard_page.dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -12,9 +15,11 @@ import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
+import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
+import '../../../mqtt/presentation/bloc/mqtt_event.dart';
+import '../../../mqtt/utils/mqtt_message_helper.dart';
 import '../../../my_device/presentation/widgets/actions_section.dart';
 import '../../../my_device/presentation/widgets/ctrl_display.dart';
-import '../../../my_device/presentation/widgets/header_section.dart';
 import '../../../my_device/presentation/widgets/latestmsg_section.dart';
 import '../../../my_device/presentation/widgets/motor_valve_section.dart';
 import '../../../my_device/presentation/widgets/pressure_section.dart';
@@ -39,6 +44,9 @@ class DashboardPage extends StatelessWidget {
         }
         bloc.add(ResetDashboardSelectionEvent());
       }
+
+      final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+      mqttBloc.setProcessingContext(context);
     });
 
     return BlocProvider.value(
@@ -86,7 +94,6 @@ class DashboardPage extends StatelessWidget {
 
                     final selectedController = effectiveIndex >= 0 ? controllers[effectiveIndex] : null;
 
-                    print("selectedController :: $selectedController");
 
                     return Scaffold(
                       appBar: AppBar(
@@ -110,172 +117,205 @@ class DashboardPage extends StatelessWidget {
                               children: [
                                 if(dashboardState.groups.isNotEmpty)
                                   if(dashboardState.groups.length > 1)
-                                    PopupMenuButton<int>(
-                                      icon: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            selectedGroup.groupName,
-                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                          ),
-                                          const Icon(Icons.arrow_drop_down, color: Colors.white),
-                                        ],
-                                      ),
-                                      onSelected: (groupId) {
-                                        final bloc = context.read<DashboardBloc>();
-                                        if (!bloc.isClosed) {
-                                          final userId = selectedGroup.userId;
-                                          if (!dashboardState.groupControllers.containsKey(groupId)) {
-                                            bloc.add(FetchControllersEvent(userId, groupId));
+                                    Expanded(
+                                      child: PopupMenuButton<int>(
+                                        icon: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              selectedGroup.groupName,
+                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                            ),
+                                            const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                          ],
+                                        ),
+                                        onSelected: (groupId) {
+                                          final bloc = context.read<DashboardBloc>();
+                                          if (!bloc.isClosed) {
+                                            final userId = selectedGroup.userId;
+                                            if (!dashboardState.groupControllers.containsKey(groupId)) {
+                                              bloc.add(FetchControllersEvent(userId, groupId));
+                                            }
+                                            bloc.add(SelectGroupEvent(groupId));
                                           }
-                                          bloc.add(SelectGroupEvent(groupId));
-                                        }
-                                      },
-                                      itemBuilder: (context) => dashboardState.groups.map((group) => PopupMenuItem<int>(
-                                        value: group.userGroupId,
-                                        child: Text(group.groupName),
-                                      )).toList(),
+                                        },
+                                        itemBuilder: (context) => dashboardState.groups.map((group) => PopupMenuItem<int>(
+                                          value: group.userGroupId,
+                                          child: Text(group.groupName),
+                                        )).toList(),
+                                      ),
                                     )
                                   else
-                                    Text(dashboardState.groups[0].groupName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                    Expanded(child: Text(dashboardState.groups[0].groupName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                                 if(dashboardState.groups.length > 1)
                                   Container(width: 1, height: 20, color: Colors.white54,),
                                 if (controllers.isNotEmpty)
                                   if(controllers.length > 1)
-                                    PopupMenuButton<int>(
-                                      enabled: controllers.isNotEmpty,
-                                      icon: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            selectedController?.deviceName ?? 'Select controller',
-                                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                          ),
-                                          const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                    Expanded(
+                                      child: PopupMenuButton<int>(
+                                        enabled: controllers.isNotEmpty,
+                                        icon: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              selectedController?.deviceName ?? 'Select controller',
+                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                            ),
+                                            const Icon(Icons.arrow_drop_down, color: Colors.white),
+                                          ],
+                                        ),
+                                        onSelected: (controllerIndex) {
+                                          final bloc = context.read<DashboardBloc>();
+                                          if (!bloc.isClosed) {
+                                            bloc.add(SelectControllerEvent(controllerIndex));
+                                          }
+                                        },
+                                        itemBuilder: (context) => controllers.isNotEmpty
+                                            ? controllers.asMap().entries
+                                            .map<PopupMenuEntry<int>>((entry) {
+                                          final index = entry.key;
+                                          final ctrl = entry.value;
+                                          return PopupMenuItem<int>(
+                                            value: index,
+                                            child: Text(ctrl.deviceName),
+                                          );
+                                        }).toList()
+                                            : [
+                                          const PopupMenuItem<int>(
+                                            enabled: false,
+                                            child: Text('No controllers available'),
+                                          )
                                         ],
                                       ),
-                                      onSelected: (controllerIndex) {
-                                        final bloc = context.read<DashboardBloc>();
-                                        if (!bloc.isClosed) {
-                                          bloc.add(SelectControllerEvent(controllerIndex));
-                                        }
-                                      },
-                                      itemBuilder: (context) => controllers.isNotEmpty
-                                          ? controllers.asMap().entries
-                                          .map<PopupMenuEntry<int>>((entry) {
-                                        final index = entry.key;
-                                        final ctrl = entry.value;
-                                        return PopupMenuItem<int>(
-                                          value: index,
-                                          child: Text(ctrl.deviceName),
-                                        );
-                                      }).toList()
-                                          : [
-                                        const PopupMenuItem<int>(
-                                          enabled: false,
-                                          child: Text('No controllers available'),
-                                        )
-                                      ],
                                     )
                                   else
-                                    Text(controllers[0].deviceName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)
+                                    Expanded(child: Text(controllers[0].deviceName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),))
                               ],
                             ),
                           ),
                         ),
+                        actions: [
+                          IconButton(
+                            onPressed: () async {
+                              final String phoneNumber = selectedController?.simNumber ?? '';
+                              final Uri url = Uri.parse('tel:$phoneNumber');
+
+                              try {
+                                if (await canLaunchUrl(url)) {
+                                  await launchUrl(
+                                    url,
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                }
+                              } catch (e) {
+                                debugPrint('Error launching call: $e');
+                              }
+                            },
+                            icon: const Icon(Icons.call, color: Colors.white),
+                          ),
+                          IconButton(
+                            onPressed: null,
+                            icon: Icon(Icons.circle,
+                                color: selectedController?.ctrlStatusFlag == '1' ? Colors.green : Colors.red),
+                          ),
+                        ],
                       ),
                       body: selectedController == null
                           ? const Center(child: CircularProgressIndicator())
-                          : LayoutBuilder(
-                        builder: (context, constraints) {
-                          final width = constraints.maxWidth;
+                          : RefreshIndicator(
+                        onRefresh: () async {
+                          final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+                          final deviceId = selectedController.deviceId;
+                          final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
+                          mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
+                          print("Live message from server : ${selectedController.liveMessage}");
+                        },
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final width = constraints.maxWidth;
 
-                          int modelCheck = ([1, 5].contains(selectedController.modelId)) ? 300 : 120;
-                          double scale(double size) => size * (width / modelCheck);
+                            int modelCheck = ([1, 5].contains(selectedController.modelId)) ? 300 : 120;
+                            double scale(double size) => size * (width / modelCheck);
 
-                          return GlassyWrapper(
-                            child: CustomScrollView(
-                              physics: NeverScrollableScrollPhysics(),
-                              slivers: [
-                                SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: Padding(
-                                    padding: EdgeInsetsGeometry.all(scale(2)),
-                                    child: GlassCard(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          HeaderSection(
-                                            ctrlName: selectedController.deviceName,
-                                            isMqttConnected: selectedController.ctrlStatusFlag == '1',
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          SyncSection(
-                                            liveSync: selectedController.livesyncTime,
-                                            smsSync: selectedController.msgDesc,
-                                            model: selectedController.modelId,
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          GlassCard(
-                                            child: CtrlDisplay(
-                                              signal: 50,
-                                              battery: 50,
-                                              status: selectedController.status,
-                                              vrb: 456,
-                                              amp: 200,
+                            return GlassyWrapper(
+                              child: CustomScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                slivers: [
+                                  SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: Padding(
+                                      padding: EdgeInsetsGeometry.all(scale(2)),
+                                      child: GlassCard(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            SyncSection(
+                                              liveSync: selectedController.livesyncTime,
+                                              smsSync: selectedController.msgDesc,
+                                              model: selectedController.modelId,
                                             ),
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          RYBSection(
-                                            r: selectedController.liveMessage.rVoltage,
-                                            y: selectedController.liveMessage.yVoltage,
-                                            b: selectedController.liveMessage.bVoltage,
-                                            c1: selectedController.liveMessage.rCurrent,
-                                            c2: selectedController.liveMessage.yCurrent,
-                                            c3: selectedController.liveMessage.bCurrent,
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          MotorValveSection(
-                                            motorOn: selectedController.liveMessage.motorOnOff,
-                                            motorOn2: selectedController.liveMessage.valveOnOff,
-                                            valveOn: selectedController.liveMessage.valveOnOff,
-                                            model: selectedController.modelId,
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          if ([1, 5].contains(selectedController.modelId))
-                                            Column(
-                                              children: [
-                                                PressureSection(
-                                                  prsIn: selectedController.liveMessage.prsIn,
-                                                  prsOut: selectedController.liveMessage.prsOut,
-                                                  activeZone: selectedController.zoneNo,
-                                                  fertlizer: '',
-                                                ),
-                                                SizedBox(height: scale(8)),
-                                                TimerSection(
-                                                  setTime: selectedController.setFlow,
-                                                  remainingTime: selectedController.remFlow,
-                                                ),
-                                              ],
+                                            SizedBox(height: scale(8)),
+                                            GlassCard(
+                                              child: CtrlDisplay(
+                                                signal: 50,
+                                                battery: 50,
+                                                status: selectedController.status,
+                                                vrb: 456,
+                                                amp: 200,
+                                              ),
                                             ),
-                                          LatestMsgSection(
-                                            msg: ([1, 5].contains(selectedController.modelId))
-                                                ? selectedController.msgDesc
-                                                : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
-                                          ),
-                                          SizedBox(height: scale(8)),
-                                          ActionsSection(model: selectedController.modelId),
-                                        ],
+                                            SizedBox(height: scale(8)),
+                                            RYBSection(
+                                              r: selectedController.liveMessage.rVoltage,
+                                              y: selectedController.liveMessage.yVoltage,
+                                              b: selectedController.liveMessage.bVoltage,
+                                              c1: selectedController.liveMessage.rCurrent,
+                                              c2: selectedController.liveMessage.yCurrent,
+                                              c3: selectedController.liveMessage.bCurrent,
+                                            ),
+                                            SizedBox(height: scale(8)),
+                                            MotorValveSection(
+                                              motorOn: selectedController.liveMessage.motorOnOff,
+                                              motorOn2: selectedController.liveMessage.valveOnOff,
+                                              valveOn: selectedController.liveMessage.valveOnOff,
+                                              model: selectedController.modelId,
+                                            ),
+                                            SizedBox(height: scale(8)),
+                                            if ([1, 5].contains(selectedController.modelId))
+                                              Column(
+                                                children: [
+                                                  PressureSection(
+                                                    prsIn: selectedController.liveMessage.prsIn,
+                                                    prsOut: selectedController.liveMessage.prsOut,
+                                                    activeZone: selectedController.zoneNo,
+                                                    fertlizer: '',
+                                                  ),
+                                                  SizedBox(height: scale(8)),
+                                                  TimerSection(
+                                                    setTime: selectedController.setFlow,
+                                                    remainingTime: selectedController.remFlow,
+                                                  ),
+                                                ],
+                                              ),
+                                            LatestMsgSection(
+                                              msg: ([1, 5].contains(selectedController.modelId))
+                                                  ? selectedController.msgDesc
+                                                  : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
+                                            ),
+                                            SizedBox(height: scale(8)),
+                                            ActionsSection(model: selectedController.modelId),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
-                        },
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     );
                   } else if (dashboardState is DashboardLoading) {

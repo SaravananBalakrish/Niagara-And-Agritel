@@ -8,7 +8,9 @@ import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
 import '../../features/dashboard/domain/usecases/fetch_controllers_usecase.dart';
 import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import '../../features/dashboard/utils/dashboard_dispatcher.dart';
 import '../../features/mqtt/presentation/bloc/mqtt_bloc.dart';
+import '../../features/mqtt/utils/mqtt_message_helper.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -106,6 +108,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => FetchDashboardGroups(sl()));
   sl.registerLazySingleton(() => FetchControllers(sl()));
   sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl(), mqttBloc: sl()));
+
+  sl.registerLazySingleton<MessageDispatcher>(() => DashboardMessageDispatcher(dashboardBloc: sl<DashboardBloc>()));
 }
 
 // Reset all

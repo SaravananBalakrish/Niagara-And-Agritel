@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../domain/entities/livemessage_entity.dart';
+
 abstract class DashboardEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -40,4 +42,11 @@ class SelectControllerEvent extends DashboardEvent {
 
 class ResetDashboardSelectionEvent extends DashboardEvent {
   @override List<Object?> get props => [];
+}
+
+class UpdateLiveMessageEvent extends DashboardEvent {
+  final String deviceId;
+  final LiveMessageEntity liveMessage;
+
+  UpdateLiveMessageEvent(this.deviceId, this.liveMessage);
 }

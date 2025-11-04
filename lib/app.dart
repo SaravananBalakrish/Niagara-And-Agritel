@@ -17,31 +17,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> appMain() async {
   await di.init();
-
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await di.sl<NotificationService>().init();
-
-  // NEW: Handle initial auth check here to avoid StatefulWidget
   final authBloc = di.sl<AuthBloc>();
   authBloc.add(CheckCachedUserEvent());
-
-  // NEW: Setup FCM (moved from initState)
-  /*final fcmToken = await di.sl<NotificationService>().getFcmToken();
-  print('FCM Token: $fcmToken');
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    di.sl<NotificationService>().showNotification(
-      title: message.notification?.title ?? 'App Notification',
-      body: message.notification?.body ?? 'You have a new message',
-      payload: message.data.toString(),
-    );
-  });
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print('Notification opened: ${message.data}');
-    // Note: Router access requires context; defer to a listener in widget if needed
-    // For simplicity, assume router is accessible via global or BlocListener
-  });*/
-
   runApp(RootApp(authBloc: authBloc));
 }
 
@@ -70,6 +50,7 @@ class RootApp extends StatelessWidget {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
             theme: themeProvider.theme,
+            themeMode: ThemeMode.dark,
             routerConfig: AppRouter(authBloc: authBloc).router,
           );
         },

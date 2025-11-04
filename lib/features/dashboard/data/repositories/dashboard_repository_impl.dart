@@ -26,7 +26,8 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final response = await remote.fetchControllers(userId, groupId);
       print("response from the fetchControllers :: $response");
       return Right(response);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print("fetchControllers Stack trace : $stackTrace");
       return Left(ServerFailure('Failed to fetch controllers: $e'));
     }
   }

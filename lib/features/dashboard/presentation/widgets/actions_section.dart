@@ -37,7 +37,7 @@ class ActionsSection extends StatelessWidget {
               icon: Icons.email,
               title: "Message",
               onTap: () {},
-             ),
+            ),
           ),
           Expanded(
             child: MenuButton(
@@ -49,38 +49,38 @@ class ActionsSection extends StatelessWidget {
         ],
       ),
     ) : Padding(padding: const EdgeInsets.symmetric(horizontal: 5),
-    child: Row(
-    children: [
-    Expanded(
-    child: MenuButton(
-    icon: Icons.settings,
-    title: "Pump\nSettings",
-    onTap: () {},
-    ),
-    ),
-    Expanded(
-    child: MenuButton(
-    icon: Icons.insert_chart,
-    title: "Power\nGraph",
-    onTap: () {},
-    ),
-    ),
-    Expanded(
-    child: MenuButton(
-    icon: Icons.email,
-    title: "Message",
-    onTap: () {},
-    ),
-    ),
-    Expanded(
-    child: MenuButton(
-    icon: Icons.error_sharp,
-    title: "Fault\nMessage",
-    onTap: () {},
-    ),
-    ),
-    ],
-    ),
+      child: Row(
+        children: [
+          Expanded(
+            child: MenuButton(
+              icon: Icons.settings,
+              title: "Pump\nSettings",
+              onTap: () {},
+            ),
+          ),
+          Expanded(
+            child: MenuButton(
+              icon: Icons.insert_chart,
+              title: "Power\nGraph",
+              onTap: () {},
+            ),
+          ),
+          Expanded(
+            child: MenuButton(
+              icon: Icons.email,
+              title: "Message",
+              onTap: () {},
+            ),
+          ),
+          Expanded(
+            child: MenuButton(
+              icon: Icons.error_sharp,
+              title: "Fault\nMessage",
+              onTap: () {},
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,4 @@
-class LiveMessageEntity {
+class ControllerLiveMessageEntity {
   final String msgType;
   final String display1;
   final String display2;
@@ -45,7 +45,7 @@ class LiveMessageEntity {
   final String runtimeToday;
   final String runtimePrevious;
 
-  const LiveMessageEntity({
+  const ControllerLiveMessageEntity({
     required this.msgType,
     required this.display1,
     required this.display2,

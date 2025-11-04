@@ -1,6 +1,7 @@
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
 
-class LiveMessageModel extends LiveMessageEntity{
+import '../../domain/entities/livemessage_entity.dart';
+
+class LiveMessageModel extends LiveMessageEntity {
   const LiveMessageModel({
     required super.motorOnOff,
     required super.valveOnOff,
@@ -42,122 +43,161 @@ class LiveMessageModel extends LiveMessageEntity{
     required super.versionBoard,
   });
 
-  /// Parse from liveMessage string
+  /// Parse from liveMessage string (MQTT cM field)
   factory LiveMessageModel.fromLiveMessage(String? message) {
-    if (message == null ||
-        message.trim().isEmpty ||
-        message.trim().toUpperCase() == "NA") {
-      return LiveMessageModel(
+    if (message == null || message.trim().isEmpty || message.trim().toUpperCase() == "NA") {
+      return const LiveMessageModel(
         motorOnOff: '0',
         valveOnOff: '0',
-        liveDisplay1: '0',
-        liveDisplay2: '0',
+        liveDisplay1: '',
+        liveDisplay2: '',
         rVoltage: '0',
         yVoltage: '0',
         bVoltage: '0',
         ryVoltage: '0',
         ybVoltage: '0',
         brVoltage: '0',
-        rCurrent: '0',
-        yCurrent: '0',
-        bCurrent: '0',
-        modeOfOperation: '0',
-        programName: '0',
+        rCurrent: '0.0',
+        yCurrent: '0.0',
+        bCurrent: '0.0',
+        modeOfOperation: '',
+        programName: '',
         zoneNo: '0',
-        valveForZone: '0',
-        zoneDuration: '0',
-        zoneRemainingTime: '0',
-        prsIn: '0',
-        prsOut: '0',
-        flowRate: '0',
+        valveForZone: '',
+        zoneDuration: '00:00:00',
+        zoneRemainingTime: '00:00:00',
+        prsIn: '0.0',
+        prsOut: '0.0',
+        flowRate: '0.0',
         wellLevel: '0',
-        fertStatus: ['0',],
+        fertStatus: <String>[],
         ec: '0',
         ph: '0',
         totalMeterFlow: '0',
         runTimeToday: '0',
         runTimePrevious: '0',
-        flowPrevDay: '0',
-        flowToday: '0',
+        flowPrevDay: '00:00:00',
+        flowToday: '00:00:00',
         moisture1: '0',
         moisture2: '0',
         energy: '0',
         powerFactor: '0',
-        fertValues: ['0',],
-        versionModule: '0',
-        versionBoard:'0',
+        fertValues: <String>[],
+        versionModule: '',
+        versionBoard: '',
       );
-      throw Exception("Invalid live message");
     }
 
-    final parts = message.split(",");
+    final parts = message.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
 
-    String safe(int index) =>
-        index < parts.length && parts[index].trim().isNotEmpty
-            ? parts[index].trim()
-            : "NA";
-
-    // Fertilizer ON/OFF status (index 24)
-    final fertStr = safe(24);
-    final fertParts = fertStr.split(":");
-    final fertStatus =
-    List<String>.generate(6, (i) => fertParts.length > i ? fertParts[i] : "0");
-
-    // EC:PH (index 25)
-    final ecphStr = safe(25);
-    final ecphParts = ecphStr.split(":");
-    final ec = ecphParts.isNotEmpty ? ecphParts[0] : "0";
-    final ph = ecphParts.length > 1 ? ecphParts[1] : "0";
-
-    // Fertilizer values (index 36)
-    List<String> fertValues = List.filled(6, "0");
-    if (parts.length >= 37) {
-      final fertValStr = safe(36);
-      final fertValParts = fertValStr.split(";");
-      fertValues = List<String>.generate(
-          6, (i) => fertValParts.length > i ? fertValParts[i] : "0");
+    // Safe access helper
+    String safeString(int index, String defaultValue) => index < parts.length ? parts[index] : defaultValue;
+    List<String> safeList(int index, List<String> defaultValue) {
+      if (index >= parts.length) return defaultValue;
+      final str = parts[index];
+      if (str.contains(':')) {
+        return str.split(':').map((s) => s.trim()).toList();
+      } else if (str.contains(';')) {
+        return str.split(';').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      }
+      return [str];
     }
 
-    // Version info (index 39, 40)
-    final versionModule = parts.length >= 40 ? safe(39) : "";
-    final versionBoard = parts.length >= 41 ? safe(40) : "";
+    // Parse specific fields
+    final motorOnOff = safeString(0, '0');
+    final valveOnOff = safeString(1, '0');
+    final liveDisplay1 = safeString(3, '');
+    final liveDisplay2 = safeString(4, '');
+    final rVoltage = safeString(5, '0');
+    final ryVoltage = safeString(6, '0');
+    final yVoltage = safeString(7, '0');
+    final ybVoltage = safeString(8, '0');
+    final bVoltage = safeString(9, '0');
+    final brVoltage = safeString(10, '0');
+    final rCurrent = safeString(11, '0.0');
+    final yCurrent = safeString(12, '0.0');
+    final bCurrent = safeString(13, '0.0');
+    final modeOfOperation = safeString(14, '');
+    final programName = safeString(15, '');
+    final zoneNo = safeString(16, '0');
+    final valveForZone = safeString(17, '');
+    final zoneDuration = safeString(18, '00:00:00');
+    final zoneRemainingTime = safeString(19, '00:00:00');
+    final prsIn = safeString(20, '0.0');
+    final prsOut = safeString(23, '0.0');
+    final flowRateTemp = safeString(25, '0.0:0');
+    final flowParts = flowRateTemp.split(':');
+    final flowRate = flowParts.length > 0 ? flowParts[0] : '0.0';
+    final totalMeterFlow = flowParts.length > 1 ? flowParts[1] : '0';
+    final wellLevel = safeString(34, '0'); // Assuming position for wellLevel
+    final runTimeToday = safeString(35, '0');
+    final flowPrevDay = safeString(27, '00:00:00');
+    final flowToday = safeString(28, '00:00:00');
+    final moisture1 = safeString(31, '0');
+    final moisture2 = safeString(32, '0');
+    final energy = safeString(29, '0');
+    final powerFactor = safeString(30, '0');
+
+    // Fert values
+    final fertValues = safeList(24, <String>[]);
+
+    // Fert status (run times, split by ';', take first 8)
+    List<String> fertStatus = <String>[];
+    String runTimePrevious = '0';
+    String ec = '0';
+    if (parts.length > 36) {
+      final longPart = parts[36];
+      final semiParts = longPart.split(';');
+      if (semiParts.length >= 9) {
+        fertStatus = semiParts.sublist(0, 8).map((s) => s.trim()).toList();
+        ec = semiParts[8].trim();
+        runTimePrevious = semiParts.sublist(0, 8).last.trim(); // Last run time as previous?
+      } else {
+        fertStatus = semiParts.map((s) => s.trim()).toList();
+        if (semiParts.isNotEmpty) runTimePrevious = semiParts.last.trim();
+      }
+    }
+
+    final ph = safeString(37, '0');
+    final versionModule = safeString(39, '');
+    final versionBoard = safeString(40, '');
 
     return LiveMessageModel(
-      motorOnOff: safe(0),
-      valveOnOff: safe(1),
-      liveDisplay1: safe(3),
-      liveDisplay2: safe(4),
-      rVoltage: safe(5),
-      yVoltage: safe(6),
-      bVoltage: safe(7),
-      ryVoltage: safe(8),
-      ybVoltage: safe(9),
-      brVoltage: safe(10),
-      rCurrent: safe(11),
-      yCurrent: safe(12),
-      bCurrent: safe(13),
-      modeOfOperation: safe(14),
-      programName: safe(15),
-      zoneNo: safe(16),
-      valveForZone: safe(17),
-      zoneDuration: safe(18),
-      zoneRemainingTime: safe(19),
-      prsIn: safe(20),
-      prsOut: safe(21),
-      flowRate: safe(22),
-      wellLevel: safe(23),
+      motorOnOff: motorOnOff,
+      valveOnOff: valveOnOff,
+      liveDisplay1: liveDisplay1,
+      liveDisplay2: liveDisplay2,
+      rVoltage: rVoltage,
+      yVoltage: yVoltage,
+      bVoltage: bVoltage,
+      ryVoltage: ryVoltage,
+      ybVoltage: ybVoltage,
+      brVoltage: brVoltage,
+      rCurrent: rCurrent,
+      yCurrent: yCurrent,
+      bCurrent: bCurrent,
+      modeOfOperation: modeOfOperation,
+      programName: programName,
+      zoneNo: zoneNo,
+      valveForZone: valveForZone,
+      zoneDuration: zoneDuration,
+      zoneRemainingTime: zoneRemainingTime,
+      prsIn: prsIn,
+      prsOut: prsOut,
+      flowRate: flowRate,
+      wellLevel: wellLevel,
       fertStatus: fertStatus,
       ec: ec,
       ph: ph,
-      totalMeterFlow: safe(26),
-      runTimeToday: safe(27),
-      runTimePrevious: safe(28),
-      flowPrevDay: safe(29),
-      flowToday: safe(30),
-      moisture1: safe(31),
-      moisture2: safe(32),
-      energy: safe(33),
-      powerFactor: safe(34),
+      totalMeterFlow: totalMeterFlow,
+      runTimeToday: runTimeToday,
+      runTimePrevious: runTimePrevious,
+      flowPrevDay: flowPrevDay,
+      flowToday: flowToday,
+      moisture1: moisture1,
+      moisture2: moisture2,
+      energy: energy,
+      powerFactor: powerFactor,
       fertValues: fertValues,
       versionModule: versionModule,
       versionBoard: versionBoard,

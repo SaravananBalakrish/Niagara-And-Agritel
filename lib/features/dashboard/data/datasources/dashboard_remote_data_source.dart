@@ -59,7 +59,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     } catch (e, stackTrace) {
       print('Fetch controllers error: $e');
       print('Fetch controllers stack trace: $stackTrace');
-      throw Exception('Failed to fetch controllers: $e');
+      throw Exception('Failed to fetch controllers: $stackTrace');
     }
   }
 }

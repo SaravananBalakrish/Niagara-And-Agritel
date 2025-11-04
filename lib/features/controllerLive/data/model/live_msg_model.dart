@@ -1,8 +1,6 @@
-
-
 import '../../domain/entities/live_msg_entity.dart';
 
-class LiveMessageModel extends LiveMessageEntity {
+class LiveMessageModel extends ControllerLiveMessageEntity {
   const LiveMessageModel({
     required super.msgType,
     required super.display1,

@@ -12,11 +12,6 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Log the debug token (debug mode only)
-  /*await FirebaseAppCheck.instance.activate(
-    androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.deviceCheck,
-  );*/
   try {
     // print("🔍 App Check: Activating with provider ${kDebugMode ? 'debug' : 'playIntegrity'}");
     await FirebaseAppCheck.instance.activate(
