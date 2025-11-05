@@ -11,12 +11,12 @@ import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../dashboard/presentation/bloc/dashboard_state.dart';
-import '../../../my_device/presentation/widgets/ctrl_display.dart';
-import '../../../my_device/presentation/widgets/latestmsg_section.dart';
-import '../../../my_device/presentation/widgets/pressure_section.dart';
-import '../../../my_device/presentation/widgets/ryb_section.dart';
-import '../../../my_device/presentation/widgets/timer_section.dart';
 import 'package:get_it/get_it.dart' as di;
+import '../../../dashboard/presentation/widgets/ctrl_display.dart';
+import '../../../dashboard/presentation/widgets/latestmsg_section.dart';
+import '../../../dashboard/presentation/widgets/pressure_section.dart';
+import '../../../dashboard/presentation/widgets/ryb_section.dart';
+import '../../../dashboard/presentation/widgets/timer_section.dart';
 import '../widgets/livepage_display_values.dart';
 
 class CtrlLivePage extends StatelessWidget {

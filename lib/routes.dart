@@ -21,7 +21,6 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
-import 'features/my_device/presentation/pages/my_device_page.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {

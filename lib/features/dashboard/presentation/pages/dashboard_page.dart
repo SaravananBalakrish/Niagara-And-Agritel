@@ -17,16 +17,17 @@ import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
-import '../../../my_device/presentation/widgets/actions_section.dart';
-import '../../../my_device/presentation/widgets/ctrl_display.dart';
-import '../../../my_device/presentation/widgets/latestmsg_section.dart';
-import '../../../my_device/presentation/widgets/motor_valve_section.dart';
-import '../../../my_device/presentation/widgets/pressure_section.dart';
-import '../../../my_device/presentation/widgets/ryb_section.dart';
-import '../../../my_device/presentation/widgets/sync_section.dart';
-import '../../../my_device/presentation/widgets/timer_section.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
+
+import '../widgets/actions_section.dart';
+import '../widgets/ctrl_display.dart';
+import '../widgets/latestmsg_section.dart';
+import '../widgets/motor_valve_section.dart';
+import '../widgets/pressure_section.dart';
+import '../widgets/ryb_section.dart';
+import '../widgets/sync_section.dart';
+import '../widgets/timer_section.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
