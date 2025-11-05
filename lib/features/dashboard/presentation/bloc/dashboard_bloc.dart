@@ -1,17 +1,25 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_event.dart';
+import '../../../mqtt/presentation/bloc/mqtt_state.dart';
 import '../../data/models/controller_model.dart';
 import '../../domain/entities/controller_entity.dart';
 import '../../domain/usecases/fetch_controllers_usecase.dart';
 import '../../domain/usecases/fetch_dashboard_groups_usecase.dart';
 import 'dashboard_event.dart';
 import 'dashboard_state.dart';
+import '../../../mqtt/utils/mqtt_message_helper.dart'; // For PublishMessageHelper
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final FetchDashboardGroups fetchDashboardGroups;
   final FetchControllers fetchControllers;
   final MqttBloc mqttBloc;
+  Timer? _pollTimer;
+  DateTime? _lastPollTime;
+  bool _isPollingActive = false; // Prevent stacked timers
 
   DashboardBloc({
     required this.fetchDashboardGroups,
@@ -23,9 +31,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final result = await fetchDashboardGroups(DashboardGroupsParams(event.userId));
 
       result.fold(
-        (failure) => emit(DashboardError(message: failure.message)),
-        (groups) {
-          emit(DashboardGroupsLoaded(groups: groups, groupControllers: {}));
+            (failure) => emit(DashboardError(message: failure.message)),
+            (groups) {
+          emit(DashboardGroupsLoaded(groups: groups));
 
           if (groups.isNotEmpty) {
             add(FetchControllersEvent(event.userId, groups[0].userGroupId));
@@ -41,8 +49,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
         final updatedControllers = Map<int, List<ControllerEntity>>.from(currentState.groupControllers);
         result.fold(
-          (failure) => emit(DashboardError(message: failure.message)),
-          (controllers) {
+              (failure) => emit(DashboardError(message: failure.message)),
+              (controllers) {
             updatedControllers[event.groupId] = controllers;
             if (controllers.isNotEmpty) {
               mqttBloc.add(SubscribeMqttEvent(controllers[0].deviceId));
@@ -59,28 +67,24 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<SelectGroupEvent>((event, emit) async {
       if (state is DashboardGroupsLoaded) {
         final currentState = state as DashboardGroupsLoaded;
-        // Reset controller index for new group
         final newState = currentState.copyWith(
           selectedGroupId: event.groupId,
-          selectedControllerIndex: null, // Reset to null; UI will default to 0
+          selectedControllerIndex: null,
         );
         emit(newState);
 
-        // Fetch controllers if not loaded
         final group = currentState.groups.firstWhere((g) => g.userGroupId == event.groupId, orElse: () => throw Exception('Group not found'));
         final userId = group.userId;
         if (!currentState.groupControllers.containsKey(event.groupId)) {
           final result = await fetchControllers(UserGroupParams(userId, event.groupId));
           result.fold(
-            (failure) => emit(DashboardError(message: failure.message)),
-            (controllers) {
+                (failure) => emit(DashboardError(message: failure.message)),
+                (controllers) {
               final updatedControllers = Map<int, List<ControllerEntity>>.from(newState.groupControllers);
               updatedControllers[event.groupId] = controllers;
-              // Subscribe to the first controller's topic after successful fetch
               if (controllers.isNotEmpty) {
                 mqttBloc.add(SubscribeMqttEvent(controllers[0].deviceId));
               }
-              // Optionally auto-select first controller here
               final updatedState = newState.copyWith(
                 groupControllers: updatedControllers,
                 selectedControllerIndex: controllers.isNotEmpty ? 0 : null,
@@ -89,9 +93,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
             },
           );
         } else {
-          // If already loaded, auto-select first
           final controllers = currentState.groupControllers[event.groupId] ?? [];
-          // Subscribe to the first controller's topic
           if (controllers.isNotEmpty) {
             mqttBloc.add(SubscribeMqttEvent(controllers[0].deviceId));
           }
@@ -110,7 +112,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
             (currentState.groupControllers[currentState.selectedGroupId!]?.length ?? 0) > event.controllerIndex) {
           final controllers = currentState.groupControllers[currentState.selectedGroupId!] ?? [];
           final selectedController = controllers[event.controllerIndex];
-          // Subscribe to the selected controller's topic
           mqttBloc.add(SubscribeMqttEvent(selectedController.deviceId));
           emit(currentState.copyWith(selectedControllerIndex: event.controllerIndex));
         }
@@ -124,10 +125,69 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           selectedGroupId: null,
           selectedControllerIndex: null,
         ));
+        _stopPolling();
       }
     });
 
     on<UpdateLiveMessageEvent>(_onUpdateLiveMessage);
+
+    on<StartPollingEvent>(_onStartPolling);
+    on<StopPollingEvent>(_onStopPolling);
+  }
+
+  void _onStartPolling(StartPollingEvent event, Emitter<DashboardState> emit) {
+    if (_isPollingActive) {
+      debugPrint('Polling already active - skipping start');
+      return;
+    }
+    _stopPolling(); // Clean any partial
+    _isPollingActive = true;
+    _lastPollTime = DateTime.now();
+
+    // Immediate first poll
+    _performPoll();
+
+    _pollTimer = Timer.periodic(const Duration(seconds: 40), (timer) {
+      _performPoll();
+    });
+  }
+
+  void _onStopPolling(StopPollingEvent event, Emitter<DashboardState> emit) {
+    _stopPolling();
+  }
+
+  void _performPoll() {
+    if (_lastPollTime != null && DateTime.now().difference(_lastPollTime!).inMilliseconds < 10000) {
+      final seconds = DateTime.now().difference(_lastPollTime!).inSeconds;
+      debugPrint('Poll throttled: too soon since last (${seconds}s)');
+      return;
+    }
+
+    if (state is DashboardGroupsLoaded) {
+      final currentState = state as DashboardGroupsLoaded;
+      if (currentState.selectedControllerIndex != null && currentState.selectedGroupId != null) {
+        final controllers = currentState.groupControllers[currentState.selectedGroupId!] ?? [];
+        final selectedIndex = currentState.selectedControllerIndex!;
+        if (selectedIndex < controllers.length) {
+          final deviceId = controllers[selectedIndex].deviceId;
+          if (mqttBloc.state is MqttConnected || mqttBloc.state is MqttMessagesState) {
+            final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
+            mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
+            _lastPollTime = DateTime.now();
+            debugPrint('Bloc polled live for $deviceId at $_lastPollTime');
+          } else {
+            debugPrint('Poll skipped: MQTT not ready (${mqttBloc.state.runtimeType})');
+          }
+        }
+      }
+    }
+  }
+
+  void _stopPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    _isPollingActive = false;
+    _lastPollTime = null;
   }
 
   Future<void> _onUpdateLiveMessage(UpdateLiveMessageEvent event, Emitter<DashboardState> emit) async {
@@ -141,7 +201,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     for (final entry in updatedGroupControllers.entries) {
       final groupId = entry.key;
       final controllers = entry.value;
-      final updatedControllers = <ControllerEntity>[];
+      final updatedControllersList = <ControllerEntity>[]; // Renamed for clarity
       bool groupUpdated = false;
 
       for (final ctrl in controllers) {
@@ -149,21 +209,27 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           // Cast to ControllerModel assuming it implements ControllerEntity and has copyWith
           final model = ctrl as ControllerModel;
           final updatedCtrl = model.copyWith(liveMessage: event.liveMessage);
-          updatedControllers.add(updatedCtrl);
+          updatedControllersList.add(updatedCtrl);
           groupUpdated = true;
           updated = true;
         } else {
-          updatedControllers.add(ctrl);
+          updatedControllersList.add(ctrl);
         }
       }
 
       if (groupUpdated) {
-        updatedGroupControllers[groupId] = updatedControllers;
+        updatedGroupControllers[groupId] = updatedControllersList;
       }
     }
 
     if (updated) {
       emit(currentState.copyWith(groupControllers: updatedGroupControllers));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _stopPolling();
+    return super.close();
   }
 }

@@ -50,3 +50,7 @@ class UpdateLiveMessageEvent extends DashboardEvent {
 
   UpdateLiveMessageEvent(this.deviceId, this.liveMessage);
 }
+
+class StartPollingEvent extends DashboardEvent {}
+
+class StopPollingEvent extends DashboardEvent {}

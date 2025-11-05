@@ -57,6 +57,7 @@ dependencies:
   flutter_spinkit: ^5.2.2
   responsive_wrapper: ^1.0.2
   url_launcher: ^6.3.2
+  timer_builder: ^2.0.0
 
 dev_dependencies:
   flutter_test:

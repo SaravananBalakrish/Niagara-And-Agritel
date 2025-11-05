@@ -1,8 +1,7 @@
-// lib/features/dashboard/presentation/pages/dashboard_page.dart
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
@@ -37,13 +36,15 @@ class DashboardPage extends StatelessWidget {
     final bloc = di.GetIt.instance.get<DashboardBloc>();
     final authState = context.read<AuthBloc>().state;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
       if (!bloc.isClosed && authState is Authenticated) {
         if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
           bloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
         }
         bloc.add(ResetDashboardSelectionEvent());
       }
+      await Future.delayed(Duration(seconds: 5));
+      bloc.add(StartPollingEvent());
 
       final mqttBloc = di.GetIt.instance.get<MqttBloc>();
       mqttBloc.setProcessingContext(context);
@@ -94,8 +95,8 @@ class DashboardPage extends StatelessWidget {
 
                     final selectedController = effectiveIndex >= 0 ? controllers[effectiveIndex] : null;
 
-
                     return Scaffold(
+                      backgroundColor: Colors.transparent,
                       appBar: AppBar(
                         title: Container(
                           width: 140,
@@ -215,106 +216,114 @@ class DashboardPage extends StatelessWidget {
                           ),
                           IconButton(
                             onPressed: null,
-                            icon: Icon(Icons.circle,
-                                color: selectedController?.ctrlStatusFlag == '1' ? Colors.green : Colors.red),
+                            icon: Icon(Icons.circle, color: selectedController?.ctrlStatusFlag == '1' ? Colors.green : Colors.red),
                           ),
                         ],
                       ),
                       body: selectedController == null
                           ? const Center(child: CircularProgressIndicator())
-                          : RefreshIndicator(
-                        onRefresh: () async {
-                          final mqttBloc = di.GetIt.instance.get<MqttBloc>();
-                          final deviceId = selectedController.deviceId;
-                          final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
-                          mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
-                          print("Live message from server : ${selectedController.liveMessage}");
-                        },
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final width = constraints.maxWidth;
+                          : GlassyWrapper(
+                        fixedBackground: true,
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+                            final deviceId = selectedController.deviceId;
+                            final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
+                            mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
+                            if (kDebugMode) {
+                              print("Live message from server : ${selectedController.liveMessage}");
+                            }
+                          },
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final width = constraints.maxWidth;
 
-                            int modelCheck = ([1, 5].contains(selectedController.modelId)) ? 300 : 120;
-                            double scale(double size) => size * (width / modelCheck);
+                              int modelCheck = ([1, 5].contains(selectedController.modelId)) ? 300 : 120;
+                              double scale(double size) => size * (width / modelCheck);
 
-                            return GlassyWrapper(
-                              child: CustomScrollView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                slivers: [
-                                  SliverFillRemaining(
-                                    hasScrollBody: false,
-                                    child: Padding(
-                                      padding: EdgeInsetsGeometry.all(scale(2)),
-                                      child: GlassCard(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            SyncSection(
-                                              liveSync: selectedController.livesyncTime,
-                                              smsSync: selectedController.msgDesc,
-                                              model: selectedController.modelId,
-                                            ),
-                                            SizedBox(height: scale(8)),
-                                            GlassCard(
-                                              child: CtrlDisplay(
-                                                signal: 50,
-                                                battery: 50,
-                                                status: selectedController.status,
-                                                vrb: 456,
-                                                amp: 200,
+                              return NotificationListener<OverscrollIndicatorNotification>(
+                                onNotification: (OverscrollIndicatorNotification notification) {
+                                  notification.disallowIndicator();
+                                  return true;
+                                },
+                                child: CustomScrollView(
+                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  slivers: [
+                                    SliverFillRemaining(
+                                      hasScrollBody: false,
+                                      child: Padding(
+                                        padding: EdgeInsetsGeometry.all(scale(2)),
+                                        child: GlassCard(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              SyncSection(
+                                                liveSync: selectedController.livesyncTime,
+                                                smsSync: selectedController.msgDesc,
+                                                model: selectedController.modelId,
                                               ),
-                                            ),
-                                            SizedBox(height: scale(8)),
-                                            RYBSection(
-                                              r: selectedController.liveMessage.rVoltage,
-                                              y: selectedController.liveMessage.yVoltage,
-                                              b: selectedController.liveMessage.bVoltage,
-                                              c1: selectedController.liveMessage.rCurrent,
-                                              c2: selectedController.liveMessage.yCurrent,
-                                              c3: selectedController.liveMessage.bCurrent,
-                                            ),
-                                            SizedBox(height: scale(8)),
-                                            MotorValveSection(
-                                              motorOn: selectedController.liveMessage.motorOnOff,
-                                              motorOn2: selectedController.liveMessage.valveOnOff,
-                                              valveOn: selectedController.liveMessage.valveOnOff,
-                                              model: selectedController.modelId,
-                                            ),
-                                            SizedBox(height: scale(8)),
-                                            if ([1, 5].contains(selectedController.modelId))
-                                              Column(
-                                                children: [
-                                                  PressureSection(
-                                                    prsIn: selectedController.liveMessage.prsIn,
-                                                    prsOut: selectedController.liveMessage.prsOut,
-                                                    activeZone: selectedController.zoneNo,
-                                                    fertlizer: '',
-                                                  ),
-                                                  SizedBox(height: scale(8)),
-                                                  TimerSection(
-                                                    setTime: selectedController.setFlow,
-                                                    remainingTime: selectedController.remFlow,
-                                                  ),
-                                                ],
+                                              SizedBox(height: scale(8)),
+                                              GlassCard(
+                                                child: CtrlDisplay(
+                                                  signal: 50,
+                                                  battery: 50,
+                                                  status: selectedController.status,
+                                                  vrb: 456,
+                                                  amp: 200,
+                                                ),
                                               ),
-                                            LatestMsgSection(
-                                              msg: ([1, 5].contains(selectedController.modelId))
-                                                  ? selectedController.msgDesc
-                                                  : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
-                                            ),
-                                            SizedBox(height: scale(8)),
-                                            ActionsSection(model: selectedController.modelId),
-                                          ],
+                                              SizedBox(height: scale(8)),
+                                              RYBSection(
+                                                r: selectedController.liveMessage.rVoltage,
+                                                y: selectedController.liveMessage.yVoltage,
+                                                b: selectedController.liveMessage.bVoltage,
+                                                c1: selectedController.liveMessage.rCurrent,
+                                                c2: selectedController.liveMessage.yCurrent,
+                                                c3: selectedController.liveMessage.bCurrent,
+                                              ),
+                                              SizedBox(height: scale(8)),
+                                              MotorValveSection(
+                                                motorOn: selectedController.liveMessage.motorOnOff,
+                                                motorOn2: selectedController.liveMessage.valveOnOff,
+                                                valveOn: selectedController.liveMessage.valveOnOff,
+                                                model: selectedController.modelId,
+                                              ),
+                                              SizedBox(height: scale(8)),
+                                              if ([1, 5].contains(selectedController.modelId))
+                                                Column(
+                                                  children: [
+                                                    PressureSection(
+                                                      prsIn: selectedController.liveMessage.prsIn,
+                                                      prsOut: selectedController.liveMessage.prsOut,
+                                                      activeZone: selectedController.zoneNo,
+                                                      fertlizer: '',
+                                                    ),
+                                                    SizedBox(height: scale(8)),
+                                                    TimerSection(
+                                                      setTime: selectedController.setFlow,
+                                                      remainingTime: selectedController.remFlow,
+                                                    ),
+                                                  ],
+                                                ),
+                                              LatestMsgSection(
+                                                msg: ([1, 5].contains(selectedController.modelId))
+                                                    ? selectedController.msgDesc
+                                                    : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
+                                              ),
+                                              SizedBox(height: scale(8)),
+                                              ActionsSection(model: selectedController.modelId),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            );
-                          },
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     );

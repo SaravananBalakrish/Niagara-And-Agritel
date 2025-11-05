@@ -1,36 +1,53 @@
 import 'package:flutter/material.dart';
+import 'dart:ui' show ImageFilter;
 
 class GlassyWrapper extends StatelessWidget {
   final Widget? child;
+  final bool fixedBackground;
 
-  const GlassyWrapper({super.key, this.child});
+  const GlassyWrapper({
+    super.key,
+    this.child,
+    this.fixedBackground = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Base glassy gradient background - now positioned to fill the stack
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomRight,
-                colors: [
-                  Theme.of(context).colorScheme.primaryContainer,
-                  Colors.black87,
-                ],
-              ),
+    List<Widget> stackChildren = [
+      // Base glassy gradient background - positioned to fill the stack
+      Positioned.fill(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primaryContainer,
+                Colors.black87,
+              ],
             ),
           ),
         ),
-        // Subtle decorations (orbs for depth)
-        Positioned.fill(
-          child: _buildBackgroundDecorations(context),
-        ),
-        // Child content (your pages) - now positioned to fill and respect bounds
-        if (child != null) Positioned.fill(child: child!),
-      ],
+      ),
+      // Subtle decorations (orbs for depth)
+      Positioned.fill(
+        child: _buildBackgroundDecorations(context),
+      ),
+    ];
+
+    // Child content layer
+    if (child != null) {
+      if (fixedBackground) {
+        // For scrollable children (e.g., RefreshIndicator): Add as non-positioned child to allow internal scrolling/translation without moving the whole layer
+        stackChildren.add(child!);
+      } else {
+        // Default: Position child to fill for static/full-bleed content
+        stackChildren.add(Positioned.fill(child: child!));
+      }
+    }
+
+    return Stack(
+      children: stackChildren,
     );
   }
 
