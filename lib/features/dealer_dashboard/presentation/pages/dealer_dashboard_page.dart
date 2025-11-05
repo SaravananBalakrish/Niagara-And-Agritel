@@ -5,7 +5,7 @@ import 'package:get_it/get_it.dart' as di;
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/route_constants.dart';
-import '../../../../core/widgets/app_drawer.dart';
+import '../../../side_drawer/presentation/widgets/app_drawer.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';

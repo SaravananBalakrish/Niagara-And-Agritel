@@ -8,7 +8,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
-import '../../../../core/services/api_urls.dart';
+import '../../../../core/utils/api_urls.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../models/user_model.dart';
@@ -16,25 +16,12 @@ import 'auth_local_data_source.dart';
 
 /// Abstract class defining the remote data source contract for authentication operations.
 abstract class AuthRemoteDataSource {
-  /// Logs in a user using phone number and password.
   Future<RegisterDetailsModel> loginWithPassword(String phone, String password);
-
-  /// Sends an OTP to the provided phone number.
   Future<String> sendOtp(String phone);
-
-  /// Logs out the current user from Firebase and optionally the backend.
   Future<void> logout();
-
-  /// Verifies the OTP and completes the login process.
   Future<RegisterDetailsModel> verifyOtp(String verificationId, String otp, String countryCode);
-
-  /// Checks if a phone number is already registered.
   Future<bool> checkPhoneNumber(String phone, String countryCode);
-
-  /// Registers a new user with the provided parameters.
   Future<RegisterDetailsModel> signUp(SignUpParams params);
-
-  /// Updates the user's profile with the provided parameters.
   Future<RegisterDetailsModel> updateProfile(UpdateProfileParams params);
 }
 
@@ -357,13 +344,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Sign out from Firebase
       await _firebaseAuth.signOut();
 
-      // Optional: Call backend logout endpoint if needed for session cleanup
-      await _apiClient.post(ApiUrls.logOutUrl, body: {});
-
       // Clear local cached auth data
       final authLocalDataSource = GetIt.instance<AuthLocalDataSource>();
       await authLocalDataSource.clearAuthData();
-
+      await _apiClient.put(ApiUrls.logOutUrl, body: {});
       if (kDebugMode) {
         print('User logged out successfully');
       }

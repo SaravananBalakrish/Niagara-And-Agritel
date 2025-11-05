@@ -2,7 +2,7 @@ import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/gro
 import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/controller_model.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
-import '../../../../core/services/api_urls.dart';
+import '../../../../core/utils/api_urls.dart';
 import '../../domain/entities/group_entity.dart';
 import '../../domain/entities/controller_entity.dart';
 

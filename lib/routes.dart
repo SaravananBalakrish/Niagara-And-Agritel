@@ -8,13 +8,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/chat.dart';
-import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/groups.dart';
-import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/presentation/pages/sub_users.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/chat.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/groups.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
-import 'core/widgets/app_drawer.dart';
+import 'features/side_drawer/presentation/pages/sub_users.dart';
+import 'features/side_drawer/presentation/widgets/app_drawer.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
@@ -56,14 +56,17 @@ class AppRouter {
         if (isOtpSent && state.matchedLocation != RouteConstants.verifyOtp) {
           print('Redirecting to OTP screen: ${RouteConstants.verifyOtp}');
           return RouteConstants.verifyOtp;
-          return RouteConstants.dealerDashboard;
         }
         if (isLoggedIn &&
             (state.matchedLocation == RouteConstants.login ||
                 state.matchedLocation == RouteConstants.verifyOtp)) {
           print('Redirecting to dashboard: ${RouteConstants.dashboard}');
-          return RouteConstants.dealerDashboard;
-          return RouteConstants.dealerDashboard;
+          print(authState.user.userDetails.userType);
+          if (authState.user.userDetails.userType == 2) {
+            return RouteConstants.dealerDashboard;
+          } else if (authState.user.userDetails.userType == 1) {
+            return RouteConstants.dashboard;
+          }
         }
         if (!isLoggedIn &&
             !isOtpSent &&
@@ -71,7 +74,6 @@ class AppRouter {
             state.matchedLocation != RouteConstants.verifyOtp) {
           print('Redirecting to login: ${RouteConstants.login}');
           return RouteConstants.login;
-          return RouteConstants.dealerDashboard;
         }
         print('No redirect needed');
         return null;

@@ -86,16 +86,20 @@ class _LoginPageState extends State<LoginPage> {
                 }
                 if (state is Authenticated) {
                   print('Authenticated: ${state.user.userDetails.mobile}');
-                 /* ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Welcome ${state.user.userDetails.name}"),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                    ),
-                  );*/
-                  // context.go(RouteConstants.dashboard);
-                  context.go(RouteConstants.dealerDashboard);
+                  if(state.user.userDetails.userType == 2) {
+                    context.go(RouteConstants.dealerDashboard);
+                  } else if (state.user.userDetails.userType == 1){
+                    context.go(RouteConstants.dashboard);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Admin cannot login through mobile"),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                      ),
+                    );
+                  }
                 }
                 if (state is AuthError) {
                   print('AuthError: code=${state.code}, message=${state.message}');
