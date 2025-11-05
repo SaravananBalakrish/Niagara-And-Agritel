@@ -50,7 +50,7 @@ class RootApp extends StatelessWidget {
           return MaterialApp.router(
             debugShowCheckedModeBanner: false,
             theme: themeProvider.theme,
-            themeMode: ThemeMode.dark,
+            themeMode: ThemeMode.light,
             routerConfig: AppRouter(authBloc: authBloc).router,
           );
         },
