@@ -61,6 +61,7 @@ class AppThemes {
     brightness: Brightness.light,
     primarySwatch: primarySwatch,
     primaryColor: primaryColor,
+    iconTheme: IconThemeData(color: Colors.white),
     colorScheme: ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
@@ -79,6 +80,10 @@ class AppThemes {
         ),
       ),
     ),
+    listTileTheme: ListTileThemeData(
+      textColor: Colors.white,
+
+    )
   );
 
   // Dark Theme

@@ -11,7 +11,7 @@ abstract class GroupDataSources {
 
 class GroupDataSourcesImpl extends GroupDataSources {
   final ApiClient apiClient;
-  GroupDataSourcesImpl(this.apiClient);
+  GroupDataSourcesImpl({required this.apiClient});
 
   @override
   @override

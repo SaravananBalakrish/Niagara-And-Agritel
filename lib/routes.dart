@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/chat.dart';
@@ -168,35 +169,19 @@ class AppRouter {
             } else if (location == RouteConstants.chat) {
               title = 'Chat';
             }
-            return BlocProvider<DashboardBloc>(
-              create: (_) => di.sl<DashboardBloc>(),
-              child: Scaffold(
-                extendBodyBehindAppBar: true,
-                appBar: AppBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  centerTitle: true,
-                  title: Text(title),
-                  flexibleSpace: _buildAppBarBackground(),
-                ),
-                drawer: const AppDrawer(),
-                body: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Theme.of(context).colorScheme.primaryContainer,
-                            Colors.black87,
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned.fill(child: _buildBackgroundDecorations()),
-                    child
-                  ],
+            return Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: Text(title),
+              ),
+              drawer: const AppDrawer(),
+              body: GlassyWrapper(
+                child: NotificationListener<OverscrollIndicatorNotification>(
+                    onNotification: (OverscrollIndicatorNotification notification) {
+                      notification.disallowIndicator();
+                      return true;
+                    },
+                    child: child
                 ),
               ),
             );

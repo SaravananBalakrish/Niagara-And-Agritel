@@ -1,6 +1,11 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/data/datasources/group_data_sources.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/data/repositories/fetch_group_repository.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/repositories/fetch_group_repository_impl.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/group_fetching_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/bloc/group_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
@@ -110,6 +115,12 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl(), mqttBloc: sl()));
 
   sl.registerLazySingleton<MessageDispatcher>(() => DashboardMessageDispatcher(dashboardBloc: sl<DashboardBloc>()));
+  
+  // AppDrawer Feature
+  sl.registerLazySingleton<GroupDataSources>(() => GroupDataSourcesImpl(apiClient: sl()));
+  sl.registerLazySingleton<FetchGroupRepository>(() => FetchGroupRepositoryImpl(groupDataSources: sl()));
+  sl.registerLazySingleton(() => GroupFetchingUsecase(sl()));
+  sl.registerLazySingleton(() => GroupBloc(groupFetchingUsecase: sl()));
 }
 
 // Reset all
