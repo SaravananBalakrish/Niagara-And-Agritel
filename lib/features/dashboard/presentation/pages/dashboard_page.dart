@@ -228,13 +228,18 @@ class DashboardPage extends StatelessWidget {
                                             ),
                                           ),
                                           SizedBox(height: scale(8)),
-                                          RYBSection(
-                                            r: selectedController.liveMessage.rVoltage,
-                                            y: selectedController.liveMessage.yVoltage,
-                                            b: selectedController.liveMessage.bVoltage,
-                                            c1: selectedController.liveMessage.rCurrent,
-                                            c2: selectedController.liveMessage.yCurrent,
-                                            c3: selectedController.liveMessage.bCurrent,
+                                          GestureDetector(
+                                            onTap: (){
+                                              context.push(RouteConstants.ctrlLivePage);
+                                            },
+                                            child: RYBSection(
+                                              r: selectedController.liveMessage.rVoltage,
+                                              y: selectedController.liveMessage.yVoltage,
+                                              b: selectedController.liveMessage.bVoltage,
+                                              c1: selectedController.liveMessage.rCurrent,
+                                              c2: selectedController.liveMessage.yCurrent,
+                                              c3: selectedController.liveMessage.bCurrent,
+                                            ),
                                           ),
                                           SizedBox(height: scale(8)),
                                           MotorValveSection(
