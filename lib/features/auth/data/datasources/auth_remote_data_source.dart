@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 // For platform-specific handling if needed
 import 'package:get_it/get_it.dart';
 
+import '../../../../core/di/injection.dart' as di;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/utils/api_urls.dart';
@@ -346,6 +347,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Clear local cached auth data
       final authLocalDataSource = GetIt.instance<AuthLocalDataSource>();
       await authLocalDataSource.clearAuthData();
+      await di.sl.reset();
+      await di.init();
       await _apiClient.put(ApiUrls.logOutUrl, body: {});
       if (kDebugMode) {
         print('User logged out successfully');

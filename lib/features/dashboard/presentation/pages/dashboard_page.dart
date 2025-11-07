@@ -14,6 +14,7 @@ import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
+import '../../../side_drawer/presentation/bloc/group_bloc.dart';
 import '../../../side_drawer/presentation/widgets/app_drawer.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
@@ -66,13 +67,81 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildContent(BuildContext context, DashboardState state) {
     if (state is DashboardLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Scaffold(
+          body: const Center(child: CircularProgressIndicator()));
     }
     if (state is DashboardError) {
-      return Center(child: Text('Error: ${state.message}'));
+      return GlassyWrapper(
+        child: Scaffold(
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(
+              title: Container(
+                width: 140,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                alignment: Alignment.center,
+                child: Image.asset(NiagaraCommonImages.logoSmall),
+              ),
+            ),
+            drawer: userType == 1 ? const AppDrawer() : null,
+            body: Center(
+                child: Text('Error: ${state.message}', style: TextStyle(color: Colors.white),)
+            )
+        ),
+      );
     }
     if (state is! DashboardGroupsLoaded) {
       return const SizedBox.shrink();
+    }
+
+    if (state.groups.isEmpty) {
+      return GlassyWrapper(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: Container(
+              width: 140,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              alignment: Alignment.center,
+              child: Image.asset(NiagaraCommonImages.logoSmall),
+            ),
+          ),
+          drawer: userType == 1 ? const AppDrawer() : null,
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'No groups available. Please create a group to get started.',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: (){
+
+                },
+                icon: Icon(Icons.add),
+                label: Text("Add Group"),
+                style: ButtonStyle(
+                    side: WidgetStatePropertyAll(BorderSide(color: Colors.white))
+                ),
+              )
+            ],
+          ),
+        ),
+      );
     }
 
     final bloc = context.read<DashboardBloc>();
@@ -80,12 +149,21 @@ class DashboardPage extends StatelessWidget {
 
     final (selectedGroup, selectedController, controllers) = _getSelectedGroupAndController(state);
 
-    return Scaffold(
-      appBar: _buildAppBar(selectedGroup, selectedController, controllers, state, bloc, context),
-      drawer: userType == 1 ? const AppDrawer() : null,
-      body: selectedController == null
-          ? const Center(child: CircularProgressIndicator())
-          : _buildBody(selectedController),
+    return GlassyWrapper(
+      child: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (notification) {
+          notification.disallowIndicator();
+          return true;
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: _buildAppBar(selectedGroup, selectedController, controllers, state, bloc, context),
+          drawer: userType == 1 ? const AppDrawer() : null,
+          body: selectedController == null
+              ? const Center(child: CircularProgressIndicator())
+              : _buildBody(selectedController),
+        ),
+      ),
     );
   }
 
@@ -101,9 +179,10 @@ class DashboardPage extends StatelessWidget {
 
   (GroupDetailsEntity, ControllerEntity?, List<ControllerEntity>)
   _getSelectedGroupAndController(DashboardGroupsLoaded state) {
+    // Safe now since we checked state.groups.isEmpty earlier; no throw needed
     final selectedGroup = state.groups.firstWhere(
           (group) => group.userGroupId == state.selectedGroupId,
-      orElse: () => state.groups.isNotEmpty ? state.groups[0] : throw ArgumentError('No groups available'),
+      orElse: () => state.groups[0],
     );
 
     final controllers = state.groupControllers[state.selectedGroupId] ?? [];
@@ -164,7 +243,7 @@ class DashboardPage extends StatelessWidget {
     return PreferredSize(
       preferredSize: Size(MediaQuery.of(context).size.width, 40),
       child: Container(
-        color: Theme.of(context).appBarTheme.backgroundColor,
+        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor ?? Colors.blue, // Ensure visible background
         child: Row(
           children: [
             _buildGroupSelector(state, selectedGroup, bloc),
@@ -261,13 +340,10 @@ class DashboardPage extends StatelessWidget {
   }
 
   static Widget _buildBody(dynamic selectedController) {
-    return GlassyWrapper(
-      fixedBackground: true,
-      child: RefreshIndicator(
-        onRefresh: () => _refreshLiveData(selectedController),
-        child: LayoutBuilder(
-          builder: (context, constraints) => _buildScaledContent(context, constraints, selectedController),
-        ),
+    return RefreshIndicator(
+      onRefresh: () => _refreshLiveData(selectedController),
+      child: LayoutBuilder(
+        builder: (context, constraints) => _buildScaledContent(context, constraints, selectedController),
       ),
     );
   }
@@ -287,84 +363,78 @@ class DashboardPage extends StatelessWidget {
     final modelCheck = ([1, 5].contains(controller.modelId)) ? 300 : 120;
     double scale(double size) => size * (width / modelCheck);
 
-    return NotificationListener<OverscrollIndicatorNotification>(
-      onNotification: (notification) {
-        notification.disallowIndicator();
-        return true;
-      },
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Padding(
-              padding: EdgeInsets.all(scale(2)),
-              child: GlassCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    SyncSection(
-                      liveSync: controller.livesyncTime,
-                      smsSync: controller.msgDesc,
-                      model: controller.modelId,
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: EdgeInsets.all(scale(2)),
+            child: GlassCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+                mainAxisAlignment: MainAxisAlignment.spaceAround, // Center vertically
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  SyncSection(
+                    liveSync: controller.livesyncTime,
+                    smsSync: controller.msgDesc,
+                    model: controller.modelId,
+                  ),
+                  SizedBox(height: scale(8)),
+                  GlassCard(
+                    child: CtrlDisplay(
+                      signal: 50,
+                      battery: 50,
+                      status: controller.status,
+                      vrb: 456,
+                      amp: 200,
+                    ),
+                  ),
+                  SizedBox(height: scale(8)),
+                  RYBSection(
+                    r: controller.liveMessage.rVoltage,
+                    y: controller.liveMessage.yVoltage,
+                    b: controller.liveMessage.bVoltage,
+                    c1: controller.liveMessage.rCurrent,
+                    c2: controller.liveMessage.yCurrent,
+                    c3: controller.liveMessage.bCurrent,
+                  ),
+                  SizedBox(height: scale(8)),
+                  MotorValveSection(
+                    motorOn: controller.liveMessage.motorOnOff,
+                    motorOn2: controller.liveMessage.valveOnOff,
+                    valveOn: controller.liveMessage.valveOnOff,
+                    model: controller.modelId,
+                  ),
+                  SizedBox(height: scale(8)),
+                  if ([1, 5].contains(controller.modelId)) ...[
+                    PressureSection(
+                      prsIn: controller.liveMessage.prsIn,
+                      prsOut: controller.liveMessage.prsOut,
+                      activeZone: controller.zoneNo,
+                      fertlizer: '',
                     ),
                     SizedBox(height: scale(8)),
-                    GlassCard(
-                      child: CtrlDisplay(
-                        signal: 50,
-                        battery: 50,
-                        status: controller.status,
-                        vrb: 456,
-                        amp: 200,
-                      ),
+                    TimerSection(
+                      setTime: controller.setFlow,
+                      remainingTime: controller.remFlow,
                     ),
                     SizedBox(height: scale(8)),
-                    RYBSection(
-                      r: controller.liveMessage.rVoltage,
-                      y: controller.liveMessage.yVoltage,
-                      b: controller.liveMessage.bVoltage,
-                      c1: controller.liveMessage.rCurrent,
-                      c2: controller.liveMessage.yCurrent,
-                      c3: controller.liveMessage.bCurrent,
-                    ),
-                    SizedBox(height: scale(8)),
-                    MotorValveSection(
-                      motorOn: controller.liveMessage.motorOnOff,
-                      motorOn2: controller.liveMessage.valveOnOff,
-                      valveOn: controller.liveMessage.valveOnOff,
-                      model: controller.modelId,
-                    ),
-                    SizedBox(height: scale(8)),
-                    if ([1, 5].contains(controller.modelId)) ...[
-                      PressureSection(
-                        prsIn: controller.liveMessage.prsIn,
-                        prsOut: controller.liveMessage.prsOut,
-                        activeZone: controller.zoneNo,
-                        fertlizer: '',
-                      ),
-                      SizedBox(height: scale(8)),
-                      TimerSection(
-                        setTime: controller.setFlow,
-                        remainingTime: controller.remFlow,
-                      ),
-                      SizedBox(height: scale(8)),
-                    ],
-                    LatestMsgSection(
-                      msg: ([1, 5].contains(controller.modelId))
-                          ? controller.msgDesc
-                          : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
-                    ),
-                    SizedBox(height: scale(8)),
-                    ActionsSection(model: controller.modelId),
                   ],
-                ),
+                  LatestMsgSection(
+                    msg: ([1, 5].contains(controller.modelId))
+                        ? controller.msgDesc
+                        : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
+                  ),
+                  SizedBox(height: scale(8)),
+                  ActionsSection(model: controller.modelId),
+                ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

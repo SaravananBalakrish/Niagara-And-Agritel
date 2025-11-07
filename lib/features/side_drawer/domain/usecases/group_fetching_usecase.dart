@@ -16,29 +16,9 @@ class GroupFetchingUsecase extends UseCase<dynamic, GroupFetchParams> {
   }
 }
 
-class GroupAddingUsecase extends UseCase<dynamic, GroupAddingParams> {
-  final GroupRepository fetchGroupRepository;
-  GroupAddingUsecase(this.fetchGroupRepository);
-
-  @override
-  Future<Either<Failure, dynamic>> call(GroupAddingParams params) {
-    return fetchGroupRepository.addGroup(params.userId, params.groupName);
-  }
-}
-
 class GroupFetchParams extends Equatable{
   final int userId;
   const  GroupFetchParams(this.userId);
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [userId];
-}
-
-class GroupAddingParams extends Equatable{
-  final int userId;
-  final String groupName;
-  const  GroupAddingParams(this.userId, this.groupName);
 
   @override
   // TODO: implement props

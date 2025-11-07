@@ -16,7 +16,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignUp signUp;
   final UpdateProfile updateProfile;
   final NotificationService _notificationService = di.sl<NotificationService>();
-  // Remove: final DashboardBloc _dashboardBloc = di.sl<DashboardBloc>(); // No longer needed
 
   AuthBloc({
     required this.loginWithPassword,

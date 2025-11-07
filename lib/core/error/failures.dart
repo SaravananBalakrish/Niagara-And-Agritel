@@ -38,3 +38,15 @@ class MqttFailure extends Failure {
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure([super.message = "Unexpected Failure"]);
 }
+
+class NotFoundFailure extends Failure {
+  const NotFoundFailure(super.message);
+}
+
+class ValidationFailure extends Failure {
+  const ValidationFailure(super.message);
+}
+
+class ConflictFailure extends Failure {
+  const ConflictFailure(super.message);
+}

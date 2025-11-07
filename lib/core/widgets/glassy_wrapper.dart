@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 class GlassyWrapper extends StatelessWidget {
   final Widget? child;
-  final bool fixedBackground;
 
   const GlassyWrapper({
     super.key,
     this.child,
-    this.fixedBackground = false,
   });
 
   @override
