@@ -7,13 +7,13 @@ import '../../../../core/utils/api_urls.dart';
 
 abstract class GroupDataSources {
   Future<List<GroupEntity>> fetchGroups(int userId);
+  Future<String> addGroups(int userId, String groupName);
 }
 
 class GroupDataSourcesImpl extends GroupDataSources {
   final ApiClient apiClient;
   GroupDataSourcesImpl({required this.apiClient});
 
-  @override
   @override
   Future<List<GroupEntity>> fetchGroups(int userId) async {
     print("userId in the fetchGroups :: $userId");
@@ -24,6 +24,32 @@ class GroupDataSourcesImpl extends GroupDataSources {
         final List<dynamic> dataList = response['data'];
         final List<GroupModel> parsedGroups = dataList.map((json) => GroupModel.fromJson(json as Map<String, dynamic>)).toList();
         return parsedGroups.cast<GroupEntity>();
+      } else {
+        throw ServerException(
+          statusCode: response['code'],
+          message: response['message'] ?? 'Group details fetching Error',
+        );
+      }
+    } catch (e) {
+      print('Fetch dashboard groups error: $e');
+      throw Exception('Failed to fetch dashboard groups: $e');
+    }
+  }
+
+  @override
+  Future<String> addGroups(int userId, String groupName) async {
+    print("userId in the addGroups :: $userId");
+    try {
+      final endpoint = ApiUrls.addGroupValues.replaceAll(':userId', userId.toString());
+      final response = await apiClient.post(
+        endpoint,
+        body: {
+          'userId': userId,
+          'groupName': groupName
+        },
+      );
+      if (response['code'] == 200) {
+        return response['message'];
       } else {
         throw ServerException(
           statusCode: response['code'],

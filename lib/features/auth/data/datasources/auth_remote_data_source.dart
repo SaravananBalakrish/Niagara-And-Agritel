@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart'; // For platform-specific handling if needed
+// For platform-specific handling if needed
 import 'package:get_it/get_it.dart';
 
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/utils/api_urls.dart';
-import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../models/user_model.dart';
 import 'auth_local_data_source.dart';
@@ -104,7 +103,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         if (kDebugMode) {
           print('Web: OTP sent, verificationId=${confirmationResult.verificationId}');
         }
-        return confirmationResult.verificationId!;
+        return confirmationResult.verificationId;
       } else {
         // Mobile flow: Use verifyPhoneNumber with Completer for async handling.
         final completer = Completer<String>();

@@ -1,10 +1,8 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
-import '../../../../core/services/network_info.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
 import '../bloc/auth_bloc.dart';

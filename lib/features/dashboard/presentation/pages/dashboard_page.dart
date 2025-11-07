@@ -3,15 +3,12 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/group_entity.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
-import '../../../../core/utils/route_constants.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
@@ -31,333 +28,363 @@ import '../widgets/sync_section.dart';
 import '../widgets/timer_section.dart';
 
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+  final int userId, userType;
+  const DashboardPage({super.key, required this.userId, required this.userType});
 
   @override
   Widget build(BuildContext context) {
-    final bloc = di.GetIt.instance.get<DashboardBloc>();
-    final authState = context.read<AuthBloc>().state;
+    if (userId <= 0) {
+      return const Center(child: Text('Invalid user session. Please log in again.'));
+    }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async{
-      if (!bloc.isClosed && authState is Authenticated) {
+    final bloc = di.GetIt.instance.get<DashboardBloc>();
+    _initializeBloc(bloc, context);
+
+    return BlocProvider.value(
+      value: bloc,
+      child: BlocBuilder<DashboardBloc, DashboardState>(
+        builder: (context, state) => _buildContent(context, state),
+      ),
+    );
+  }
+
+  void _initializeBloc(DashboardBloc bloc, BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!bloc.isClosed) {
         if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
-          bloc.add(FetchDashboardGroupsEvent(authState.user.userDetails.id));
+          bloc.add(FetchDashboardGroupsEvent(userId));
         }
         bloc.add(ResetDashboardSelectionEvent());
       }
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(const Duration(seconds: 5));
       bloc.add(StartPollingEvent());
 
       final mqttBloc = di.GetIt.instance.get<MqttBloc>();
       mqttBloc.setProcessingContext(context);
     });
+  }
 
-    return BlocProvider.value(
-      value: bloc,
-      child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is Authenticated) {
-            final dashboardBloc = context.read<DashboardBloc>();
-            if (!dashboardBloc.isClosed &&
-                dashboardBloc.state is! DashboardLoading &&
-                dashboardBloc.state is! DashboardGroupsLoaded) {
-              dashboardBloc.add(FetchDashboardGroupsEvent(state.user.userDetails.id));
-            }
-          } else if (state is LoggedOut) {
-            context.go(RouteConstants.login);
-          }
-        },
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, authState) {
-            if (authState is Authenticated) {
-              return BlocBuilder<DashboardBloc, DashboardState>(
-                builder: (context, dashboardState) {
-                  if (dashboardState is DashboardGroupsLoaded) {
-                    final bloc = context.read<DashboardBloc>();
-                    if (dashboardState.selectedGroupId == null && dashboardState.groups.isNotEmpty) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!bloc.isClosed) {
-                          bloc.add(SelectGroupEvent(dashboardState.groups[0].userGroupId));
-                        }
-                      });
-                    }
+  Widget _buildContent(BuildContext context, DashboardState state) {
+    if (state is DashboardLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state is DashboardError) {
+      return Center(child: Text('Error: ${state.message}'));
+    }
+    if (state is! DashboardGroupsLoaded) {
+      return const SizedBox.shrink();
+    }
 
-                    final selectedGroup = dashboardState.groups.firstWhere(
-                          (group) => group.userGroupId == dashboardState.selectedGroupId,
-                      orElse: () => dashboardState.groups.isNotEmpty ? dashboardState.groups[0] : null!,
-                    );
+    final bloc = context.read<DashboardBloc>();
+    _autoSelectGroupIfNeeded(bloc, state);
 
-                    final controllers = dashboardState.groupControllers[dashboardState.selectedGroupId] ?? [];
-                    int effectiveIndex = dashboardState.selectedControllerIndex ?? 0; // Default to 0
+    final (selectedGroup, selectedController, controllers) = _getSelectedGroupAndController(state);
 
-                    // Clamp index to valid range (0 to length-1)
-                    if (effectiveIndex >= controllers.length || effectiveIndex < 0) {
-                      effectiveIndex = controllers.isNotEmpty ? 0 : -1; // -1 signals no selection
-                    }
+    return Scaffold(
+      appBar: _buildAppBar(selectedGroup, selectedController, controllers, state, bloc, context),
+      drawer: userType == 1 ? const AppDrawer() : null,
+      body: selectedController == null
+          ? const Center(child: CircularProgressIndicator())
+          : _buildBody(selectedController),
+    );
+  }
 
-                    final selectedController = effectiveIndex >= 0 ? controllers[effectiveIndex] : null;
+  void _autoSelectGroupIfNeeded(DashboardBloc bloc, DashboardGroupsLoaded state) {
+    if (state.selectedGroupId == null && state.groups.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!bloc.isClosed) {
+          bloc.add(SelectGroupEvent(state.groups[0].userGroupId));
+        }
+      });
+    }
+  }
 
-                    return Scaffold(
-                      backgroundColor: Colors.transparent,
-                      appBar: AppBar(
-                        title: Container(
-                          width: 140,
-                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            NiagaraCommonImages.logoSmall,
-                          ),
-                        ),
-                        bottom: PreferredSize(
-                          preferredSize: Size(MediaQuery.of(context).size.width, 40),
-                          child: Container(
-                            color: Theme.of(context).appBarTheme.backgroundColor,
-                            child: Row(
-                              children: [
-                                if(dashboardState.groups.isNotEmpty)
-                                  if(dashboardState.groups.length > 1)
-                                    Expanded(
-                                      child: PopupMenuButton<int>(
-                                        icon: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              selectedGroup.groupName,
-                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                            ),
-                                            const Icon(Icons.arrow_drop_down, color: Colors.white),
-                                          ],
-                                        ),
-                                        onSelected: (groupId) {
-                                          final bloc = context.read<DashboardBloc>();
-                                          if (!bloc.isClosed) {
-                                            final userId = selectedGroup.userId;
-                                            if (!dashboardState.groupControllers.containsKey(groupId)) {
-                                              bloc.add(FetchControllersEvent(userId, groupId));
-                                            }
-                                            bloc.add(SelectGroupEvent(groupId));
-                                          }
-                                        },
-                                        itemBuilder: (context) => dashboardState.groups.map((group) => PopupMenuItem<int>(
-                                          value: group.userGroupId,
-                                          child: Text(group.groupName),
-                                        )).toList(),
-                                      ),
-                                    )
-                                  else
-                                    Expanded(child: Text(dashboardState.groups[0].groupName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                if(dashboardState.groups.length > 1)
-                                  Container(width: 1, height: 20, color: Colors.white54,),
-                                if (controllers.isNotEmpty)
-                                  if(controllers.length > 1)
-                                    Expanded(
-                                      child: PopupMenuButton<int>(
-                                        enabled: controllers.isNotEmpty,
-                                        icon: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              selectedController?.deviceName ?? 'Select controller',
-                                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                            ),
-                                            const Icon(Icons.arrow_drop_down, color: Colors.white),
-                                          ],
-                                        ),
-                                        onSelected: (controllerIndex) {
-                                          final bloc = context.read<DashboardBloc>();
-                                          if (!bloc.isClosed) {
-                                            bloc.add(SelectControllerEvent(controllerIndex));
-                                          }
-                                        },
-                                        itemBuilder: (context) => controllers.isNotEmpty
-                                            ? controllers.asMap().entries
-                                            .map<PopupMenuEntry<int>>((entry) {
-                                          final index = entry.key;
-                                          final ctrl = entry.value;
-                                          return PopupMenuItem<int>(
-                                            value: index,
-                                            child: Text(ctrl.deviceName),
-                                          );
-                                        }).toList()
-                                            : [
-                                          const PopupMenuItem<int>(
-                                            enabled: false,
-                                            child: Text('No controllers available'),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  else
-                                    Expanded(child: Text(controllers[0].deviceName, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),))
-                              ],
-                            ),
-                          ),
-                        ),
-                        actions: [
-                          IconButton(
-                            onPressed: () async {
-                              final String phoneNumber = selectedController?.simNumber ?? '';
-                              final Uri url = Uri.parse('tel:$phoneNumber');
+  (GroupDetailsEntity, ControllerEntity?, List<ControllerEntity>)
+  _getSelectedGroupAndController(DashboardGroupsLoaded state) {
+    final selectedGroup = state.groups.firstWhere(
+          (group) => group.userGroupId == state.selectedGroupId,
+      orElse: () => state.groups.isNotEmpty ? state.groups[0] : throw ArgumentError('No groups available'),
+    );
 
-                              try {
-                                if (await canLaunchUrl(url)) {
-                                  await launchUrl(
-                                    url,
-                                    mode: LaunchMode.externalApplication,
-                                  );
-                                }
-                              } catch (e) {
-                                debugPrint('Error launching call: $e');
-                              }
-                            },
-                            icon: const Icon(Icons.call, color: Colors.white),
-                          ),
-                          IconButton(
-                            onPressed: null,
-                            icon: Icon(Icons.circle, color: selectedController?.ctrlStatusFlag == '1' ? Colors.green : Colors.red),
-                          ),
-                        ],
-                      ),
-                      drawer: authState.user.userDetails.userType == 1 ? AppDrawer() : null,
-                      body: selectedController == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : GlassyWrapper(
-                        fixedBackground: true,
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            final mqttBloc = di.GetIt.instance.get<MqttBloc>();
-                            final deviceId = selectedController.deviceId;
-                            final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
-                            mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
-                            if (kDebugMode) {
-                              print("Live message from server : ${selectedController.liveMessage}");
-                            }
-                          },
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final width = constraints.maxWidth;
+    final controllers = state.groupControllers[state.selectedGroupId] ?? [];
+    final effectiveIndex = controllers.isNotEmpty
+        ? (state.selectedControllerIndex ?? 0).clamp(0, controllers.length - 1)
+        : -1;
+    final selectedController = controllers.isNotEmpty ? controllers[effectiveIndex] : null;
 
-                              int modelCheck = ([1, 5].contains(selectedController.modelId)) ? 300 : 120;
-                              double scale(double size) => size * (width / modelCheck);
+    return (selectedGroup, selectedController, controllers);
+  }
 
-                              return NotificationListener<OverscrollIndicatorNotification>(
-                                onNotification: (OverscrollIndicatorNotification notification) {
-                                  notification.disallowIndicator();
-                                  return true;
-                                },
-                                child: CustomScrollView(
-                                  physics: const AlwaysScrollableScrollPhysics(),
-                                  slivers: [
-                                    SliverFillRemaining(
-                                      hasScrollBody: false,
-                                      child: Padding(
-                                        padding: EdgeInsetsGeometry.all(scale(2)),
-                                        child: GlassCard(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              SyncSection(
-                                                liveSync: selectedController.livesyncTime,
-                                                smsSync: selectedController.msgDesc,
-                                                model: selectedController.modelId,
-                                              ),
-                                              SizedBox(height: scale(8)),
-                                              GlassCard(
-                                                child: CtrlDisplay(
-                                                  signal: 50,
-                                                  battery: 50,
-                                                  status: selectedController.status,
-                                                  vrb: 456,
-                                                  amp: 200,
-                                                ),
-                                              ),
-                                              SizedBox(height: scale(8)),
-                                              RYBSection(
-                                                r: selectedController.liveMessage.rVoltage,
-                                                y: selectedController.liveMessage.yVoltage,
-                                                b: selectedController.liveMessage.bVoltage,
-                                                c1: selectedController.liveMessage.rCurrent,
-                                                c2: selectedController.liveMessage.yCurrent,
-                                                c3: selectedController.liveMessage.bCurrent,
-                                              ),
-                                              SizedBox(height: scale(8)),
-                                              MotorValveSection(
-                                                motorOn: selectedController.liveMessage.motorOnOff,
-                                                motorOn2: selectedController.liveMessage.valveOnOff,
-                                                valveOn: selectedController.liveMessage.valveOnOff,
-                                                model: selectedController.modelId,
-                                              ),
-                                              SizedBox(height: scale(8)),
-                                              if ([1, 5].contains(selectedController.modelId))
-                                                Column(
-                                                  children: [
-                                                    PressureSection(
-                                                      prsIn: selectedController.liveMessage.prsIn,
-                                                      prsOut: selectedController.liveMessage.prsOut,
-                                                      activeZone: selectedController.zoneNo,
-                                                      fertlizer: '',
-                                                    ),
-                                                    SizedBox(height: scale(8)),
-                                                    TimerSection(
-                                                      setTime: selectedController.setFlow,
-                                                      remainingTime: selectedController.remFlow,
-                                                    ),
-                                                  ],
-                                                ),
-                                              LatestMsgSection(
-                                                msg: ([1, 5].contains(selectedController.modelId))
-                                                    ? selectedController.msgDesc
-                                                    : "${selectedController.msgDesc}\n${selectedController.ctrlLatestMsg}",
-                                              ),
-                                              SizedBox(height: scale(8)),
-                                              ActionsSection(model: selectedController.modelId),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  } else if (dashboardState is DashboardLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (dashboardState is DashboardError) {
-                    return Center(child: Text('Error: ${dashboardState.message}'));
-                  }
-                  return const SizedBox.shrink(); // Fallback
-                },
-              );
-            } else if (authState is AuthLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (authState is AuthError) {
-              return Center(
-                child: Column(
-                  children: [
-                    Text('Error: ${authState.message}'),
-                    ElevatedButton(
-                      onPressed: () => context.read<AuthBloc>().add(CheckCachedUserEvent()),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return const Center(child: Text('Please log in'));
-            }
-          },
+  PreferredSizeWidget _buildAppBar(
+      GroupDetailsEntity selectedGroup,
+      ControllerEntity? selectedController,
+      List<ControllerEntity> controllers,
+      DashboardGroupsLoaded state,
+      DashboardBloc bloc,
+      BuildContext context,
+      ) {
+    return AppBar(
+      title: Container(
+        width: 140,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        alignment: Alignment.center,
+        child: Image.asset(NiagaraCommonImages.logoSmall),
+      ),
+      bottom: _buildAppBarBottom(selectedGroup, selectedController, controllers, state, bloc, context),
+      actions: [
+        IconButton(
+          onPressed: selectedController?.simNumber != null
+              ? () => _launchCall(selectedController!.simNumber)
+              : null,
+          icon: const Icon(Icons.call, color: Colors.white),
+        ),
+        IconButton(
+          onPressed: null,
+          icon: Icon(
+            Icons.circle,
+            color: selectedController?.ctrlStatusFlag == '1' ? Colors.green : Colors.red,
+          ),
+        ),
+      ],
+    );
+  }
+
+  PreferredSize _buildAppBarBottom(
+      GroupDetailsEntity selectedGroup,
+      ControllerEntity? selectedController,
+      List<ControllerEntity> controllers,
+      DashboardGroupsLoaded state,
+      DashboardBloc bloc,
+      BuildContext context
+      ) {
+    return PreferredSize(
+      preferredSize: Size(MediaQuery.of(context).size.width, 40),
+      child: Container(
+        color: Theme.of(context).appBarTheme.backgroundColor,
+        child: Row(
+          children: [
+            _buildGroupSelector(state, selectedGroup, bloc),
+            if (state.groups.length > 1) const _Divider(),
+            _buildControllerSelector(selectedController, controllers, bloc),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _buildGroupSelector(DashboardGroupsLoaded state, dynamic selectedGroup, DashboardBloc bloc) {
+    if (state.groups.isEmpty) return const SizedBox.shrink();
+
+    if (state.groups.length > 1) {
+      return Expanded(
+        child: PopupMenuButton<int>(
+          icon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                selectedGroup.groupName,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              const Icon(Icons.arrow_drop_down, color: Colors.white),
+            ],
+          ),
+          onSelected: (groupId) => _onGroupSelected(groupId, selectedGroup, state, bloc),
+          itemBuilder: (context) => state.groups
+              .map((group) => PopupMenuItem<int>(
+            value: group.userGroupId,
+            child: Text(group.groupName),
+          ))
+              .toList(),
+        ),
+      );
+    }
+    return Expanded(
+      child: Text(
+        state.groups[0].groupName,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildControllerSelector(ControllerEntity? selectedController, List<ControllerEntity> controllers, DashboardBloc bloc) {
+    if (controllers.isEmpty) return const SizedBox.shrink();
+
+    if (controllers.length > 1) {
+      return Expanded(
+        child: PopupMenuButton<int>(
+          enabled: controllers.isNotEmpty,
+          icon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                selectedController?.deviceName ?? 'Select controller',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              const Icon(Icons.arrow_drop_down, color: Colors.white),
+            ],
+          ),
+          onSelected: (index) => bloc.add(SelectControllerEvent(index)),
+          itemBuilder: (context) => controllers.isNotEmpty
+              ? controllers.asMap().entries.map((entry) => PopupMenuItem<int>(
+            value: entry.key,
+            child: Text(entry.value.deviceName),
+          )).toList()
+              : [
+            const PopupMenuItem<int>(
+              enabled: false,
+              child: Text('No controllers available'),
+            ),
+          ],
+        ),
+      );
+    }
+    return Expanded(
+      child: Text(
+        controllers[0].deviceName,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  void _onGroupSelected(int groupId, GroupDetailsEntity selectedGroup, DashboardGroupsLoaded state, DashboardBloc bloc) {
+    if (bloc.isClosed) return;
+
+    final userId = selectedGroup.userId;  // Adjust if needed to parent userId
+    if (!state.groupControllers.containsKey(groupId)) {
+      bloc.add(FetchControllersEvent(userId, groupId));
+    }
+    bloc.add(SelectGroupEvent(groupId));
+  }
+
+  static Widget _buildBody(dynamic selectedController) {
+    return GlassyWrapper(
+      fixedBackground: true,
+      child: RefreshIndicator(
+        onRefresh: () => _refreshLiveData(selectedController),
+        child: LayoutBuilder(
+          builder: (context, constraints) => _buildScaledContent(context, constraints, selectedController),
+        ),
+      ),
+    );
+  }
+
+  static Future<void> _refreshLiveData(dynamic selectedController) async {
+    final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+    final deviceId = selectedController.deviceId;
+    final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
+    mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
+    if (kDebugMode) {
+      print("Live message from server : ${selectedController.liveMessage}");
+    }
+  }
+
+  static Widget _buildScaledContent(BuildContext context, BoxConstraints constraints, dynamic controller) {
+    final width = constraints.maxWidth;
+    final modelCheck = ([1, 5].contains(controller.modelId)) ? 300 : 120;
+    double scale(double size) => size * (width / modelCheck);
+
+    return NotificationListener<OverscrollIndicatorNotification>(
+      onNotification: (notification) {
+        notification.disallowIndicator();
+        return true;
+      },
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: EdgeInsets.all(scale(2)),
+              child: GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SyncSection(
+                      liveSync: controller.livesyncTime,
+                      smsSync: controller.msgDesc,
+                      model: controller.modelId,
+                    ),
+                    SizedBox(height: scale(8)),
+                    GlassCard(
+                      child: CtrlDisplay(
+                        signal: 50,
+                        battery: 50,
+                        status: controller.status,
+                        vrb: 456,
+                        amp: 200,
+                      ),
+                    ),
+                    SizedBox(height: scale(8)),
+                    RYBSection(
+                      r: controller.liveMessage.rVoltage,
+                      y: controller.liveMessage.yVoltage,
+                      b: controller.liveMessage.bVoltage,
+                      c1: controller.liveMessage.rCurrent,
+                      c2: controller.liveMessage.yCurrent,
+                      c3: controller.liveMessage.bCurrent,
+                    ),
+                    SizedBox(height: scale(8)),
+                    MotorValveSection(
+                      motorOn: controller.liveMessage.motorOnOff,
+                      motorOn2: controller.liveMessage.valveOnOff,
+                      valveOn: controller.liveMessage.valveOnOff,
+                      model: controller.modelId,
+                    ),
+                    SizedBox(height: scale(8)),
+                    if ([1, 5].contains(controller.modelId)) ...[
+                      PressureSection(
+                        prsIn: controller.liveMessage.prsIn,
+                        prsOut: controller.liveMessage.prsOut,
+                        activeZone: controller.zoneNo,
+                        fertlizer: '',
+                      ),
+                      SizedBox(height: scale(8)),
+                      TimerSection(
+                        setTime: controller.setFlow,
+                        remainingTime: controller.remFlow,
+                      ),
+                      SizedBox(height: scale(8)),
+                    ],
+                    LatestMsgSection(
+                      msg: ([1, 5].contains(controller.modelId))
+                          ? controller.msgDesc
+                          : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
+                    ),
+                    SizedBox(height: scale(8)),
+                    ActionsSection(model: controller.modelId),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchCall(String phoneNumber) async {
+    final Uri url = Uri.parse('tel:$phoneNumber');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Error launching call: $e');
+    }
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(width: 1, height: 20, color: Colors.white54);
   }
 }

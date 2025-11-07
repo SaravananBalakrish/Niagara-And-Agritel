@@ -5,18 +5,33 @@ import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/
 
 class GroupBloc extends Bloc<GroupEvent, GroupState> {
   final GroupFetchingUsecase groupFetchingUsecase;
+  final GroupAddingUsecase groupAddingUsecase;
 
   GroupBloc({
-    required this.groupFetchingUsecase
+    required this.groupFetchingUsecase,
+    required this.groupAddingUsecase,
   }) : super(GroupInitial()) {
     on<FetchGroupsEvent>((event, emit) async {
       emit(GroupLoading());
       final result = await groupFetchingUsecase(GroupFetchParams(event.userId));
 
       result.fold(
-            (failure) => emit(GroupFetchingError(message: failure.message)),
-            (groups) {
+        (failure) => emit(GroupFetchingError(message: failure.message)),
+        (groups) {
           emit(GroupLoaded(groups: groups));
+        },
+      );
+    });
+
+    on<GroupAddEvent>((event, emit) async {
+      emit(GroupAddingStarted());
+      final result = await groupAddingUsecase(GroupAddingParams(event.userId, event.groupName));
+
+      result.fold(
+        (failure) => emit(GroupAddingError(message: failure.message)),
+        (message) {
+          emit(GroupAddingLoaded(message: message));
+          add(FetchGroupsEvent(event.userId));
         },
       );
     });

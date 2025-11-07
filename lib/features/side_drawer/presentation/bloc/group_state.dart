@@ -25,3 +25,21 @@ class GroupFetchingError extends GroupState {
   @override
   List<Object?> get props => [message];
 }
+
+class GroupAddingStarted extends GroupState {}
+
+class GroupAddingLoaded extends GroupState {
+  final String message;
+
+  GroupAddingLoaded({required this.message});
+  @override
+  List<Object?> get props => [message];
+}
+
+class GroupAddingError extends GroupState {
+  final String message;
+
+  GroupAddingError({required this.message});
+  @override
+  List<Object?> get props => [message];
+}

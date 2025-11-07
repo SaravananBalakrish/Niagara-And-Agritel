@@ -4,7 +4,7 @@ import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/liv
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
 
 import '../../domain/entities/controller_entity.dart';
-import 'dart:convert'; // Add this import for jsonDecode
+// Add this import for jsonDecode
 
 class ProgramModel extends ProgramEntity {
   const ProgramModel({
@@ -263,7 +263,7 @@ class ControllerModel extends Equatable implements ControllerEntity {
       status1: status1 ?? this.status1,
       msgcode: msgcode ?? this.msgcode,
       ctrlLatestMsg: ctrlLatestMsg ?? this.ctrlLatestMsg,
-      liveMessage: liveMessage ?? this.liveMessage,
+      liveMessage: liveMessage,
       relaystatus: relaystatus ?? this.relaystatus,
       operationMode: operationMode ?? this.operationMode,
       gprsMode: gprsMode ?? this.gprsMode,

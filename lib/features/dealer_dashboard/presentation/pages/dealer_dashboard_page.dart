@@ -1,17 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart' as di;
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/route_constants.dart';
-import '../../../side_drawer/presentation/widgets/app_drawer.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../../dashboard/presentation/bloc/dashboard_event.dart';
-import '../../../dashboard/presentation/bloc/dashboard_state.dart';
 
 class DealerDashboardPage extends StatelessWidget {
   const DealerDashboardPage({super.key});

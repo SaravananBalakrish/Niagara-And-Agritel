@@ -12,3 +12,12 @@ class FetchGroupsEvent extends GroupEvent {
   @override
   List<Object?> get props => [userId];
 }
+
+class GroupAddEvent extends GroupEvent {
+  final int userId;
+  final String groupName;
+  GroupAddEvent({required this.userId, required this.groupName});
+
+  @override
+  List<Object?> get props => [userId, groupName];
+}

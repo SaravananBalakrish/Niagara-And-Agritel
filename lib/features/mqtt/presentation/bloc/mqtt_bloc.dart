@@ -6,8 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/services/mqtt_service.dart';
-import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../utils/mqtt_message_helper.dart';
 import 'mqtt_event.dart';
 import 'mqtt_state.dart';

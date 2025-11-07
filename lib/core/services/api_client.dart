@@ -6,7 +6,6 @@ import 'package:get_it/get_it.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/models/user_model.dart';
 import '../error/exceptions.dart';
-import '../utils/api_urls.dart';
 import 'network_info.dart';
 
 class ApiClient {

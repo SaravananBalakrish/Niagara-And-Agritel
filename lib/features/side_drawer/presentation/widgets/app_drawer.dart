@@ -4,10 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../../core/utils/route_constants.dart';
-import '../../../dashboard/presentation/bloc/dashboard_state.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -20,7 +17,6 @@ class AppDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Drawer Header with User Info
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
               String userName = 'Guest';
@@ -98,7 +94,6 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          // Home (Dynamic based on userType)
           BlocBuilder<AuthBloc, AuthState>(
             builder: (context, authState) {
               String? homeRoute;
@@ -106,7 +101,7 @@ class AppDrawer extends StatelessWidget {
                 final userType = authState.user.userDetails.userType;
                 homeRoute = userType == 2 ? RouteConstants.dealerDashboard : RouteConstants.dashboard;
               } else {
-                homeRoute = RouteConstants.login; // Fallback for unauthenticated
+                homeRoute = RouteConstants.login;
               }
 
               return _buildDrawerItem(
