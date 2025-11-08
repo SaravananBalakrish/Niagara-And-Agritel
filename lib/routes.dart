@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
+import 'package:niagara_smart_drip_irrigation/features/controllerLive/presentation/pages/controller_live_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/delete_group_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/edit_group_usecase.dart';
@@ -15,6 +16,9 @@ import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
 import 'features/auth/domain/entities/user_entity.dart';
+import 'features/dashboard/domain/entities/controller_entity.dart';
+import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'features/side_drawer/domain/usecases/add_group_usecase.dart';
 import 'features/side_drawer/domain/usecases/group_fetching_usecase.dart';
 import 'features/side_drawer/presentation/bloc/group_bloc.dart';
@@ -126,9 +130,24 @@ class AppRouter {
           path: RouteConstants.dashboard,
           builder: (context, state) {
             final authData = _getAuthData();
+            final bloc = BlocProvider(
+              create: (context) => di.sl<DashboardBloc>()
+                ..add(FetchDashboardGroupsEvent(authData.id))
+                ..add(ResetDashboardSelectionEvent()),
+              child: DashboardPage(userId: authData.id, userType: authData.userType),
+            );
+            return bloc;
+          },
+        ),
+        GoRoute(
+          name: 'ctrlLivePage',
+          path: RouteConstants.ctrlLivePage,
+          builder: (context, state) {
+            print('Building ctrlLivePage, AuthBloc state: ${authBloc.state}');
+            final selectedController = state.extra as ControllerEntity?;
             return BlocProvider.value(
               value: authBloc,
-              child: DashboardPage(userId: authData.id, userType: authData.userType),
+              child: CtrlLivePage(selectedController: selectedController),
             );
           },
         ),

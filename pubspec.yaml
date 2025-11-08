@@ -58,6 +58,7 @@ dependencies:
   responsive_wrapper: ^1.0.2
   url_launcher: ^6.3.2
   timer_builder: ^2.0.0
+  syncfusion_flutter_gauges: ^31.1.19
 
 dev_dependencies:
   flutter_test:

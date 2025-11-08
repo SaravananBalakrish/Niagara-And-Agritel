@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/core/utils/route_constants.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
@@ -14,7 +16,6 @@ import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
-import '../../../side_drawer/presentation/bloc/group_bloc.dart';
 import '../../../side_drawer/presentation/widgets/app_drawer.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
@@ -51,14 +52,11 @@ class DashboardPage extends StatelessWidget {
 
   void _initializeBloc(DashboardBloc bloc, BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!bloc.isClosed) {
-        if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
-          bloc.add(FetchDashboardGroupsEvent(userId));
-        }
-        bloc.add(ResetDashboardSelectionEvent());
+      if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
+        bloc.add(FetchDashboardGroupsEvent(userId));
       }
       await Future.delayed(const Duration(seconds: 5));
-      bloc.add(StartPollingEvent());
+      if (!bloc.isClosed) bloc.add(StartPollingEvent());
 
       final mqttBloc = di.GetIt.instance.get<MqttBloc>();
       mqttBloc.setProcessingContext(context);
@@ -358,7 +356,7 @@ class DashboardPage extends StatelessWidget {
     }
   }
 
-  static Widget _buildScaledContent(BuildContext context, BoxConstraints constraints, dynamic controller) {
+  static Widget _buildScaledContent(BuildContext context, BoxConstraints constraints, ControllerEntity controller) {
     final width = constraints.maxWidth;
     final modelCheck = ([1, 5].contains(controller.modelId)) ? 300 : 120;
     double scale(double size) => size * (width / modelCheck);
@@ -392,13 +390,18 @@ class DashboardPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: scale(8)),
-                  RYBSection(
-                    r: controller.liveMessage.rVoltage,
-                    y: controller.liveMessage.yVoltage,
-                    b: controller.liveMessage.bVoltage,
-                    c1: controller.liveMessage.rCurrent,
-                    c2: controller.liveMessage.yCurrent,
-                    c3: controller.liveMessage.bCurrent,
+                  GestureDetector(
+                    onTap: () {
+                      context.push(RouteConstants.ctrlLivePage, extra: controller);
+                    },
+                    child: RYBSection(
+                      r: controller.liveMessage.rVoltage,
+                      y: controller.liveMessage.yVoltage,
+                      b: controller.liveMessage.bVoltage,
+                      c1: controller.liveMessage.rCurrent,
+                      c2: controller.liveMessage.yCurrent,
+                      c3: controller.liveMessage.bCurrent,
+                    ),
                   ),
                   SizedBox(height: scale(8)),
                   MotorValveSection(
