@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/delete_group_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/edit_group_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/chat.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/groups.dart';
 
@@ -171,10 +173,14 @@ class AppRouter {
                 final authData = _getAuthData();
                 final groupFetchingUseCase = di.sl<GroupFetchingUsecase>();
                 final groupAddingUseCase = di.sl<GroupAddingUsecase>();
+                final editGroupUsecase = di.sl<EditGroupUsecase>();
+                final deleteGroupUsecase = di.sl<DeleteGroupUsecase>();
                 return BlocProvider(
                   create: (context) => GroupBloc(
                     groupFetchingUsecase: groupFetchingUseCase,
                     groupAddingUsecase: groupAddingUseCase,
+                    editGroupUsecase: editGroupUsecase,
+                    deleteGroupUsecase: deleteGroupUsecase,
                   )..add(FetchGroupsEvent(authData.id)),
                   child: GroupsPage(userId: authData.id),
                 );

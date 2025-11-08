@@ -27,4 +27,25 @@ class GroupRepositoryImpl extends GroupRepository {
       return Left(ServerFailure('Group Adding Failure: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> editGroup(int userId, String groupName, int groupId) async{
+    try {
+      final groupData = await groupDataSources.editGroups(userId, groupName, groupId);
+      return Right(groupData);
+    } catch (e) {
+      return Left(ServerFailure('Group Adding Failure: $e'));
+    }
+  }
+
+  // New Delete Method
+  @override
+  Future<Either<Failure, String>> deleteGroup(int userId, int groupId) async {
+    try {
+      final groupData = await groupDataSources.deleteGroup(userId, groupId);
+      return Right(groupData);
+    } catch (e) {
+      return Left(ServerFailure('Group Delete Failure: $e'));
+    }
+  }
 }

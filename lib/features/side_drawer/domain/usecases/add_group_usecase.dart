@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../repositories/fetch_group_repository.dart';
-import 'group_fetching_usecase.dart';
 
 class GroupAddingUsecase extends UseCase<dynamic, GroupAddingParams> {
   final GroupRepository fetchGroupRepository;

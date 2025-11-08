@@ -21,3 +21,30 @@ class GroupAddEvent extends GroupEvent {
   @override
   List<Object?> get props => [userId, groupName];
 }
+
+class GroupEditEvent extends GroupEvent {
+  final int userId;
+  final String groupName;
+  final int groupId;
+  GroupEditEvent({
+    required this.userId,
+    required this.groupName,
+    required this.groupId,
+  });
+
+  @override
+  List<Object?> get props => [userId, groupName, groupId];
+}
+
+// New Delete Event
+class GroupDeleteEvent extends GroupEvent {
+  final int userId;
+  final int groupId;
+  GroupDeleteEvent({
+    required this.userId,
+    required this.groupId,
+  });
+
+  @override
+  List<Object?> get props => [userId, groupId];
+}

@@ -63,7 +63,7 @@ class ApiClient {
         ...?headers,
       };
 
-      print("Request Method: $method | Endpoint: $endpoint | Headers: $mergedHeaders");
+      print("Request Method: $method | Endpoint: $endpoint");
 
       // Make the initial request
       final requestUri = Uri.parse('$baseUrl$endpoint');

@@ -43,3 +43,39 @@ class GroupAddingError extends GroupState {
   @override
   List<Object?> get props => [message];
 }
+
+class EditGroupInitial extends GroupState {}
+
+class EditGroupSuccess extends GroupState {
+  final String message;
+
+  EditGroupSuccess({required this.message});
+  @override
+  List<Object?> get props => [message];
+}
+
+class EditGroupError extends GroupState {
+  final String message;
+  EditGroupError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class GroupDeletingStarted extends GroupState {}
+
+class GroupDeleteSuccess extends GroupState {
+  final String message;
+
+  GroupDeleteSuccess({required this.message});
+  @override
+  List<Object?> get props => [message];
+}
+
+class GroupDeleteError extends GroupState {
+  final String message;
+
+  GroupDeleteError({required this.message});
+  @override
+  List<Object?> get props => [message];
+}

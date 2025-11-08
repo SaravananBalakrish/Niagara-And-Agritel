@@ -83,7 +83,20 @@ class AppThemes {
     listTileTheme: ListTileThemeData(
       textColor: Colors.white,
 
-    )
+    ),
+    textTheme: TextTheme(
+      titleMedium: TextStyle(color: Colors.white),
+      titleSmall: TextStyle(color: Colors.white),
+      titleLarge: TextStyle(color: Colors.white),
+      bodySmall: TextStyle(color: Colors.white),
+      bodyLarge: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.white),
+    ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white)
+        ),
+      )
   );
 
   // Dark Theme
