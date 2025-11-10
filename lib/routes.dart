@@ -1,35 +1,39 @@
-// Updated routes.dart - Simplified to focus on routing only; UI logic extracted to pages/widgets
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
-import 'package:niagara_smart_drip_irrigation/features/auth/presentation/pages/sign_up_page.dart';
-import 'package:niagara_smart_drip_irrigation/features/controllerLive/presentation/pages/controller_live_page.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/delete_group_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/edit_group_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/chat.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/pages/groups.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
+import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
+import 'features/auth/presentation/pages/sign_up_page.dart';
+import 'features/controllerLive/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/domain/entities/controller_entity.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dashboard/presentation/bloc/dashboard_event.dart';
-import 'features/side_drawer/domain/usecases/add_group_usecase.dart';
-import 'features/side_drawer/domain/usecases/group_fetching_usecase.dart';
-import 'features/side_drawer/presentation/bloc/group_bloc.dart';
-import 'features/side_drawer/presentation/bloc/group_event.dart';
-import 'features/side_drawer/presentation/pages/sub_users.dart';
-import 'features/side_drawer/presentation/widgets/app_drawer.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
+import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
+import 'features/side_drawer/groups/domain/usecases/add_group_usecase.dart';
+import 'features/side_drawer/groups/domain/usecases/delete_group_usecase.dart';
+import 'features/side_drawer/groups/domain/usecases/edit_group_usecase.dart';
+import 'features/side_drawer/groups/domain/usecases/group_fetching_usecase.dart';
+import 'features/side_drawer/groups/presentation/bloc/group_bloc.dart';
+import 'features/side_drawer/groups/presentation/bloc/group_event.dart';
+import 'features/side_drawer/groups/presentation/pages/chat.dart';
+import 'features/side_drawer/groups/presentation/pages/groups.dart';
+import 'features/side_drawer/groups/presentation/widgets/app_drawer.dart';
+import 'features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
+import 'features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
+import 'features/side_drawer/sub_users/presentation/bloc/sub_users_event.dart';
+import 'features/side_drawer/sub_users/presentation/pages/sub_users.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -158,6 +162,7 @@ class AppRouter {
             if (location == RouteConstants.groups) title = 'Groups';
             else if (location == RouteConstants.subUsers) title = 'Sub Users';
             else if (location == RouteConstants.chat) title = 'Chat';
+            else if (location == RouteConstants.subUserDetails) title = 'Sub User Details';
 
             return BlocProvider.value(
               value: authBloc,
@@ -205,12 +210,45 @@ class AppRouter {
                 );
               },
             ),
-            _protectedRoute(
+            _authRoute(
               name: 'subUsers',
               path: RouteConstants.subUsers,
-              builder: (context, state) => const SubUsers(),
+              builder: (context, state) {
+                final authData = _getAuthData();
+                final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
+                final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
+                return BlocProvider(
+                  create: (context) => SubUsersBloc(
+                    getSubUsersUsecase: getSubUserUsecase,
+                    getSubUserDetailsUsecase: getSubUserDetailsUsecase,
+                  )..add(GetSubUsersEvent(userId: authData.id)),
+                  child: SubUsers(userId: authData.id),
+                );
+              },
             ),
-            _protectedRoute(
+            _authRoute(
+              name: 'subUserDetails',
+              path: RouteConstants.subUserDetails,
+              builder: (context, state) {
+                final authData = _getAuthData();
+                final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
+                final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
+                final params = state.extra is Map ? state.extra as Map : null;
+                return BlocProvider(
+                  create: (context) => SubUsersBloc(
+                    getSubUsersUsecase: getSubUserUsecase,
+                    getSubUserDetailsUsecase: getSubUserDetailsUsecase,
+                  )..add(GetSubUsersEvent(userId: authData.id)),
+                  child: SubUserDetailsScreen(
+                    subUserDetailsParams: GetSubUserDetailsParams(
+                        userId: params?['userId'],
+                        subUserCode: params?['subUserCode']
+                    ),
+                  ),
+                );
+              },
+            ),
+            _authRoute(
               name: 'chat',
               path: RouteConstants.chat,
               builder: (context, state) => const Chat(),
@@ -241,18 +279,6 @@ class AppRouter {
   Widget _buildWithAuthBloc(Widget child) => BlocProvider.value(value: authBloc, child: child);
 
   GoRoute _authRoute({
-    required String name,
-    required String path,
-    required Widget Function(BuildContext, GoRouterState) builder,
-  }) {
-    return GoRoute(
-      name: name,
-      path: path,
-      builder: (context, state) => _buildWithAuthBloc(builder(context, state)),
-    );
-  }
-
-  GoRoute _protectedRoute({
     required String name,
     required String path,
     required Widget Function(BuildContext, GoRouterState) builder,

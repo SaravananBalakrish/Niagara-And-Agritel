@@ -16,7 +16,7 @@ import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../../mqtt/presentation/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
-import '../../../side_drawer/presentation/widgets/app_drawer.dart';
+import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
 import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
 

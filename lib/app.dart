@@ -15,6 +15,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   notificationService.handleBackgroundMessage(message);
 }
 
+late final AppRouter appRouter;
+
 Future<void> appMain() async {
   await di.init();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
@@ -22,6 +24,9 @@ Future<void> appMain() async {
   await di.sl<NotificationService>().init();
   final authBloc = di.sl<AuthBloc>();
   authBloc.add(CheckCachedUserEvent());
+
+  appRouter = AppRouter(authBloc: authBloc);
+
   runApp(RootApp(authBloc: authBloc));
 }
 
@@ -51,7 +56,7 @@ class RootApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: themeProvider.theme,
             themeMode: ThemeMode.light,
-            routerConfig: AppRouter(authBloc: authBloc).router,
+            routerConfig: appRouter.router,
           );
         },
       ),

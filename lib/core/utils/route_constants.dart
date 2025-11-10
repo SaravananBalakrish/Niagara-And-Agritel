@@ -7,6 +7,7 @@ class RouteConstants {
   static const String dashboard = "/dashboard";
   static const String groups = "/groups";
   static const String subUsers = "/subUsers";
+  static const String subUserDetails = "/subUserDetails";
   static const String chat = "/chat";
   static const String dealerDashboard = "/dealerDashboard";
   static const String deviceDetails = "/devices/:id";

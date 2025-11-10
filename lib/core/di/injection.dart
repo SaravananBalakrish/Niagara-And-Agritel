@@ -1,13 +1,12 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/data/datasources/group_data_sources.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/repositories/fetch_group_repository.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/data/repositories/fetch_group_repository_impl.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/delete_group_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/edit_group_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/domain/usecases/group_fetching_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/presentation/bloc/group_bloc.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/data_sources/sub_user_data_sources.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/repositories/sub_user_repository_impl.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/repositories/sub_user_repo.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
@@ -18,7 +17,14 @@ import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../features/dashboard/utils/dashboard_dispatcher.dart';
 import '../../features/mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../features/mqtt/utils/mqtt_message_helper.dart';
-import '../../features/side_drawer/domain/usecases/add_group_usecase.dart';
+import '../../features/side_drawer/groups/data/datasources/group_data_sources.dart';
+import '../../features/side_drawer/groups/data/repositories/fetch_group_repository_impl.dart';
+import '../../features/side_drawer/groups/domain/repositories/fetch_group_repository.dart';
+import '../../features/side_drawer/groups/domain/usecases/add_group_usecase.dart';
+import '../../features/side_drawer/groups/domain/usecases/delete_group_usecase.dart';
+import '../../features/side_drawer/groups/domain/usecases/edit_group_usecase.dart';
+import '../../features/side_drawer/groups/domain/usecases/group_fetching_usecase.dart';
+import '../../features/side_drawer/groups/presentation/bloc/group_bloc.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
@@ -131,6 +137,15 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
       groupAddingUsecase: sl(),
       editGroupUsecase: sl(),
       deleteGroupUsecase: sl()
+  ));
+
+  sl.registerLazySingleton<SubUserDataSources>(() => SubUserDataSourceImpl(apiClient: sl()));
+  sl.registerLazySingleton<SubUserRepo>(() => SubUserRepositoryImpl(subUserDataSources: sl()));
+  sl.registerLazySingleton(() => GetSubUsersUsecase(subUserRepo: sl()));
+  sl.registerLazySingleton(() => GetSubUserDetailsUsecase(subUserRepo: sl()));
+  sl.registerFactory(() => SubUsersBloc(
+      getSubUsersUsecase: sl(),
+      getSubUserDetailsUsecase: sl(),
   ));
 }
 
