@@ -18,7 +18,7 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
   int _retryAttempts = 0;
   static const int maxRetries = 5;
   static const Duration retryDelay = Duration(seconds: 5);
-  String? _currentDeviceId; // Track currently subscribed deviceId
+  String? _currentDeviceId;
   bool get isConnected => mqttService.isConnected;
 
   MqttBloc({required this.mqttService}) : super(MqttInitial()) {
@@ -43,7 +43,6 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
       if (kDebugMode) print('🔵 MqttBloc._onConnect: Connected successfully');
       emit(MqttConnected());
 
-      // Listen to incoming messages
       _subscription = mqttService.updates.listen((messages) {
         if (kDebugMode) print('🔵 MqttBloc._onConnect: Listener set up');
         for (var message in messages) {
@@ -62,7 +61,6 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
       }
       emit(MqttError(errorMsg));
 
-      // Auto-retry on auth/network errors (not on max attempts)
       final shouldRetry = _retryAttempts < maxRetries &&
           (e.toString().contains('notAuthorized') ||
               e.toString().contains('NoConnectionException') ||
@@ -88,12 +86,10 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
     print("_onSubscribe current state: ${state.runtimeType}");
   }
   if (mqttService.isConnected) {
-    // FIXED: Skip if same deviceId
     if (_currentDeviceId == event.deviceId) {
       if (kDebugMode) print('Already subscribed to ${event.deviceId} - skipping');
       return;
     }
-    // Unsubscribe from existing if different
     if (_currentDeviceId != null) {
       if (kDebugMode) print('Unsubscribing from old topic: tweet/$_currentDeviceId');
       mqttService.unsubscribe(_currentDeviceId!);

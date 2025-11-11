@@ -127,9 +127,9 @@ class LiveMessageModel extends LiveMessageEntity {
     final prsOut = safeString(23, '0.0');
     final flowRateTemp = safeString(25, '0.0:0');
     final flowParts = flowRateTemp.split(':');
-    final flowRate = flowParts.length > 0 ? flowParts[0] : '0.0';
-    final totalMeterFlow = flowParts.length > 1 ? flowParts[1] : '0';
-    final wellLevel = safeString(34, '0'); // Assuming position for wellLevel
+    final flowRate = flowParts.isNotEmpty ? flowParts[0] : '0.0';
+    final totalMeterFlow = flowParts.isNotEmpty ? flowParts[1] : '0';
+    final wellLevel = safeString(34, '0');
     final runTimeToday = safeString(35, '0');
     final flowPrevDay = safeString(27, '00:00:00');
     final flowToday = safeString(28, '00:00:00');
