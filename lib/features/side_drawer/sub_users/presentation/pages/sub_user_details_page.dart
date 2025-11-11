@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/custom_phone_field.dart';
 
 import '../../../../../core/di/injection.dart' as di;
 import '../../domain/entities/sub_user_details_entity.dart';
@@ -31,7 +33,9 @@ class SubUserDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, SubUsersState state) {
-    print("state in the _buildBody :: $state");
+    final _formKey = GlobalKey<FormState>();
+    final _phoneKey = GlobalKey<CustomPhoneFieldState>();
+    final _nameKey = GlobalKey<FormFieldState>();
     if (state is SubUserDetailsLoading || state is SubUserInitial) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -42,38 +46,42 @@ class SubUserDetailsScreen extends StatelessWidget {
 
     if (state is SubUserDetailsLoaded) {
       final subUserDetail = state.subUserDetails.subUserDetail;
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildFieldRow(
-              label: 'Sub-user Code',
-              value: subUserDetail.subUserCode,
-              isEditable: false,
-            ),
-            const SizedBox(height: 16),
-            _buildPhoneField(context, subUserDetail.mobileNumber),
-            const SizedBox(height: 16),
-            _buildTextField(
-              label: 'Sub-user name',
-              initialValue: subUserDetail.userName,
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'List of controllers',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ...state.subUserDetails.controllerList.map((controller) => _buildControllerTile(
-              controller: controller,
-              onSelectedChanged: (selected) {},
-              onEnabledChanged: (enabled) {},
-            )),
-            const SizedBox(height: 24),
-            _buildActionButtons(context),
-          ],
+      return Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildFieldRow(
+                label: 'Sub-user Code',
+                value: subUserDetail.subUserCode,
+                isEditable: false,
+              ),
+              const SizedBox(height: 16),
+              _buildPhoneField(context, subUserDetail.mobileNumber, _phoneKey),
+              const SizedBox(height: 16),
+              _buildTextField(
+                label: 'Sub-user name',
+                initialValue: subUserDetail.userName,
+                nameKey: _nameKey,
+                onChanged: (value) {}, // Update Bloc if needed, e.g., bloc.add(UpdateNameEvent(value));
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'List of controllers',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...state.subUserDetails.controllerList.map((controller) => _buildControllerTile(
+                controller: controller,
+                onSelectedChanged: (selected) {},
+                onEnabledChanged: (enabled) {},
+              )),
+              const SizedBox(height: 24),
+              _buildActionButtons(context, _formKey, _phoneKey, _nameKey, state),
+            ],
+          ),
         ),
       );
     }
@@ -94,52 +102,40 @@ class SubUserDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoneField(BuildContext context, String initialPhone) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Sub-user Mobile Number', style: TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(4)),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [Text('+91'), Icon(Icons.arrow_drop_down, size: 20)],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.verified, color: Colors.green), // Validation checkmark
-                ),
-                onChanged: (value) {},
-              ),
-            ),
-          ],
+  Widget _buildPhoneField(BuildContext context, String initialPhone, GlobalKey<CustomPhoneFieldState> phoneKey) {
+    return CustomPhoneField(
+      key: phoneKey,
+      initialCountryCode: 'IN',
+      initialValue: initialPhone,
+      decoration: InputDecoration(
+        border: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white)
         ),
-      ],
+        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        labelText: 'Sub User Phone number',
+        suffixIcon: Icon(Icons.verified, color: Colors.green),
+        errorStyle: const TextStyle(color: Colors.redAccent),
+      ),
     );
   }
 
   Widget _buildTextField({
     required String label,
     required String initialValue,
+    required GlobalKey<FormFieldState> nameKey,
     required Function(String) onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextField(
-          decoration: const InputDecoration(border: OutlineInputBorder()),
+        TextFormField(
+          key: nameKey,
+          decoration: InputDecoration(
+            label: Text(label)
+          ),
+          initialValue: initialValue,
           onChanged: onChanged,
+          validator: (value) => value?.isEmpty == true ? 'Name is required' : null,
         ),
       ],
     );
@@ -176,12 +172,18 @@ class SubUserDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(
+      BuildContext context,
+      GlobalKey<FormState> formKey,
+      GlobalKey<CustomPhoneFieldState> phoneKey,
+      GlobalKey<FormFieldState> nameKey,
+      SubUsersState state, // Pass state for loaded data if needed
+      ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () => _handleSubmit(context, formKey, phoneKey, nameKey, state),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
           child: const Text('Submit'),
         ),
@@ -191,7 +193,7 @@ class SubUserDetailsScreen extends StatelessWidget {
           child: const Text('Cancel'),
         ),
         OutlinedButton(
-          onPressed: () {},
+          onPressed: () => _handleDelete(context, state),
           style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
           child: const Text('Delete'),
         ),
@@ -199,13 +201,36 @@ class SubUserDetailsScreen extends StatelessWidget {
     );
   }
 
- /* void _handleSubmit(BuildContext context) {
-    final bloc = context.read<SubUserEditBloc>();
-    bloc.add(UpdateSubUserEvent()); // Triggers usecase
+  void _handleSubmit(
+      BuildContext context,
+      GlobalKey<FormState> formKey,
+      GlobalKey<CustomPhoneFieldState> phoneKey,
+      GlobalKey<FormFieldState> nameKey,
+      SubUsersState state,
+      ) {
+    if (formKey.currentState!.validate()) {
+      final bloc = context.read<SubUsersBloc>();
+      final fullPhone = phoneKey.currentState!.fullPhoneNumber;
+      final updatedName = nameKey.currentState!.value; // Gets current text value
+      // Collect other changes (e.g., selected controllers from Bloc state)
+      if (state is SubUserDetailsLoaded) {
+        // Example: Dispatch update event with collected data
+        // bloc.add(UpdateSubUserEvent(
+        //   phone: fullPhone,
+        //   name: updatedName,
+        //   // controllerSelections: ... from state or local tracking
+        // ));
+        print('Submitting: Phone=$fullPhone, Name=$updatedName');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sub-user updated!')),
+        );
+        // Optionally pop or refresh
+      }
+    }
   }
 
-  void _handleDelete(BuildContext context) {
-    final bloc = context.read<SubUserEditBloc>();
+  void _handleDelete(BuildContext context, SubUsersState state) {
+    final bloc = context.read<SubUsersBloc>();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -216,12 +241,18 @@ class SubUserDetailsScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              bloc.add(DeleteSubUserEvent());
+              if (state is SubUserDetailsLoaded) {
+                // bloc.add(DeleteSubUserEvent(subUserId: subUserDetailsParams.subUserId)); // Use params or state
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Sub-user deleted!')),
+                );
+                context.pop(); // Navigate back after delete
+              }
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
-  }*/
+  }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niagara_smart_drip_irrigation/features/mqtt/presentation/bloc/mqtt_bloc.dart';
+import 'package:niagara_smart_drip_irrigation/features/mqtt/bloc/mqtt_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/di/injection.dart' as di;

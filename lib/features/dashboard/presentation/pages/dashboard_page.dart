@@ -13,8 +13,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
-import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
-import '../../../mqtt/presentation/bloc/mqtt_event.dart';
+import '../../../mqtt/bloc/mqtt_bloc.dart';
+import '../../../mqtt/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
 import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
 import '../bloc/dashboard_state.dart';
@@ -241,7 +241,7 @@ class DashboardPage extends StatelessWidget {
     return PreferredSize(
       preferredSize: Size(MediaQuery.of(context).size.width, 40),
       child: Container(
-        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor ?? Colors.blue, // Ensure visible background
+        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor, // Ensure visible background
         child: Row(
           children: [
             _buildGroupSelector(state, selectedGroup, bloc),

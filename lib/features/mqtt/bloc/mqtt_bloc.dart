@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import '../../../../core/di/injection.dart';
-import '../../../../core/services/mqtt_service.dart';
-import '../../utils/mqtt_message_helper.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/services/mqtt_service.dart';
+import '../utils/mqtt_message_helper.dart';
 import 'mqtt_event.dart';
 import 'mqtt_state.dart';
 

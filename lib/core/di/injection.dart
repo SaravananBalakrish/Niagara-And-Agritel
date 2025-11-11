@@ -15,7 +15,7 @@ import '../../features/dashboard/domain/usecases/fetch_controllers_usecase.dart'
 import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../features/dashboard/utils/dashboard_dispatcher.dart';
-import '../../features/mqtt/presentation/bloc/mqtt_bloc.dart';
+import '../../features/mqtt/bloc/mqtt_bloc.dart';
 import '../../features/mqtt/utils/mqtt_message_helper.dart';
 import '../../features/side_drawer/groups/data/datasources/group_data_sources.dart';
 import '../../features/side_drawer/groups/data/repositories/fetch_group_repository_impl.dart';

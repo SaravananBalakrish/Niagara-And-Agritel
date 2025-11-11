@@ -252,7 +252,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return response['code'] == 200;
-      return _handleApiResponse(response, successCode: 200, operation: 'Phone check') != null;
     } catch (e) {
       if (kDebugMode) {
         print('Check phone number error: $e');

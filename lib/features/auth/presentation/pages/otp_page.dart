@@ -73,8 +73,20 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                       margin: const EdgeInsets.all(16),
                     ),
                   );
-                  // context.go(RouteConstants.dashboard);
-                  context.go(RouteConstants.dealerDashboard);
+                  if(state.user.userDetails.userType == 2) {
+                    context.go(RouteConstants.dealerDashboard);
+                  } else if (state.user.userDetails.userType == 1){
+                    context.go(RouteConstants.dashboard);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Admin cannot login through mobile"),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                      ),
+                    );
+                  }
                 }
                 if (state is AuthError) {
                   setState(() {
@@ -189,8 +201,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                     child: TextFormField(
                                       controller: otpController,
                                       keyboardType: TextInputType.number,
+                                      style: TextStyle(color: Colors.black),
                                       decoration: InputDecoration(
                                         labelText: 'OTP',
+                                        labelStyle: TextStyle(color: Colors.black),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
                                           borderSide: BorderSide.none,

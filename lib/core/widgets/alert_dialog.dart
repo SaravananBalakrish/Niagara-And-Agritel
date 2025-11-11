@@ -1,8 +1,3 @@
-// glassy_alert_dialog.dart - Standalone iOS-like Glassy Alert Dialog
-// Matches the screenshot's glassy, blurred overlay style for modals/alerts.
-// Updated: BackdropFilter now wraps the entire Dialog in build() for consistent blur,
-// even when used directly in showDialog (without static show).
-
 import 'package:flutter/material.dart';
 import 'dart:ui';
 
@@ -32,7 +27,7 @@ class GlassyAlertDialog extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (BuildContext dialogContext) => GlassyAlertDialog(  // Use class directly; blur is in build()
+      builder: (BuildContext dialogContext) => GlassyAlertDialog(
         title: title,
         content: content,
         actions: actions,
@@ -44,18 +39,18 @@ class GlassyAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BackdropFilter(  // Wrap entire Dialog for blurred background (matches screenshot)
-      filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0), // Frosted blur on underlying UI
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
       child: Dialog(
-        backgroundColor: Colors.transparent, // Transparent to let blur show through
+        backgroundColor: Colors.transparent,
         insetPadding: insetPadding ?? const EdgeInsets.all(32.0),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2), // Semi-transparent glassy content
+            color: Colors.white.withOpacity(0.2),
             borderRadius: BorderRadius.circular(20.0),
             border: Border.all(
-              color: Colors.white.withOpacity(0.4), // Subtle glassy border
+              color: Colors.white.withOpacity(0.4),
               width: 1.5,
             ),
             boxShadow: [
@@ -95,7 +90,6 @@ class GlassyAlertDialog extends StatelessWidget {
                   ),
                 ),
               ],
-              // Actions Section (Horizontal or Vertical like iOS/screenshot buttons)
               if (actions.isNotEmpty)
                 Container(
                   width: double.infinity,
