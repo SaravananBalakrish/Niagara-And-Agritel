@@ -27,8 +27,6 @@ class SubUsersError extends SubUsersState {
   List<Object?> get props => [message];
 }
 
-class SubUserDetailsInitial extends SubUsersState {}
-
 class SubUserDetailsLoading extends SubUsersState {}
 
 class SubUserDetailsLoaded extends SubUsersState {

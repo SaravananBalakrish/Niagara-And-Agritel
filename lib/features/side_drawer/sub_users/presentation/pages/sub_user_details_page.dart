@@ -31,7 +31,8 @@ class SubUserDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, SubUsersState state) {
-    if (state is SubUserDetailsLoading) {
+    print("state in the _buildBody :: $state");
+    if (state is SubUserDetailsLoading || state is SubUserInitial) {
       return const Center(child: CircularProgressIndicator());
     }
 
