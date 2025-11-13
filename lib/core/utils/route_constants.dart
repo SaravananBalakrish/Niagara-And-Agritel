@@ -13,4 +13,5 @@ class RouteConstants {
   static const String deviceDetails = "/devices/:id";
   static const String myDevicePage = "/myDevicePage";
   static const String ctrlLivePage = "/ctrlLivePage";
+  static const String ctrlDetailsPage = "/ctrlDetailsPage";
 }

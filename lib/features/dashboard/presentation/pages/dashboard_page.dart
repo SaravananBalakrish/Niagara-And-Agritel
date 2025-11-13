@@ -368,70 +368,75 @@ class DashboardPage extends StatelessWidget {
           hasScrollBody: false,
           child: Padding(
             padding: EdgeInsets.all(scale(2)),
-            child: GlassCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
-                mainAxisAlignment: MainAxisAlignment.spaceAround, // Center vertically
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SyncSection(
-                    liveSync: controller.livesyncTime,
-                    smsSync: controller.msgDesc,
-                    model: controller.modelId,
-                  ),
-                  SizedBox(height: scale(8)),
-                  GlassCard(
-                    child: CtrlDisplay(
-                      signal: controller.liveMessage.signal,
-                      battery: controller.liveMessage.batVolt,
-                      l1display:controller.liveMessage.liveDisplay1,
-                      l2display: controller.liveMessage.liveDisplay2,
-                    ),
-                  ),
-                  SizedBox(height: scale(8)),
-                  GestureDetector(
-                    onTap: () {
-                      context.push(RouteConstants.ctrlLivePage, extra: controller.liveMessage);
-                    },
-                    child: RYBSection(
-                      r: controller.liveMessage.rVoltage,
-                      y: controller.liveMessage.yVoltage,
-                      b: controller.liveMessage.bVoltage,
-                      c1: controller.liveMessage.rCurrent,
-                      c2: controller.liveMessage.yCurrent,
-                      c3: controller.liveMessage.bCurrent,
-                    ),
-                  ),
-                  SizedBox(height: scale(8)),
-                  MotorValveSection(
-                    motorOn: controller.liveMessage.motorOnOff,
-                    motorOn2: controller.liveMessage.valveOnOff,
-                    valveOn: controller.liveMessage.valveOnOff,
-                    model: controller.modelId,
-                  ),
-                  SizedBox(height: scale(8)),
-                  if ([1, 5].contains(controller.modelId)) ...[
-                    PressureSection(
-                      prsIn: controller.liveMessage.prsIn,
-                      prsOut: controller.liveMessage.prsOut,
-                      activeZone: controller.zoneNo,
-                      fertlizer: '',
+            child: GestureDetector(
+              onTap: () {
+                context.push(RouteConstants.ctrlDetailsPage, extra: controller.liveMessage);
+              },
+              child:  GlassCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+                  mainAxisAlignment: MainAxisAlignment.spaceAround, // Center vertically
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    SyncSection(
+                      liveSync: controller.livesyncTime,
+                      smsSync: controller.msgDesc,
+                      model: controller.modelId,
                     ),
                     SizedBox(height: scale(8)),
-                    TimerSection(
-                      setTime: controller.setFlow,
-                      remainingTime: controller.remFlow,
+                    GlassCard(
+                      child: CtrlDisplay(
+                        signal: controller.liveMessage.signal,
+                        battery: controller.liveMessage.batVolt,
+                        l1display:controller.liveMessage.liveDisplay1,
+                        l2display: controller.liveMessage.liveDisplay2,
+                      ),
                     ),
                     SizedBox(height: scale(8)),
+                    GestureDetector(
+                      onTap: () {
+                        context.push(RouteConstants.ctrlLivePage, extra: controller.liveMessage);
+                      },
+                      child: RYBSection(
+                        r: controller.liveMessage.rVoltage,
+                        y: controller.liveMessage.yVoltage,
+                        b: controller.liveMessage.bVoltage,
+                        c1: controller.liveMessage.rCurrent,
+                        c2: controller.liveMessage.yCurrent,
+                        c3: controller.liveMessage.bCurrent,
+                      ),
+                    ),
+                    SizedBox(height: scale(8)),
+                    MotorValveSection(
+                      motorOn: controller.liveMessage.motorOnOff,
+                      motorOn2: controller.liveMessage.valveOnOff,
+                      valveOn: controller.liveMessage.valveOnOff,
+                      model: controller.modelId,
+                    ),
+                    SizedBox(height: scale(8)),
+                    if ([1, 5].contains(controller.modelId)) ...[
+                      PressureSection(
+                        prsIn: controller.liveMessage.prsIn,
+                        prsOut: controller.liveMessage.prsOut,
+                        activeZone: controller.zoneNo,
+                        fertlizer: '',
+                      ),
+                      SizedBox(height: scale(8)),
+                      TimerSection(
+                        setTime: controller.setFlow,
+                        remainingTime: controller.remFlow,
+                      ),
+                      SizedBox(height: scale(8)),
+                    ],
+                    LatestMsgSection(
+                      msg: ([1, 5].contains(controller.modelId))
+                          ? controller.msgDesc
+                          : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
+                    ),
+                    SizedBox(height: scale(8)),
+                    ActionsSection(model: controller.modelId),
                   ],
-                  LatestMsgSection(
-                    msg: ([1, 5].contains(controller.modelId))
-                        ? controller.msgDesc
-                        : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
-                  ),
-                  SizedBox(height: scale(8)),
-                  ActionsSection(model: controller.modelId),
-                ],
+                ),
               ),
             ),
           ),

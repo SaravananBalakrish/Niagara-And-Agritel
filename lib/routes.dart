@@ -12,6 +12,7 @@ import 'core/utils/route_constants.dart';
 import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
+import 'features/controller_details/presentation/pages/controller_details_page.dart';
 import 'features/dashboard/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/domain/entities/controller_entity.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
@@ -153,6 +154,17 @@ class AppRouter {
             return BlocProvider.value(
               value: authBloc,
               child: CtrlLivePage(selectedController: selectedController),
+            );
+          },
+        ),
+        GoRoute(
+          name: 'ctrlDetailsPage',
+          path: RouteConstants.ctrlDetailsPage,
+          builder: (context, state) {
+             final selectedController = state.extra as LiveMessageEntity?;
+            return BlocProvider.value(
+              value: authBloc,
+              child: ControllerDetailsPage(),
             );
           },
         ),
