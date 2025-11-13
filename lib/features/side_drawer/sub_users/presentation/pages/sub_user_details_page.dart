@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/custom_phone_field.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/retry.dart';
 
 import '../../../../../core/di/injection.dart' as di;
 import '../../domain/entities/sub_user_details_entity.dart';
@@ -23,8 +25,24 @@ class SubUserDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => di.sl<SubUsersBloc>()
-        ..add(LoadSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams)),
-      child: BlocBuilder<SubUsersBloc, SubUsersState>(
+        ..add(GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams)),
+      child: BlocConsumer<SubUsersBloc, SubUsersState>(
+        listener: (context, state) {
+          if (state is SubUserDetailsUpdateStarted) {
+            // showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+          } else if (state is SubUserDetailsUpdateSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Update successful: ${state.message}')),
+            );
+            context.read<SubUsersBloc>().add(
+              GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams),
+            );
+          } else if (state is SubUserDetailsUpdateError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Update failed: ${state.message}'), backgroundColor: Colors.red),
+            );
+          }
+        },
         builder: (context, state) {
           return _buildBody(context, state);
         },
@@ -33,9 +51,89 @@ class SubUserDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, SubUsersState state) {
-    final _formKey = GlobalKey<FormState>();
-    final _phoneKey = GlobalKey<CustomPhoneFieldState>();
-    final _nameKey = GlobalKey<FormFieldState>();
+    final formKey = GlobalKey<FormState>();
+    final phoneKey = GlobalKey<CustomPhoneFieldState>();
+    final nameKey = GlobalKey<FormFieldState>();
+
+    if (state is SubUserDetailsLoading || state is SubUserInitial || state is SubUserDetailsUpdateStarted) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state is SubUserDetailsError || state is SubUserDetailsUpdateError) {
+      return Retry(
+          message: state is SubUserDetailsUpdateError
+              ? 'Update error: ${state.message}'
+              : state is SubUserDetailsError ? 'Error loading sub-user: ${state.message}' : 'Unknown',
+          onPressed: () => context.read<SubUsersBloc>().add(
+            GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams),
+          )
+      );
+    }
+
+    if (state is SubUserDetailsUpdateSuccess) {
+      if (state is SubUserDetailsLoaded) {
+        return _buildLoadedUI(context, (state as SubUserDetailsLoaded).subUserDetails, formKey, phoneKey, nameKey);
+      }
+      return const Center(child: Text('Update successful! Reloading...'));
+    }
+
+    if (state is SubUserDetailsLoaded) {
+      return _buildLoadedUI(context, state.subUserDetails, formKey, phoneKey, nameKey);
+    }
+
+    return const Center(child: Text('Unexpected state. Please retry.'));
+  }
+
+  Widget _buildLoadedUI(BuildContext context, SubUserDetailsEntity subUserDetails, GlobalKey<FormState> formKey, GlobalKey<CustomPhoneFieldState> phoneKey, GlobalKey<FormFieldState> nameKey) {
+    final subUserDetail = subUserDetails.subUserDetail;
+    return Form(
+      key: formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildFieldRow(
+              label: 'Sub-user Code',
+              value: subUserDetail.subUserCode,
+              theme: Theme.of(context),
+            ),
+            const SizedBox(height: 16),
+            _buildPhoneField(context, subUserDetail.mobileNumber, phoneKey, subUserDetail.mobileCountryCode),
+            const SizedBox(height: 16),
+            _buildTextField(
+              label: 'Sub-user name',
+              initialValue: subUserDetail.userName,
+              nameKey: nameKey,
+              onChanged: (value) {}, // Note: To persist name changes, update bloc state here if needed (similar to controllers)
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'List of controllers',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            ...subUserDetails.controllerList.asMap().entries.map((entry) {
+              final index = entry.key;
+              final controller = entry.value;
+              return _buildControllerTile(
+                controller: controller,
+                index: index,
+                blocContext: context,
+              );
+            }),
+            const SizedBox(height: 24),
+            _buildActionButtons(context, formKey, phoneKey, nameKey, subUserDetails),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /*Widget _buildBody(BuildContext context, SubUsersState state) {
+    final formKey = GlobalKey<FormState>();
+    final phoneKey = GlobalKey<CustomPhoneFieldState>();
+    final nameKey = GlobalKey<FormFieldState>();
     if (state is SubUserDetailsLoading || state is SubUserInitial) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -47,7 +145,7 @@ class SubUserDetailsScreen extends StatelessWidget {
     if (state is SubUserDetailsLoaded) {
       final subUserDetail = state.subUserDetails.subUserDetail;
       return Form(
-        key: _formKey,
+        key: formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -56,16 +154,16 @@ class SubUserDetailsScreen extends StatelessWidget {
               _buildFieldRow(
                 label: 'Sub-user Code',
                 value: subUserDetail.subUserCode,
-                isEditable: false,
+                theme: Theme.of(context)
               ),
               const SizedBox(height: 16),
-              _buildPhoneField(context, subUserDetail.mobileNumber, _phoneKey),
+              _buildPhoneField(context, subUserDetail.mobileNumber, phoneKey, subUserDetail.mobileCountryCode),
               const SizedBox(height: 16),
               _buildTextField(
                 label: 'Sub-user name',
                 initialValue: subUserDetail.userName,
-                nameKey: _nameKey,
-                onChanged: (value) {}, // Update Bloc if needed, e.g., bloc.add(UpdateNameEvent(value));
+                nameKey: nameKey,
+                onChanged: (value) {},
               ),
               const SizedBox(height: 24),
               const Text(
@@ -73,36 +171,38 @@ class SubUserDetailsScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...state.subUserDetails.controllerList.map((controller) => _buildControllerTile(
-                controller: controller,
-                onSelectedChanged: (selected) {},
-                onEnabledChanged: (enabled) {},
-              )),
+              ...state.subUserDetails.controllerList.asMap().entries.map((entry) {
+                final index = entry.key;
+                final controller = entry.value;
+                return _buildControllerTile(
+                  controller: controller,
+                  index: index,
+                  blocContext: context,
+                );
+              }),
               const SizedBox(height: 24),
-              _buildActionButtons(context, _formKey, _phoneKey, _nameKey, state),
+              _buildActionButtons(context, formKey, phoneKey, nameKey, state),
             ],
           ),
         ),
       );
     }
     return const Center(child: Text('Error loading sub-user'));
-  }
+  }*/
 
-  Widget _buildFieldRow({required String label, required String value, bool isEditable = true}) {
+  Widget _buildFieldRow({required String label, required String value, required ThemeData theme}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SizedBox(
-          width: 120,
-          child: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(width: 16),
-        Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
+        Text(value, style: theme.textTheme.titleLarge),
       ],
     );
   }
 
-  Widget _buildPhoneField(BuildContext context, String initialPhone, GlobalKey<CustomPhoneFieldState> phoneKey) {
+  Widget _buildPhoneField(BuildContext context, String initialPhone, GlobalKey<CustomPhoneFieldState> phoneKey, String countryCode) {
     return CustomPhoneField(
       key: phoneKey,
       initialCountryCode: 'IN',
@@ -113,7 +213,6 @@ class SubUserDetailsScreen extends StatelessWidget {
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         labelText: 'Sub User Phone number',
-        suffixIcon: Icon(Icons.verified, color: Colors.green),
         errorStyle: const TextStyle(color: Colors.redAccent),
       ),
     );
@@ -143,31 +242,43 @@ class SubUserDetailsScreen extends StatelessWidget {
 
   Widget _buildControllerTile({
     required SubUserControllerEntity controller,
-    bool isSelected = false,
-    bool isEnabled = false,
-    required ValueChanged<bool> onSelectedChanged,
-    required ValueChanged<bool> onEnabledChanged,
+    required int index,
+    required BuildContext blocContext,
   }) {
-    return Card(
+    final isSelected = controller.shareFlag == 1;
+    final isEnabled = controller.dndStatus == '1';
+
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Checkbox(
-              value: isSelected,
-              onChanged: (value) => onSelectedChanged(value ?? false),
-            ),
-            Expanded(child: Text(controller.deviceName)),
-            const SizedBox(width: 16),
-            Text('DND'),
-            Switch(
-              value: isEnabled,
-              onChanged: onEnabledChanged,
-              activeColor: Colors.blue,
-            ),
-          ],
-        ),
+      padding: EdgeInsets.symmetric(vertical: 0),
+      child: Row(
+        children: [
+          Checkbox(
+            value: isSelected,
+            onChanged: (value) {
+              blocContext.read<SubUsersBloc>().add(
+                UpdateControllerSelectionEvent(
+                  controllerIndex: index,
+                  isSelected: value ?? false,
+                ),
+              );
+            },
+          ),
+          Expanded(child: Text(controller.deviceName)),
+          const SizedBox(width: 16),
+          const Text('DND'),
+          Switch(
+            value: isEnabled,
+            onChanged: (value) {
+              blocContext.read<SubUsersBloc>().add(
+                UpdateControllerDndEvent(
+                  controllerIndex: index,
+                  isEnabled: value,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -177,25 +288,24 @@ class SubUserDetailsScreen extends StatelessWidget {
       GlobalKey<FormState> formKey,
       GlobalKey<CustomPhoneFieldState> phoneKey,
       GlobalKey<FormFieldState> nameKey,
-      SubUsersState state, // Pass state for loaded data if needed
+      SubUserDetailsEntity subUserDetails,
       ) {
     return Row(
+      spacing: 15,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton(
-          onPressed: () => _handleSubmit(context, formKey, phoneKey, nameKey, state),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-          child: const Text('Submit'),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => _handleSubmit(context, formKey, phoneKey, nameKey, subUserDetails),
+            child: const Text('Submit'),
+          ),
         ),
-        ElevatedButton(
-          onPressed: () => context.pop(),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
-          child: const Text('Cancel'),
-        ),
-        OutlinedButton(
-          onPressed: () => _handleDelete(context, state),
-          style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
-          child: const Text('Delete'),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => context.pop(),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.black),
+            child: const Text('Cancel'),
+          ),
         ),
       ],
     );
@@ -206,53 +316,25 @@ class SubUserDetailsScreen extends StatelessWidget {
       GlobalKey<FormState> formKey,
       GlobalKey<CustomPhoneFieldState> phoneKey,
       GlobalKey<FormFieldState> nameKey,
-      SubUsersState state,
+      SubUserDetailsEntity subUserDetails,
       ) {
     if (formKey.currentState!.validate()) {
       final bloc = context.read<SubUsersBloc>();
-      final fullPhone = phoneKey.currentState!.fullPhoneNumber;
-      final updatedName = nameKey.currentState!.value; // Gets current text value
-      // Collect other changes (e.g., selected controllers from Bloc state)
-      if (state is SubUserDetailsLoaded) {
-        // Example: Dispatch update event with collected data
-        // bloc.add(UpdateSubUserEvent(
-        //   phone: fullPhone,
-        //   name: updatedName,
-        //   // controllerSelections: ... from state or local tracking
-        // ));
-        print('Submitting: Phone=$fullPhone, Name=$updatedName');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sub-user updated!')),
-        );
-        // Optionally pop or refresh
-      }
-    }
-  }
+      final fullPhone = phoneKey.currentState!.phoneNumber;
+      final countryCode = phoneKey.currentState!.countryCode;
+      final updatedName = nameKey.currentState!.value;
 
-  void _handleDelete(BuildContext context, SubUsersState state) {
-    final bloc = context.read<SubUsersBloc>();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this sub-user?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (state is SubUserDetailsLoaded) {
-                // bloc.add(DeleteSubUserEvent(subUserId: subUserDetailsParams.subUserId)); // Use params or state
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sub-user deleted!')),
-                );
-                context.pop(); // Navigate back after delete
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+      final updatedSubUserDetail = subUserDetails.subUserDetail.copyWith(
+        mobileNumber: fullPhone,
+        userName: updatedName,
+        mobileCountryCode: countryCode,
+      );
+      final updatedDetails = SubUserDetailsEntity(
+        subUserDetail: updatedSubUserDetail,
+        controllerList: subUserDetails.controllerList,
+      );
+
+      bloc.add(SubUserDetailsUpdateEvent(updatedDetails: updatedDetails));
+    }
   }
 }

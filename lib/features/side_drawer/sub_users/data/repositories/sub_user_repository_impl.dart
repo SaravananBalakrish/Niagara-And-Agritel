@@ -29,4 +29,14 @@ class SubUserRepositoryImpl extends SubUserRepo {
       return Left(ServerFailure('Group Fetching Failure: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, String>> updateSubUserDetails(SubUserDetailsEntity subUserDetails) async{
+    try {
+      final subUsersList = await subUserDataSources.updateSubUserDetails(subUserDetails);
+      return Right(subUsersList);
+    } catch (e) {
+      return Left(ServerFailure('Group Fetching Failure: $e'));
+    }
+  }
 }

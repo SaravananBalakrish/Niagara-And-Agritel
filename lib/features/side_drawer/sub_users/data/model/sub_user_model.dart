@@ -6,16 +6,18 @@ class SubUserModel extends SubUserEntity {
     required super.mobileCountryCode,
     required super.mobileNumber,
     required super.sharedUserId,
-    required super.subUserCode
+    required super.subUserCode,
+    required super.subuserId,
   });
 
   factory SubUserModel.fromJson(Map<String, dynamic> json) {
     return SubUserModel(
-        userName: json["userName"],
-        mobileCountryCode: json["mobileCountryCode"] ?? json["mobCountryCode"],
-        mobileNumber: json["mobileNumber"],
-        sharedUserId: json["sharedUserId"],
-        subUserCode: json["subUserCode"]
+      userName: json["userName"],
+      mobileCountryCode: json["mobileCountryCode"] ?? json["mobCountryCode"],
+      mobileNumber: json["mobileNumber"],
+      sharedUserId: json["sharedUserId"] ?? json['shareUserId'],
+      subUserCode: json["subUserCode"],
+      subuserId: json["subuserId"],
     );
   }
 }

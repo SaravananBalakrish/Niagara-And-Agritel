@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 
+import '../../domain/entities/sub_user_details_entity.dart';
+
 abstract class SubUsersEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -14,10 +16,45 @@ class GetSubUsersEvent extends SubUsersEvent {
   List<Object?> get props => [userId];
 }
 
-class LoadSubUserDetailsEvent extends SubUsersEvent {
+class GetSubUserDetailsEvent extends SubUsersEvent {
   final GetSubUserDetailsParams subUserDetailsParams;
-  LoadSubUserDetailsEvent({required this.subUserDetailsParams});
+  GetSubUserDetailsEvent({required this.subUserDetailsParams});
 
   @override
   List<Object?> get props => [subUserDetailsParams];
+}
+
+class UpdateControllerSelectionEvent extends SubUsersEvent {
+  final int controllerIndex;
+  final bool isSelected;
+
+  UpdateControllerSelectionEvent({
+    required this.controllerIndex,
+    required this.isSelected,
+  });
+
+  @override
+  List<Object?> get props => [controllerIndex, isSelected];
+}
+
+class UpdateControllerDndEvent extends SubUsersEvent {
+  final int controllerIndex;
+  final bool isEnabled;
+
+  UpdateControllerDndEvent({
+    required this.controllerIndex,
+    required this.isEnabled,
+  });
+
+  @override
+  List<Object?> get props => [controllerIndex, isEnabled];
+}
+
+class SubUserDetailsUpdateEvent extends SubUsersEvent {
+  final SubUserDetailsEntity updatedDetails;
+
+  SubUserDetailsUpdateEvent({required this.updatedDetails});
+
+  @override
+  List<Object?> get props => [updatedDetails];
 }

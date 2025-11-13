@@ -61,6 +61,7 @@ class SubUsers extends StatelessWidget {
                       onTap: () {
                         context.push(RouteConstants.subUserDetails, extra: {"userId": userId, "subUserCode": subUserEntity.subUserCode});
                       },
+                      trailing: IconButton(onPressed: (){}, icon: Icon(Icons.delete, color: Colors.red,)),
                     ),
                   );
                 },

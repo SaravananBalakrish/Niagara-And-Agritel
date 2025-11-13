@@ -9,6 +9,7 @@ abstract class SubUsersState extends Equatable {
 }
 
 class SubUserLoading extends SubUsersState {}
+
 class SubUserInitial extends SubUsersState {}
 
 class SubUsersLoaded extends SubUsersState {
@@ -40,6 +41,24 @@ class SubUserDetailsLoaded extends SubUsersState {
 class SubUserDetailsError extends SubUsersState {
   final String message;
   SubUserDetailsError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class SubUserDetailsUpdateStarted extends SubUsersState {}
+
+class SubUserDetailsUpdateSuccess extends SubUsersState {
+  final String message;
+  SubUserDetailsUpdateSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class SubUserDetailsUpdateError extends SubUsersState {
+  final String message;
+  SubUserDetailsUpdateError({required this.message});
 
   @override
   List<Object?> get props => [message];

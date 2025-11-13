@@ -6,6 +6,7 @@ import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/dat
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/repositories/sub_user_repo.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
@@ -143,9 +144,11 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton<SubUserRepo>(() => SubUserRepositoryImpl(subUserDataSources: sl()));
   sl.registerLazySingleton(() => GetSubUsersUsecase(subUserRepo: sl()));
   sl.registerLazySingleton(() => GetSubUserDetailsUsecase(subUserRepo: sl()));
+  sl.registerLazySingleton(() => UpdateSubUserDetailsUseCase(subUserRepo: sl()));
   sl.registerFactory(() => SubUsersBloc(
       getSubUsersUsecase: sl(),
       getSubUserDetailsUsecase: sl(),
+      updateSubUserDetailsUseCase: sl(),
   ));
 }
 

@@ -97,8 +97,12 @@ class CustomPhoneFieldState extends State<CustomPhoneField> {
     super.dispose();
   }
 
-  String get fullPhoneNumber {
+  String get phoneNumber {
     return _countryCode + _effectiveController.text;
+  }
+
+  String get countryCode {
+    return _countryCode;
   }
 
   Color _getDefaultColor() {
@@ -125,13 +129,14 @@ class CustomPhoneFieldState extends State<CustomPhoneField> {
     final defaultTextColor = widget.textColor ?? _getDefaultColor();
 
     return Row(
-      spacing: 2,
       children: [
         _buildCountrySelector(),
+        SizedBox(width: 2,),
         Expanded(
           child: TextFormField(
             key: _fieldKey,
             controller: _effectiveController,
+            keyboardType: TextInputType.number,
             style: TextStyle(color: defaultTextColor),
             decoration: (widget.decoration ??
                 InputDecoration(
@@ -148,11 +153,33 @@ class CustomPhoneFieldState extends State<CustomPhoneField> {
                     horizontal: 10,
                     vertical: 12,
                   ),
+                  suffix: InkWell(
+                    onTap: (){
+                      setState(() {
+                        _effectiveController.clear();
+                      });
+                    },
+                    child: Icon(
+                        Icons.clear,
+                        color: Colors.red
+                    ),
+                  ),
                   errorStyle: const TextStyle(color: Colors.redAccent),
                 ))
                 .copyWith(
               labelStyle: (widget.decoration?.labelStyle ??
                   TextStyle(color: defaultLabelColor)),
+              suffix: InkWell(
+                onTap: (){
+                  setState(() {
+                    _effectiveController.clear();
+                  });
+                },
+                child: Icon(
+                    Icons.clear,
+                    color: Colors.red
+                ),
+              ),
             ),
             onChanged: (value) {
               setState(() {});

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
 
 import 'core/di/injection.dart' as di;
@@ -217,10 +218,12 @@ class AppRouter {
                 final authData = _getAuthData();
                 final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
                 final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
+                final updateSubUserDetailsUsecase = di.sl<UpdateSubUserDetailsUseCase>();
                 return BlocProvider(
                   create: (context) => SubUsersBloc(
                     getSubUsersUsecase: getSubUserUsecase,
                     getSubUserDetailsUsecase: getSubUserDetailsUsecase,
+                    updateSubUserDetailsUseCase: updateSubUserDetailsUsecase,
                   )..add(GetSubUsersEvent(userId: authData.id)),
                   child: SubUsers(userId: authData.id),
                 );
@@ -233,11 +236,13 @@ class AppRouter {
                 final authData = _getAuthData();
                 final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
                 final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
+                final updateSubUserDetailsUsecase = di.sl<UpdateSubUserDetailsUseCase>();
                 final params = state.extra is Map ? state.extra as Map : null;
                 return BlocProvider(
                   create: (context) => SubUsersBloc(
                     getSubUsersUsecase: getSubUserUsecase,
                     getSubUserDetailsUsecase: getSubUserDetailsUsecase,
+                    updateSubUserDetailsUseCase: updateSubUserDetailsUsecase,
                   )..add(GetSubUsersEvent(userId: authData.id)),
                   child: SubUserDetailsScreen(
                     subUserDetailsParams: GetSubUserDetailsParams(

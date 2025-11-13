@@ -11,6 +11,7 @@ import '../../domain/entities/sub_user_entity.dart';
 abstract class SubUserDataSources {
   Future<List<SubUserEntity>> getSubUsers(int userId);
   Future<SubUserDetailsEntity> getSubUserDetails(GetSubUserDetailsParams subUserDetailParams);
+  Future<String> updateSubUserDetails(SubUserDetailsEntity subUserDetailsEntity);
 }
 
 class SubUserDataSourceImpl extends SubUserDataSources {
@@ -57,6 +58,52 @@ class SubUserDataSourceImpl extends SubUserDataSources {
     } catch (e, s) {
       print('getSubUserDetails error: $e');
       print('getSubUserDetails stack trace: $s');
+      throw Exception('Failed to get Sub User Details: $e');
+    }
+  }
+
+  @override
+  Future<String> updateSubUserDetails(SubUserDetailsEntity subUserDetailsEntity) async {
+    try {
+      final endpoint = ApiUrls.updateSubUserDetails;
+      final subUserDetail = subUserDetailsEntity.subUserDetail;
+
+      final selectedControllers = subUserDetailsEntity.controllerList
+          .where((controller) => controller.shareFlag == 1)
+          .toList();
+
+      final controllerListData = selectedControllers.map((controller) => {
+        'userDeviceId': controller.userDeviceId,
+        'dndStatus': controller.dndStatus,
+        'eSms': 'REG01,${subUserDetail.mobileCountryCode},${subUserDetail.mobileNumber}',
+        'dndSms': 'DNDSMS,${controller.shareFlag},${controller.dndStatus}',
+      }).toList();
+
+      final reqBody = {
+        'shareUserId': subUserDetail.sharedUserId,
+        'subUserId': subUserDetail.subuserId,
+        'userId': 2558,
+        'subUserCode': subUserDetail.subUserCode,
+        'userName': subUserDetail.userName,
+        'mobileNumber': subUserDetail.mobileNumber,
+        'mobileCountryCode': subUserDetail.mobileCountryCode,
+        'controllerList': controllerListData,
+      };
+
+      print("reqBody :: $reqBody");
+      final response = await apiClient.put(endpoint, body: reqBody);
+      print("response in the updateSubUserDetails :: ${response['message']}");
+      if (response['code'] == 200) {
+        return response['message'] ?? 'Update successful';
+      } else {
+        throw ServerException(
+          statusCode: response['code'],
+          message: response['message'],
+        );
+      }
+    } catch (e, s) {
+      print('updateSubUserDetails error: $e');
+      print('updateSubUserDetails stack trace: $s');
       throw Exception('Failed to get Sub User Details: $e');
     }
   }
