@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
@@ -12,7 +13,7 @@ import 'core/utils/route_constants.dart';
 import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
-import 'features/controllerLive/presentation/pages/controller_live_page.dart';
+import 'features/dashboard/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/domain/entities/controller_entity.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dashboard/presentation/bloc/dashboard_event.dart';
@@ -149,7 +150,7 @@ class AppRouter {
           path: RouteConstants.ctrlLivePage,
           builder: (context, state) {
             print('Building ctrlLivePage, AuthBloc state: ${authBloc.state}');
-            final selectedController = state.extra as ControllerEntity?;
+            final selectedController = state.extra as LiveMessageEntity?;
             return BlocProvider.value(
               value: authBloc,
               child: CtrlLivePage(selectedController: selectedController),

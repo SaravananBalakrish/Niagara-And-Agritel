@@ -382,17 +382,16 @@ class DashboardPage extends StatelessWidget {
                   SizedBox(height: scale(8)),
                   GlassCard(
                     child: CtrlDisplay(
-                      signal: 50,
-                      battery: 50,
-                      status: controller.status,
-                      vrb: 456,
-                      amp: 200,
+                      signal: controller.liveMessage.signal,
+                      battery: controller.liveMessage.batVolt,
+                      l1display:controller.liveMessage.liveDisplay1,
+                      l2display: controller.liveMessage.liveDisplay2,
                     ),
                   ),
                   SizedBox(height: scale(8)),
                   GestureDetector(
                     onTap: () {
-                      context.push(RouteConstants.ctrlLivePage, extra: controller);
+                      context.push(RouteConstants.ctrlLivePage, extra: controller.liveMessage);
                     },
                     child: RYBSection(
                       r: controller.liveMessage.rVoltage,
