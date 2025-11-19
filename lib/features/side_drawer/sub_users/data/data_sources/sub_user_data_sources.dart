@@ -1,16 +1,18 @@
+import 'dart:convert';
+
 import 'package:logger/logger.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/model/sub_user_details_model.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/model/sub_user_model.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/entities/sub_user_details_entity.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
 import '../../../../../core/utils/api_helper.dart';
 import '../../../../../core/utils/api_urls.dart';
+import '../../domain/entities/sub_user_details_entity.dart';
 import '../../domain/entities/sub_user_entity.dart';
+import '../../domain/usecases/get_sub_user_by_phone_usecase.dart';
+import '../../domain/usecases/get_sub_user_details_usecase.dart';
+import '../../domain/usecases/update_sub_user_usecase.dart';
+import '../model/sub_user_details_model.dart';
+import '../model/sub_user_model.dart';
 
 abstract class SubUserDataSources {
   Future<List<SubUserEntity>> getSubUsers(int userId);
@@ -83,8 +85,8 @@ class SubUserDataSourceImpl extends SubUserDataSources {
         .toList();
 
     try {
-      final endpoint = ApiUrls.addSubUser;
       if (updateSubUserDetailsParams.isNewSubUser) {
+        final endpoint = ApiUrls.addSubUser;
         final controllerListData = selectedControllers.map((controller) => {
           'userDeviceId': controller.userDeviceId,
           'sms': '${subUserDetail.subUserCode},${subUserDetail.mobileCountryCode},${subUserDetail.mobileNumber},',
@@ -99,8 +101,27 @@ class SubUserDataSourceImpl extends SubUserDataSources {
         };
 
         final response = await safeApiCall(() => apiClient.post(endpoint, body: reqBody));
-        return response['message'] ?? 'Update successful';  // safeApiCall ensures 200
+        return response['message'] ?? 'Update successful';
+      } else if(updateSubUserDetailsParams.isDelete){
+        final endpoint = ApiUrls.deleteSubUserDetails
+            .replaceAll(":userId", updateSubUserDetailsParams.userId.toString())
+            .replaceAll(":shareUserId", subUserDetail.sharedUserId.toString());
+
+        final controllerListData = updateSubUserDetailsParams.subUserDetailsEntity.controllerList.map((controller) => {
+          'userDeviceId': controller.userDeviceId.toString(),
+          'sms': '${subUserDetail.subUserCode},${subUserDetail.mobileCountryCode},0000000000,',
+        }).toList();
+
+        final reqBody = {
+          "sentSms" : controllerListData
+        };
+
+        logger.d('Request body for delete: ${jsonEncode(reqBody)}');
+        final response = await safeApiCall(() => apiClient.put(endpoint, body: reqBody));
+        logger.i('delete response: ${response['message']}');
+        return response['message'] ?? 'delete successful';
       } else {
+        final endpoint = ApiUrls.updateSubUserDetails;
         final controllerListData = selectedControllers.map((controller) => {
           'userDeviceId': controller.userDeviceId,
           'dndStatus': controller.dndStatus,
@@ -119,7 +140,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
           'controllerList': controllerListData,
         };
 
-        logger.d('Request body for update: $reqBody');  // Optional debug log
+        logger.d('Request body for update: $reqBody');
         final response = await safeApiCall(() => apiClient.put(endpoint, body: reqBody));
         logger.i('Update response: ${response['message']}');
         return response['message'] ?? 'Update successful';

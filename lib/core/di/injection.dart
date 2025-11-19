@@ -149,9 +149,9 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => UpdateSubUserDetailsUseCase(subUserRepo: sl()));
   sl.registerFactory(() => GetSubUserByPhoneUsecase(subUserRepo: sl()));
   sl.registerFactory(() => SubUsersBloc(
-      getSubUsersUsecase: sl(),
-      getSubUserDetailsUsecase: sl(),
-      updateSubUserDetailsUseCase: sl(),
+    getSubUsersUsecase: sl(),
+    getSubUserDetailsUsecase: sl(),
+    updateSubUserDetailsUseCase: sl(),
     getSubUserByPhoneUsecase: sl(),
   ));
 }

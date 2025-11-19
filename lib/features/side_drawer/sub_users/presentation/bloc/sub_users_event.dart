@@ -13,7 +13,7 @@ class GetSubUsersEvent extends SubUsersEvent {
   GetSubUsersEvent({required this.userId});
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [];
 }
 
 class GetSubUserDetailsEvent extends SubUsersEvent {
@@ -21,7 +21,7 @@ class GetSubUserDetailsEvent extends SubUsersEvent {
   GetSubUserDetailsEvent({required this.subUserDetailsParams});
 
   @override
-  List<Object?> get props => [subUserDetailsParams];
+  List<Object?> get props => [];
 }
 
 class UpdateControllerSelectionEvent extends SubUsersEvent {
@@ -56,7 +56,7 @@ class SubUserDetailsUpdateEvent extends SubUsersEvent {
   SubUserDetailsUpdateEvent({required this.updatedDetails});
 
   @override
-  List<Object?> get props => [updatedDetails];
+  List<Object?> get props => [];
 }
 
 class GetSubUserByPhoneEvent extends SubUsersEvent {
@@ -65,5 +65,5 @@ class GetSubUserByPhoneEvent extends SubUsersEvent {
   GetSubUserByPhoneEvent({required this.getSubUserByPhoneParams});
 
   @override
-  List<Object?> get props => [getSubUserByPhoneParams];
+  List<Object?> get props => [];
 }

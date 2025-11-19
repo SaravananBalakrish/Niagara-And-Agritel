@@ -136,9 +136,7 @@ class SubUsersBloc extends Bloc<SubUsersEvent, SubUsersState> {
         ),
             (subUserModel) {
           print("subUserModel :: $subUserModel");
-          // Ensure subUserModel is a Map<String, dynamic> for type safety
           if (subUserModel is! Map<String, dynamic>) {
-            // Handle unexpected type (e.g., emit error or log)
             emit(GetSubUserByPhoneError(
               message: 'Invalid subUserModel format',
               subUserDetails: currentState.subUserDetails,

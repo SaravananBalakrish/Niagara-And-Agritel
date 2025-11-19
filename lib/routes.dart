@@ -15,7 +15,6 @@ import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
 import 'features/dashboard/presentation/pages/controller_live_page.dart';
-import 'features/dashboard/domain/entities/controller_entity.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dashboard/presentation/bloc/dashboard_event.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';

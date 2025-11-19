@@ -40,11 +40,9 @@ class ApiUrls {
   /// Post methods
   static const String addSubUser = 'user/share/controller';
 
-  /// Delete methods
-  static const String deleteSubUserDetails = 'user/:userId/shareuser/:shareUserId';
-
   /// Put methods
   static const String updateSubUserDetails = 'user/share/controller';
+  static const String deleteSubUserDetails = 'user/:userId/shareuser/:shareUserId';
 
 
   //TODO: GROUP URLs

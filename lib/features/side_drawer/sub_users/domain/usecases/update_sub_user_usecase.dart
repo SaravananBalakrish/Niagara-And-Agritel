@@ -20,7 +20,8 @@ class UpdateSubUserDetailsParams extends Equatable {
   final SubUserDetailsEntity subUserDetailsEntity;
   final int userId;
   final bool isNewSubUser;
-  const UpdateSubUserDetailsParams({required this.subUserDetailsEntity, required this.userId, required this.isNewSubUser});
+  final bool isDelete;
+  const UpdateSubUserDetailsParams({required this.subUserDetailsEntity, required this.userId, required this.isNewSubUser, required this.isDelete});
 
   @override
   List<Object?> get props => [subUserDetailsEntity, userId, isNewSubUser];

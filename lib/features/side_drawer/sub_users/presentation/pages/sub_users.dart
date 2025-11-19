@@ -67,16 +67,6 @@ class SubUsers extends StatelessWidget {
                               "isNewSubUser": subUserEntity.sharedUserId.toString().isEmpty
                             });
                       },
-                      trailing: FilledButton.tonalIcon(
-                        onPressed: (){
-
-                        },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(Colors.red.withAlpha(200)),
-                        ),
-                        icon: Icon(Icons.delete, color: Colors.white,),
-                        label: Text('Delete', style: TextStyle(color: Colors.white),),
-                      ),
                     ),
                   );
                 },

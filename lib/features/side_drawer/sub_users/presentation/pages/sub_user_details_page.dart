@@ -265,7 +265,14 @@ class SubUserDetailsScreen extends StatelessWidget {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () =>_handleSubmit(context, formKey, phoneKey, nameController, subUserDetails),
+            onPressed: () => _handleSubmit(context, formKey, phoneKey, nameController, subUserDetails, isDelete: true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Delete'),
+          ),
+        ),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: () => _handleSubmit(context, formKey, phoneKey, nameController, subUserDetails),
             child: const Text('Submit'),
           ),
         ),
@@ -286,6 +293,7 @@ class SubUserDetailsScreen extends StatelessWidget {
       GlobalKey<CustomPhoneFieldState> phoneKey,
       TextEditingController nameController,
       SubUserDetailsEntity subUserDetails,
+      {bool isDelete = false}
       ) async{
     if (formKey.currentState!.validate()) {
       final bloc = context.read<SubUsersBloc>();
@@ -308,7 +316,8 @@ class SubUserDetailsScreen extends StatelessWidget {
               updatedDetails: UpdateSubUserDetailsParams(
                   subUserDetailsEntity: updatedDetails,
                   userId: subUserDetailsParams.userId,
-                  isNewSubUser: subUserDetailsParams.isNewSubUser
+                  isNewSubUser: subUserDetailsParams.isNewSubUser,
+                  isDelete: isDelete
               )
           )
       );
