@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart' as di;
+import '../../../../core/error/failures.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../data/datasources/auth_local_data_source.dart';
-import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/usecases/login_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';

@@ -63,3 +63,44 @@ class SubUserDetailsUpdateError extends SubUsersState {
   @override
   List<Object?> get props => [message];
 }
+
+class GetSubUserByPhoneStarted extends SubUsersState {}
+
+class GetSubUserByPhoneSuccess extends SubUsersState {
+  final dynamic userData;
+  GetSubUserByPhoneSuccess({required this.userData});
+
+  @override
+  List<Object?> get props => [userData];
+}
+
+class GetSubUserByPhoneError extends SubUsersState {
+  final String message;
+  final SubUserDetailsEntity subUserDetails;
+
+  GetSubUserByPhoneError({
+    required this.message,
+    required this.subUserDetails,
+  });
+
+  @override
+  List<Object?> get props => [message, subUserDetails];
+}
+
+class DeleteSubUserStarted extends SubUsersState {}
+
+class DeleteSubUserSuccess extends SubUsersState {
+  final String message;
+  DeleteSubUserSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class DeleteSubUserError extends SubUsersState {
+  final String message;
+  DeleteSubUserError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
@@ -220,11 +221,13 @@ class AppRouter {
                 final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
                 final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
                 final updateSubUserDetailsUsecase = di.sl<UpdateSubUserDetailsUseCase>();
+                final getSubUserByPhoneUseCase = di.sl<GetSubUserByPhoneUsecase>();
                 return BlocProvider(
                   create: (context) => SubUsersBloc(
                     getSubUsersUsecase: getSubUserUsecase,
                     getSubUserDetailsUsecase: getSubUserDetailsUsecase,
                     updateSubUserDetailsUseCase: updateSubUserDetailsUsecase,
+                    getSubUserByPhoneUsecase: getSubUserByPhoneUseCase,
                   )..add(GetSubUsersEvent(userId: authData.id)),
                   child: SubUsers(userId: authData.id),
                 );
@@ -238,17 +241,20 @@ class AppRouter {
                 final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
                 final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
                 final updateSubUserDetailsUsecase = di.sl<UpdateSubUserDetailsUseCase>();
+                final getSubUserByPhoneUseCase = di.sl<GetSubUserByPhoneUsecase>();
                 final params = state.extra is Map ? state.extra as Map : null;
                 return BlocProvider(
                   create: (context) => SubUsersBloc(
                     getSubUsersUsecase: getSubUserUsecase,
                     getSubUserDetailsUsecase: getSubUserDetailsUsecase,
                     updateSubUserDetailsUseCase: updateSubUserDetailsUsecase,
+                    getSubUserByPhoneUsecase: getSubUserByPhoneUseCase,
                   )..add(GetSubUsersEvent(userId: authData.id)),
                   child: SubUserDetailsScreen(
                     subUserDetailsParams: GetSubUserDetailsParams(
                         userId: params?['userId'],
-                        subUserCode: params?['subUserCode']
+                        subUserCode: params?['subUserCode'],
+                        isNewSubUser: params?['isNewSubUser']
                     ),
                   ),
                 );

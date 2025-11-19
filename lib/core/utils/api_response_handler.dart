@@ -53,8 +53,8 @@ Either<Failure, T> handleApiResponse<T>(
       return Right(parsed);
     } else {
       return switch (apiCode) {
-        ApiCode.unauthorized => Left(AuthFailure(code: '$code', message: message)),
-        ApiCode.forbidden => Left(AuthFailure(code: '$code', message: message)),
+        ApiCode.unauthorized => Left(AuthFailure(message)),
+        ApiCode.forbidden => Left(AuthFailure(message)),
         ApiCode.notFound => Left(NotFoundFailure(message)),
         ApiCode.badRequest => Left(ValidationFailure(message)),
         ApiCode.conflict => Left(ConflictFailure(message)),

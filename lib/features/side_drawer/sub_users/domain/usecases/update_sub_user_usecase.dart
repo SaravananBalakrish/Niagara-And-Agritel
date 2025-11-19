@@ -6,20 +6,22 @@ import '../../../../../core/error/failures.dart';
 import '../../../../../core/usecases/usecase.dart';
 import '../repositories/sub_user_repo.dart';
 
-class UpdateSubUserDetailsUseCase extends UseCase<dynamic, SubUserDetailsEntity> {
+class UpdateSubUserDetailsUseCase extends UseCase<dynamic, UpdateSubUserDetailsParams> {
   final SubUserRepo subUserRepo;
   UpdateSubUserDetailsUseCase({required this.subUserRepo});
 
   @override
-  Future<Either<Failure, dynamic>> call(SubUserDetailsEntity subUserDetailsEntity) {
-    return subUserRepo.updateSubUserDetails(subUserDetailsEntity);
+  Future<Either<Failure, dynamic>> call(UpdateSubUserDetailsParams updateSubUserDetailsParams) {
+    return subUserRepo.updateSubUserDetails(updateSubUserDetailsParams);
   }
 }
 
 class UpdateSubUserDetailsParams extends Equatable {
   final SubUserDetailsEntity subUserDetailsEntity;
-  const UpdateSubUserDetailsParams({required this.subUserDetailsEntity});
+  final int userId;
+  final bool isNewSubUser;
+  const UpdateSubUserDetailsParams({required this.subUserDetailsEntity, required this.userId, required this.isNewSubUser});
 
   @override
-  List<Object?> get props => [subUserDetailsEntity];
+  List<Object?> get props => [subUserDetailsEntity, userId, isNewSubUser];
 }

@@ -10,8 +10,8 @@ class LoginWithPassword extends UseCase<RegisterDetailsEntity, LoginParams> {
   LoginWithPassword(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(LoginParams params) {
-    return repository.loginWithPassword(params.phone, params.password);
+  Future<Either<Failure, RegisterDetailsEntity>> call(LoginParams updateSubUserDetailsParams) {
+    return repository.loginWithPassword(updateSubUserDetailsParams.phone, updateSubUserDetailsParams.password);
   }
 }
 
@@ -29,8 +29,8 @@ class SendOtp extends UseCase<String, PhoneParams> {
   SendOtp(this.repository);
 
   @override
-  Future<Either<Failure, String>> call(PhoneParams params) {
-    final fullPhone = params.phone.startsWith('+') ? params.phone : params.countryCode + params.phone;
+  Future<Either<Failure, String>> call(PhoneParams updateSubUserDetailsParams) {
+    final fullPhone = updateSubUserDetailsParams.phone.startsWith('+') ? updateSubUserDetailsParams.phone : updateSubUserDetailsParams.countryCode + updateSubUserDetailsParams.phone;
     return repository.sendOtp(fullPhone);
   }
 }
@@ -49,8 +49,8 @@ class VerifyOtp extends UseCase<RegisterDetailsEntity, VerifyOtpParams> {
   VerifyOtp(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(VerifyOtpParams params) {
-    return repository.verifyOtp(params.verificationId, params.otp, params.countryCode);
+  Future<Either<Failure, RegisterDetailsEntity>> call(VerifyOtpParams updateSubUserDetailsParams) {
+    return repository.verifyOtp(updateSubUserDetailsParams.verificationId, updateSubUserDetailsParams.otp, updateSubUserDetailsParams.countryCode);
   }
 }
 
@@ -70,7 +70,7 @@ class Logout extends UseCase<void, NoParams> {
   Logout(this.repository);
 
   @override
-  Future<Either<Failure, void>> call(NoParams params) {
+  Future<Either<Failure, void>> call(NoParams updateSubUserDetailsParams) {
     return repository.logout();
   }
 }
@@ -81,8 +81,8 @@ class CheckPhoneNumber extends UseCase<bool, PhoneParams> {
   CheckPhoneNumber(this.repository);
 
   @override
-  Future<Either<Failure, bool>> call(PhoneParams params) {
-    return repository.checkPhoneNumber(params.phone, params.countryCode);
+  Future<Either<Failure, bool>> call(PhoneParams updateSubUserDetailsParams) {
+    return repository.checkPhoneNumber(updateSubUserDetailsParams.phone, updateSubUserDetailsParams.countryCode);
   }
 }
 
@@ -91,8 +91,8 @@ class SignUp extends UseCase<RegisterDetailsEntity, SignUpParams> {
   SignUp(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(SignUpParams params) {
-    return repository.signUp(params);
+  Future<Either<Failure, RegisterDetailsEntity>> call(SignUpParams updateSubUserDetailsParams) {
+    return repository.signUp(updateSubUserDetailsParams);
   }
 }
 
@@ -138,8 +138,8 @@ class UpdateProfile extends UseCase<RegisterDetailsEntity, UpdateProfileParams> 
   UpdateProfile(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(UpdateProfileParams params) {
-    return repository.updateProfile(params);
+  Future<Either<Failure, RegisterDetailsEntity>> call(UpdateProfileParams updateSubUserDetailsParams) {
+    return repository.updateProfile(updateSubUserDetailsParams);
   }
 }
 

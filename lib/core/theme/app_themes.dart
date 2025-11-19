@@ -94,21 +94,27 @@ class AppThemes {
     inputDecorationTheme: InputDecorationTheme(
       border: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
+        borderRadius: BorderRadius.circular(12),
       ),
       enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.white),
+        borderRadius: BorderRadius.circular(12),
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.white, width: 2.0),
+        borderRadius: BorderRadius.circular(12),
       ),
       errorBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.redAccent),
+        borderRadius: BorderRadius.circular(12),
       ),
       focusedErrorBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.redAccent, width: 2.0),
+        borderRadius: BorderRadius.circular(12),
       ),
       disabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+        borderRadius: BorderRadius.circular(12),
       ),
       hintStyle: TextStyle(color: Colors.white54),
       labelStyle: TextStyle(color: Colors.white54),

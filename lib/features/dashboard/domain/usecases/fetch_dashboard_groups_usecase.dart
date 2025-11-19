@@ -10,8 +10,8 @@ class FetchDashboardGroups extends UseCase<dynamic, DashboardGroupsParams> {
   FetchDashboardGroups(this.repository);
 
   @override
-  Future<Either<Failure, List<GroupDetailsEntity>>> call(DashboardGroupsParams params) {
-    return repository.fetchDashboardGroups(params.userId);
+  Future<Either<Failure, List<GroupDetailsEntity>>> call(DashboardGroupsParams updateSubUserDetailsParams) {
+    return repository.fetchDashboardGroups(updateSubUserDetailsParams.userId);
   }
 }
 

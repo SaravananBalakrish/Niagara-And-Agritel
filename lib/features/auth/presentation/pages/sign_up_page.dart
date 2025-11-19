@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:niagara_smart_drip_irrigation/features/auth/domain/entities/user_entity.dart';
 
+import '../../../../core/widgets/glassy_wrapper.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -120,262 +121,264 @@ class _UserProfileFormState extends State<UserProfileForm> {
         )
             : null,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Personal Information',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
-                    ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _mobileController,
-                      decoration: InputDecoration(
-                        labelText: 'Mobile Number *',
-                        prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
-                        prefixText: '+91 ',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      body: GlassyWrapper(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Personal Information',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
                       ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _userNameController,
-                      decoration: InputDecoration(
-                        labelText: 'User Name *',
-                        prefixIcon: Icon(Icons.person, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _selectedOption,
-                      decoration: InputDecoration(
-                        labelText: 'Select One',
-                        prefixIcon: Icon(Icons.list, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      items: _optionValues.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (value) => setState(() => _selectedOption = value),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Address',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Theme.of(context).primaryColor),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _address1Controller,
-                      decoration: InputDecoration(
-                        labelText: 'Address 1',
-                        prefixIcon: Icon(Icons.location_on, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _address2Controller,
-                      decoration: InputDecoration(
-                        labelText: 'Address 2',
-                        prefixIcon: Icon(Icons.location_on, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _townController,
-                            decoration: InputDecoration(
-                              labelText: 'Town',
-                              prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: _mobileController,
+                        decoration: InputDecoration(
+                          labelText: 'Mobile Number *',
+                          prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
+                          prefixText: '+91 ',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextField(
-                            controller: _villageController,
-                            decoration: InputDecoration(
-                              labelText: 'Village',
-                              prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedCountry,
-                            decoration: InputDecoration(
-                              labelText: 'Select Country',
-                              prefixIcon: Icon(Icons.public, color: Theme.of(context).primaryColor),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            items: _countryValues.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (value) => setState(() => _selectedCountry = value),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedState,
-                            decoration: InputDecoration(
-                              labelText: 'Select State',
-                              prefixIcon: Icon(Icons.map, color: Theme.of(context).primaryColor),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            items: _stateValues.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            onChanged: (value) => setState(() => _selectedState = value),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _cityController,
-                      decoration: InputDecoration(
-                        labelText: 'City',
-                        prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        keyboardType: TextInputType.phone,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _postalCodeController,
-                      decoration: InputDecoration(
-                        labelText: 'Postal Code',
-                        prefixIcon: Icon(Icons.mail, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _altPhoneController,
-                      decoration: InputDecoration(
-                        labelText: 'Alternate Phone Number',
-                        prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _emailController,
-                      decoration: InputDecoration(
-                        labelText: 'Email Address',
-                        prefixIcon: Icon(Icons.email, color: Theme.of(context).primaryColor),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    if (!widget.isEdit) ...[
                       const SizedBox(height: 16),
                       TextField(
-                        controller: _passwordController,
+                        controller: _userNameController,
                         decoration: InputDecoration(
-                          labelText: 'Password *',
-                          prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
+                          labelText: 'User Name *',
+                          prefixIcon: Icon(Icons.person, color: Theme.of(context).primaryColor),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.visibility_off),
-                            onPressed: () {
-                              // Implement toggle obscureText here if needed
-                            },
-                          ),
                         ),
-                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        value: _selectedOption,
+                        decoration: InputDecoration(
+                          labelText: 'Select One',
+                          prefixIcon: Icon(Icons.list, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        items: _optionValues.map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (value) => setState(() => _selectedOption = value),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Address',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Theme.of(context).primaryColor),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: _address1Controller,
+                        decoration: InputDecoration(
+                          labelText: 'Address 1',
+                          prefixIcon: Icon(Icons.location_on, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _address2Controller,
+                        decoration: InputDecoration(
+                          labelText: 'Address 2',
+                          prefixIcon: Icon(Icons.location_on, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _townController,
+                              decoration: InputDecoration(
+                                labelText: 'Town',
+                                prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextField(
+                              controller: _villageController,
+                              decoration: InputDecoration(
+                                labelText: 'Village',
+                                prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedCountry,
+                              decoration: InputDecoration(
+                                labelText: 'Select Country',
+                                prefixIcon: Icon(Icons.public, color: Theme.of(context).primaryColor),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              items: _countryValues.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (value) => setState(() => _selectedCountry = value),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedState,
+                              decoration: InputDecoration(
+                                labelText: 'Select State',
+                                prefixIcon: Icon(Icons.map, color: Theme.of(context).primaryColor),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              items: _stateValues.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (value) => setState(() => _selectedState = value),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _cityController,
+                        decoration: InputDecoration(
+                          labelText: 'City',
+                          prefixIcon: Icon(Icons.location_city, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _postalCodeController,
+                        decoration: InputDecoration(
+                          labelText: 'Postal Code',
+                          prefixIcon: Icon(Icons.mail, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _altPhoneController,
+                        decoration: InputDecoration(
+                          labelText: 'Alternate Phone Number',
+                          prefixIcon: Icon(Icons.phone, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email Address',
+                          prefixIcon: Icon(Icons.email, color: Theme.of(context).primaryColor),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      if (!widget.isEdit) ...[
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password *',
+                            prefixIcon: Icon(Icons.lock, color: Theme.of(context).primaryColor),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.visibility_off),
+                              onPressed: () {
+                                // Implement toggle obscureText here if needed
+                              },
+                            ),
+                          ),
+                          obscureText: true,
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_validateForm()) {
+                            if(widget.isEdit) {
+                              context.read<AuthBloc>().add(UpdateProfileEvent(UpdateProfileParams(
+                                id: widget.initialData!.id, // Assuming UserEntity has id
+                                name: _userNameController.text,
+                                addressOne: _address1Controller.text,
+                                mobile: _mobileController.text,
+                                userType: widget.initialData!.userType,
+                                addressTwo: _address2Controller.text,
+                                town: _townController.text,
+                                village: _villageController.text,
+                                country: _selectedCountry,
+                                state: _selectedState,
+                                city: _cityController.text,
+                                postalCode: _postalCodeController.text,
+                                altPhone: _altPhoneController.text,
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              )));
+                            } else {
+                              context.read<AuthBloc>().add(SignUpEvent(SignUpParams(
+                                name: _userNameController.text,
+                                addressOne: _address1Controller.text,
+                                mobile: _mobileController.text,
+                                userType: widget.initialData!.userType,
+                                addressTwo: _address2Controller.text,
+                                town: _townController.text,
+                                village: _villageController.text,
+                                country: _selectedCountry,
+                                state: _selectedState,
+                                city: _cityController.text,
+                                postalCode: _postalCodeController.text,
+                                altPhone: _altPhoneController.text,
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              )));
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: Text(
+                          widget.isEdit ? 'Update Profile' : 'Sign Up',
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ],
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_validateForm()) {
-                          if(widget.isEdit) {
-                            context.read<AuthBloc>().add(UpdateProfileEvent(UpdateProfileParams(
-                              id: widget.initialData!.id, // Assuming UserEntity has id
-                              name: _userNameController.text,
-                              addressOne: _address1Controller.text,
-                              mobile: _mobileController.text,
-                              userType: widget.initialData!.userType,
-                              addressTwo: _address2Controller.text,
-                              town: _townController.text,
-                              village: _villageController.text,
-                              country: _selectedCountry,
-                              state: _selectedState,
-                              city: _cityController.text,
-                              postalCode: _postalCodeController.text,
-                              altPhone: _altPhoneController.text,
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                            )));
-                          } else {
-                            context.read<AuthBloc>().add(SignUpEvent(SignUpParams(
-                              name: _userNameController.text,
-                              addressOne: _address1Controller.text,
-                              mobile: _mobileController.text,
-                              userType: widget.initialData!.userType,
-                              addressTwo: _address2Controller.text,
-                              town: _townController.text,
-                              village: _villageController.text,
-                              country: _selectedCountry,
-                              state: _selectedState,
-                              city: _cityController.text,
-                              postalCode: _postalCodeController.text,
-                              altPhone: _altPhoneController.text,
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                            )));
-                          }
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: Text(
-                        widget.isEdit ? 'Update Profile' : 'Sign Up',
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

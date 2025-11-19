@@ -59,9 +59,24 @@ class SubUsers extends StatelessWidget {
                       title: Text(subUserEntity.userName, style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(subUserEntity.mobileNumber),
                       onTap: () {
-                        context.push(RouteConstants.subUserDetails, extra: {"userId": userId, "subUserCode": subUserEntity.subUserCode});
+                        context.push(
+                            RouteConstants.subUserDetails,
+                            extra: {
+                              "userId": userId,
+                              "subUserCode": subUserEntity.subUserCode,
+                              "isNewSubUser": subUserEntity.sharedUserId.toString().isEmpty
+                            });
                       },
-                      trailing: IconButton(onPressed: (){}, icon: Icon(Icons.delete, color: Colors.red,)),
+                      trailing: FilledButton.tonalIcon(
+                        onPressed: (){
+
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(Colors.red.withAlpha(200)),
+                        ),
+                        icon: Icon(Icons.delete, color: Colors.white,),
+                        label: Text('Delete', style: TextStyle(color: Colors.white),),
+                      ),
                     ),
                   );
                 },

@@ -4,7 +4,8 @@ import 'package:equatable/equatable.dart';
 /// They are higher-level, safe to expose to UI or usecases.
 abstract class Failure extends Equatable {
   final String message;
-  const Failure(this.message);
+  final String? code;
+  const Failure(this.message, {this.code});
 
   @override
   List<Object?> get props => [message];
@@ -49,4 +50,8 @@ class ValidationFailure extends Failure {
 
 class ConflictFailure extends Failure {
   const ConflictFailure(super.message);
+}
+
+class AuthFailure extends Failure {
+  const AuthFailure(super.message);
 }

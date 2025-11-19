@@ -1,6 +1,8 @@
-import 'package:bloc/bloc.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/entities/sub_user_details_entity.dart';
+import '../../domain/usecases/get_sub_user_by_phone_usecase.dart';
+import '../../domain/usecases/get_sub_user_details_usecase.dart';
 import '../../domain/usecases/get_sub_users_usecase.dart';
 import '../../domain/usecases/update_sub_user_usecase.dart';
 import 'sub_users_event.dart';
@@ -10,20 +12,22 @@ class SubUsersBloc extends Bloc<SubUsersEvent, SubUsersState> {
   final GetSubUsersUsecase getSubUsersUsecase;
   final GetSubUserDetailsUsecase getSubUserDetailsUsecase;
   final UpdateSubUserDetailsUseCase updateSubUserDetailsUseCase;
+  final GetSubUserByPhoneUsecase getSubUserByPhoneUsecase;
   SubUsersBloc({
     required this.getSubUsersUsecase,
     required this.getSubUserDetailsUsecase,
     required this.updateSubUserDetailsUseCase,
+    required this.getSubUserByPhoneUsecase,
   }) : super(SubUserInitial()) {
     on<GetSubUsersEvent>(_onGetSubUsers);
     on<GetSubUserDetailsEvent>(_onGetSubUserDetails);
     on<UpdateControllerSelectionEvent>(_onUpdateSelection);
     on<UpdateControllerDndEvent>(_onUpdateDnd);
     on<SubUserDetailsUpdateEvent>(_onUpdateDetails);
+    on<GetSubUserByPhoneEvent>(_onGetUserByPhone);
   }
 
   Future<void> _onGetSubUsers(GetSubUsersEvent event, Emitter<SubUsersState> emit) async {
-    print('Event received for userId: ${event.userId}');
     emit(SubUserLoading());
     final result = await getSubUsersUsecase(GetSubUsersParams(userId: event.userId));
     result.fold(
@@ -39,7 +43,8 @@ class SubUsersBloc extends Bloc<SubUsersEvent, SubUsersState> {
     final result = await getSubUserDetailsUsecase(
         GetSubUserDetailsParams(
             userId: event.subUserDetailsParams.userId,
-            subUserCode: event.subUserDetailsParams.subUserCode
+            subUserCode: event.subUserDetailsParams.subUserCode,
+            isNewSubUser: event.subUserDetailsParams.isNewSubUser
         )
     );
     result.fold(
@@ -111,5 +116,52 @@ class SubUsersBloc extends Bloc<SubUsersEvent, SubUsersState> {
           (failure) => emit(SubUserDetailsUpdateError(message: failure.message)),
           (message) => emit(SubUserDetailsUpdateSuccess(message: message)),
     );
+  }
+
+  Future<void> _onGetUserByPhone(
+      GetSubUserByPhoneEvent event,
+      Emitter<SubUsersState> emit,
+      ) async {
+    if (state is SubUserDetailsLoaded) {
+      final currentState = state as SubUserDetailsLoaded;
+      final result = await getSubUserByPhoneUsecase(
+        GetSubUserByPhoneParams(phoneNumber: event.getSubUserByPhoneParams.phoneNumber),
+      );
+      result.fold(
+            (failure) => emit(
+          GetSubUserByPhoneError(
+            message: failure.message,
+            subUserDetails: currentState.subUserDetails,
+          ),
+        ),
+            (subUserModel) {
+          print("subUserModel :: $subUserModel");
+          // Ensure subUserModel is a Map<String, dynamic> for type safety
+          if (subUserModel is! Map<String, dynamic>) {
+            // Handle unexpected type (e.g., emit error or log)
+            emit(GetSubUserByPhoneError(
+              message: 'Invalid subUserModel format',
+              subUserDetails: currentState.subUserDetails,
+            ));
+            return;
+          }
+
+          final userName = subUserModel['userName'];
+          final subUserId = subUserModel['subUserId'];
+          final mobileNumber = subUserModel['mobileNumber'];
+
+          final updatedSubUserDetail = currentState.subUserDetails.subUserDetail.copyWith(
+            userName: userName,
+            subuserId: subUserId,
+            mobileNumber: mobileNumber
+          );
+          final updatedDetails = SubUserDetailsEntity(
+            subUserDetail: updatedSubUserDetail,
+            controllerList: currentState.subUserDetails.controllerList,
+          );
+          emit(SubUserDetailsLoaded(subUserDetails: updatedDetails));
+        },
+      );
+    }
   }
 }

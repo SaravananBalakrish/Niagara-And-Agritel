@@ -10,6 +10,7 @@ class CustomPhoneField extends StatefulWidget {
   final InputDecoration? decoration;
   final Color? labelColor;
   final Color? textColor;
+  final Widget? suffix;
 
   const CustomPhoneField({
     super.key,
@@ -19,6 +20,7 @@ class CustomPhoneField extends StatefulWidget {
     this.decoration,
     this.labelColor,
     this.textColor,
+    this.suffix,
   });
 
   @override
@@ -98,7 +100,7 @@ class CustomPhoneFieldState extends State<CustomPhoneField> {
   }
 
   String get phoneNumber {
-    return _countryCode + _effectiveController.text;
+    return _effectiveController.text;
   }
 
   String get countryCode {
@@ -123,62 +125,124 @@ class CustomPhoneFieldState extends State<CustomPhoneField> {
     return null;
   }
 
+  Widget? _buildMergedSuffix() {
+    final clearWidget = _effectiveController.text.isNotEmpty
+        ? InkWell(
+      onTap: () {
+        _effectiveController.clear();
+        setState(() {});
+      },
+      child: const Icon(Icons.clear, color: Colors.red),
+    )
+        : const SizedBox.shrink();
+
+    Widget? baseSuffix;
+    if (widget.decoration?.suffix != null) {
+      baseSuffix = widget.decoration!.suffix;
+    } else if (widget.suffix != null) {
+      baseSuffix = widget.suffix;
+    }
+
+    if (baseSuffix == null) {
+      return clearWidget;
+    }
+
+    return IntrinsicWidth(
+      child: Row(
+        children: [
+          clearWidget,
+          const SizedBox(width: 8),
+          baseSuffix,
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final defaultLabelColor = widget.labelColor ?? Colors.white54;
     final defaultTextColor = widget.textColor ?? _getDefaultColor();
 
+    // Get effective decoration (default or custom)
+    InputDecoration effectiveDecoration = widget.decoration ??
+        InputDecoration(
+          labelText: 'Phone Number',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(0),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white),
+            borderRadius: BorderRadius.circular(0),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white, width: 2.0),
+            borderRadius: BorderRadius.circular(0),
+          ),
+          errorBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.redAccent),
+            borderRadius: BorderRadius.circular(0),
+          ),
+          focusedErrorBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.redAccent, width: 2.0),
+            borderRadius: BorderRadius.circular(0),
+          ),
+          disabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(0),
+          ),
+          prefixStyle: const TextStyle(color: Colors.black),
+          filled: true,
+          fillColor: Colors.white.withOpacity(0.9),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 12,
+          ),
+          errorStyle: const TextStyle(color: Colors.redAccent),
+        );
+
+    // Apply merged suffix to effective decoration
+    effectiveDecoration = effectiveDecoration.copyWith(
+      suffix: _buildMergedSuffix(),
+      labelStyle: effectiveDecoration.labelStyle?.copyWith(color: defaultLabelColor) ??
+          TextStyle(color: defaultLabelColor),
+    );
+
     return Row(
       children: [
         _buildCountrySelector(),
-        SizedBox(width: 2,),
+        const SizedBox(width: 2),
         Expanded(
           child: TextFormField(
             key: _fieldKey,
             controller: _effectiveController,
             keyboardType: TextInputType.number,
             style: TextStyle(color: defaultTextColor),
-            decoration: (widget.decoration ??
-                InputDecoration(
-                  labelText: 'Phone Number',
-                  labelStyle: TextStyle(color: defaultLabelColor),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixStyle: const TextStyle(color: Colors.black),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.9),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 12,
-                  ),
-                  suffix: InkWell(
-                    onTap: (){
-                      setState(() {
-                        _effectiveController.clear();
-                      });
-                    },
-                    child: Icon(
-                        Icons.clear,
-                        color: Colors.red
-                    ),
-                  ),
-                  errorStyle: const TextStyle(color: Colors.redAccent),
-                ))
+            decoration: effectiveDecoration
                 .copyWith(
-              labelStyle: (widget.decoration?.labelStyle ??
-                  TextStyle(color: defaultLabelColor)),
-              suffix: InkWell(
-                onTap: (){
-                  setState(() {
-                    _effectiveController.clear();
-                  });
-                },
-                child: Icon(
-                    Icons.clear,
-                    color: Colors.red
-                ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(0),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white, width: 2.0),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              errorBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              focusedErrorBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent, width: 2.0),
+                borderRadius: BorderRadius.circular(0),
+              ),
+              disabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.5)),
+                borderRadius: BorderRadius.circular(0),
               ),
             ),
             onChanged: (value) {

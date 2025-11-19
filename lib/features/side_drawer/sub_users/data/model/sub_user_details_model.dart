@@ -18,7 +18,7 @@ class SubUserControllerModel extends SubUserControllerEntity {
         productId: json['productId'],
         deviceName: json['deviceName'],
         simNumber: json['simNumber'],
-        dndStatus: json['dndStatus'],
+        dndStatus: json['dndStatus'] ?? '',
         shareFlag: json['shareFlag'],
         deviceId: json['deviceId']
     );

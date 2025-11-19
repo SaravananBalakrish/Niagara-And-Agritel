@@ -10,8 +10,8 @@ class FetchControllers extends UseCase<List<ControllerEntity>, UserGroupParams> 
   FetchControllers(this.repository);
 
   @override
-  Future<Either<Failure, List<ControllerEntity>>> call(UserGroupParams params) {
-    return repository.fetchControllers(params.userId, params.groupId);
+  Future<Either<Failure, List<ControllerEntity>>> call(UserGroupParams updateSubUserDetailsParams) {
+    return repository.fetchControllers(updateSubUserDetailsParams.userId, updateSubUserDetailsParams.groupId);
   }
 }
 

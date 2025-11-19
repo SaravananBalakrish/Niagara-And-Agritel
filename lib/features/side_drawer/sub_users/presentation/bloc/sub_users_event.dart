@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
-
-import '../../domain/entities/sub_user_details_entity.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 
 abstract class SubUsersEvent extends Equatable {
   @override
@@ -51,10 +51,19 @@ class UpdateControllerDndEvent extends SubUsersEvent {
 }
 
 class SubUserDetailsUpdateEvent extends SubUsersEvent {
-  final SubUserDetailsEntity updatedDetails;
+  final UpdateSubUserDetailsParams updatedDetails;
 
   SubUserDetailsUpdateEvent({required this.updatedDetails});
 
   @override
   List<Object?> get props => [updatedDetails];
+}
+
+class GetSubUserByPhoneEvent extends SubUsersEvent {
+  final GetSubUserByPhoneParams getSubUserByPhoneParams;
+
+  GetSubUserByPhoneEvent({required this.getSubUserByPhoneParams});
+
+  @override
+  List<Object?> get props => [getSubUserByPhoneParams];
 }

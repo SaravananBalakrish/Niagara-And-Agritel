@@ -5,7 +5,7 @@ import '../error/failures.dart';
 /// [Type] = return type on success.
 /// [Params] = input type (use `NoParams` if none).
 abstract class UseCase<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
+  Future<Either<Failure, Type>> call(Params updateSubUserDetailsParams);
 }
 
 /// Base class for real-time / continuous data use cases (MQTT, WebSocket, Streams).

@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
-import '../../../../core/widgets/custom_phone_field.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -223,11 +222,39 @@ class _LoginPageState extends State<LoginPage> {
                                     key: _formKey,
                                     child: Column(
                                       children: [
-                                        CustomPhoneField(
-                                          key: Key('Phone'),
-                                          labelColor: Colors.black45,
-                                          textColor: Colors.black,
+                                        IntlPhoneField(
                                           controller: phoneController,
+                                          initialCountryCode: 'IN',
+                                          style: TextStyle(color: Colors.black),
+                                          dropdownTextStyle: TextStyle(color: Colors.black),
+                                          decoration: InputDecoration(
+                                            labelText: 'Phone Number',
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.white.withOpacity(0.9),
+                                            contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
+                                              vertical: 5,
+                                            ),
+                                            labelStyle: TextStyle(color: Colors.black45),
+                                            prefixIcon: const Icon(Icons.phone, color: Colors.blue),
+                                            errorStyle: const TextStyle(color: Colors.redAccent),
+                                          ),
+                                          onCountryChanged: (country) {
+                                            setState(() {
+                                              countryCode = '+${country.dialCode}';
+                                              errorMessage = null;
+                                            });
+                                          },
+                                          validator: (value) {
+                                            if (value == null || value.number.isEmpty) {
+                                              return 'Please enter a valid phone number';
+                                            }
+                                            return null;
+                                          },
                                         ),
                                         if (!useOtpLogin) ...[
                                           const SizedBox(height: 16),
@@ -236,16 +263,16 @@ class _LoginPageState extends State<LoginPage> {
                                             style: TextStyle(color: Colors.black),
                                             decoration: InputDecoration(
                                               labelText: 'Password',
-                                              labelStyle: TextStyle(color: Colors.black),
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(12),
                                                 borderSide: BorderSide.none,
                                               ),
+                                              labelStyle: TextStyle(color: Colors.black45),
                                               filled: true,
                                               fillColor: Colors.white.withOpacity(0.9),
                                               contentPadding: const EdgeInsets.symmetric(
                                                 horizontal: 16,
-                                                vertical: 14,
+                                                vertical: 5,
                                               ),
                                               prefixIcon: const Icon(Icons.lock, color: Colors.blue),
                                               errorStyle: const TextStyle(color: Colors.redAccent),

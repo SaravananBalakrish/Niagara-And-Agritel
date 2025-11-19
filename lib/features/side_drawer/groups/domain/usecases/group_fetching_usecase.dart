@@ -12,8 +12,8 @@ class GroupFetchingUsecase extends UseCase<dynamic, GroupFetchParams> {
   GroupFetchingUsecase(this.fetchGroupRepository);
 
   @override
-  Future<Either<Failure, dynamic>> call(GroupFetchParams params) {
-    return fetchGroupRepository.fetchGroupEntity(params.userId);
+  Future<Either<Failure, dynamic>> call(GroupFetchParams updateSubUserDetailsParams) {
+    return fetchGroupRepository.fetchGroupEntity(updateSubUserDetailsParams.userId);
   }
 }
 

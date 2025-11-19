@@ -10,8 +10,8 @@ class DeleteGroupUsecase extends UseCase<dynamic, DeleteGroupParams> {
   DeleteGroupUsecase(this.fetchGroupRepository);
 
   @override
-  Future<Either<Failure, dynamic>> call(DeleteGroupParams params) {
-    return fetchGroupRepository.deleteGroup(params.userId, params.groupId);
+  Future<Either<Failure, dynamic>> call(DeleteGroupParams updateSubUserDetailsParams) {
+    return fetchGroupRepository.deleteGroup(updateSubUserDetailsParams.userId, updateSubUserDetailsParams.groupId);
   }
 }
 

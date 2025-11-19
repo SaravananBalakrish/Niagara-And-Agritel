@@ -64,6 +64,8 @@ class ApiClient {
       };
 
       print("Request Method: $method | Endpoint: $endpoint");
+      // print("Request Body: $body");
+      // print("Encoded Body: ${jsonEncode(body)}");
 
       // Make the initial request
       final requestUri = Uri.parse('$baseUrl$endpoint');
@@ -104,10 +106,13 @@ class ApiClient {
     if (statusCode >= 200 && statusCode < 300) {
       return responseBody != null ? jsonDecode(responseBody) : null;
     } else if (statusCode == 401) {
-      // Common token refresh and retry logic
       return await _attemptTokenRefreshAndRetry(method, endpoint, headers, body);
     } else if (statusCode == 500) {
       throw ServerException(message: responseBody ?? "Internal Server Error", statusCode: 500);
+    } else if (statusCode == 404) {
+      throw NotFoundException(message: responseBody ?? "Resource not found", code: 404);
+    } else if (statusCode >= 400 && statusCode < 500) {
+      throw ValidationException(message: responseBody ?? "Invalid request", code: statusCode);
     } else {
       throw UnexpectedException("Error $statusCode: $responseBody");
     }

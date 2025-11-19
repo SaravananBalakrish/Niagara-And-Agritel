@@ -87,6 +87,7 @@ class ApiUrls {
 
   //TODO: CONTROLLER URLs
   /// Get methods
+  static const String getControllerList = 'user/:userId/controller/list';
   static const String getViewControllerCustomerDetails = 'user/:userId/subuser/:subuserId/controller/:userDeviceId/view';
 
   /// Delete Methods

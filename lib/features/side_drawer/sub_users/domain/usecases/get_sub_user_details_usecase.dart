@@ -10,16 +10,17 @@ class GetSubUserDetailsUsecase extends UseCase<dynamic, GetSubUserDetailsParams>
   GetSubUserDetailsUsecase({required this.subUserRepo});
 
   @override
-  Future<Either<Failure, dynamic>> call(GetSubUserDetailsParams params) {
-    return subUserRepo.getSubUserDetails(params);
+  Future<Either<Failure, dynamic>> call(GetSubUserDetailsParams updateSubUserDetailsParams) {
+    return subUserRepo.getSubUserDetails(updateSubUserDetailsParams);
   }
 }
 
 class GetSubUserDetailsParams extends Equatable {
   final int userId;
   final String subUserCode;
-  const GetSubUserDetailsParams({required this.userId, required this.subUserCode});
+  final bool isNewSubUser;
+  const GetSubUserDetailsParams({required this.userId, required this.subUserCode, required this.isNewSubUser});
 
   @override
-  List<Object?> get props => [userId, subUserCode];
+  List<Object?> get props => [];
 }
