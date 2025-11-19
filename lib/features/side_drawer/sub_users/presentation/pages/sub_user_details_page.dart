@@ -24,39 +24,36 @@ class SubUserDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => di.sl<SubUsersBloc>()
-        ..add(GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams)),
-      child: BlocConsumer<SubUsersBloc, SubUsersState>(
-        listener: (context, state) {
-          if (state is SubUserDetailsUpdateStarted) {
-            // showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
-          } else if (state is SubUserDetailsUpdateSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
-            context.read<SubUsersBloc>().add(
-              GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams),
-            );
-          } else if (state is SubUserDetailsUpdateError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-            );
-          }
-          if (state is GetSubUserByPhoneError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          return _buildBody(context, state);
-        },
-      ),
+    context.read<SubUsersBloc>().add(
+      GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams),
     );
+    return BlocConsumer<SubUsersBloc, SubUsersState>(
+      listener: _buildListener(context),  // extract for clarity
+      builder: (context, state) => _buildBody(context, state),
+    );
+  }
+
+  void Function(BuildContext, SubUsersState) _buildListener(BuildContext context) {
+    return (context, state) {
+      if (state is SubUserDetailsUpdateSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message)),
+        );
+
+        // THIS IS THE SAME BLOC as in SubUsers list → will refresh the list!
+        context.read<SubUsersBloc>().add(
+          GetSubUsersEvent(userId: subUserDetailsParams.userId),
+        );
+
+        Future.delayed(const Duration(milliseconds: 800), () {
+          if (context.mounted) context.pop();
+        });
+      } else if (state is SubUserDetailsUpdateError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+        );
+      }
+    };
   }
 
   Widget _buildBody(BuildContext context, SubUsersState state) {

@@ -236,19 +236,10 @@ class AppRouter {
               name: 'subUserDetails',
               path: RouteConstants.subUserDetails,
               builder: (context, state) {
-                final authData = _getAuthData();
-                final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
-                final getSubUserDetailsUsecase = di.sl<GetSubUserDetailsUsecase>();
-                final updateSubUserDetailsUsecase = di.sl<UpdateSubUserDetailsUseCase>();
-                final getSubUserByPhoneUseCase = di.sl<GetSubUserByPhoneUsecase>();
                 final params = state.extra is Map ? state.extra as Map : null;
-                return BlocProvider(
-                  create: (context) => SubUsersBloc(
-                    getSubUsersUsecase: getSubUserUsecase,
-                    getSubUserDetailsUsecase: getSubUserDetailsUsecase,
-                    updateSubUserDetailsUseCase: updateSubUserDetailsUsecase,
-                    getSubUserByPhoneUsecase: getSubUserByPhoneUseCase,
-                  )..add(GetSubUsersEvent(userId: authData.id)),
+                final SubUsersBloc existingBloc = params?['existingBloc'] as SubUsersBloc;
+                return BlocProvider.value(
+                  value: existingBloc,
                   child: SubUserDetailsScreen(
                     subUserDetailsParams: GetSubUserDetailsParams(
                         userId: params?['userId'],

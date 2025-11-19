@@ -158,7 +158,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
     try {
       final endpoint = ApiUrls.getSubUSer.replaceAll(':mobileno', geSubUserByPhoneParams.phoneNumber);
       final response = await safeApiCall(() => apiClient.get(endpoint));
-      logger.d('Response for phone lookup: $response');  // Optional
+      logger.d('Response for phone lookup: $response');
       return response['data'];
     } on FormatException catch (e) {
       logger.e('JSON parse error in getSubUserByPhone: $e');
