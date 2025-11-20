@@ -280,8 +280,6 @@ class AppRouter {
 
   Widget _buildWithAuthBloc(Widget child) => BlocProvider.value(value: authBloc, child: child);
 
-
-
   GoRoute _authRoute({
     required String name,
     required String path,
