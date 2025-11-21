@@ -81,7 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, RegisterDetailsEntity>> signUp(SignUpParams params) async {
     try {
       final authData = await remote.signUp(params);
-      await local.cacheAuthData(authData); // Cache after successful sign-up
+      await local.cacheAuthData(authData);
       return Right(authData);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message));

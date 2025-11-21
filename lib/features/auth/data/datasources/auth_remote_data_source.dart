@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 // For platform-specific handling if needed
 import 'package:get_it/get_it.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/error/exceptions.dart';
@@ -266,26 +268,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final deviceInfo = await _getDeviceInfo();
 
       final body = {
+        'mobileCountryCode': '91',
         'mobileNumber': params.mobile,
-        'name': params.name,
+        'userName': params.name,
         'userType': params.userType ?? '',
+        "language":1,
         'addressOne': params.addressOne ?? '',
         'addressTwo': params.addressTwo ?? '',
         'town': params.town ?? '',
         'village': params.village ?? '',
-        'country': params.country ?? '',
-        'state': params.state ?? '',
+        'country': 'IND',
+        'state': 'TN',
         'city': params.city ?? '',
         'postalCode': params.postalCode ?? '',
-        'altPhone': params.altPhone ?? '',
+        'altPhoneNum': [
+          {'mobileNumber': params.altPhone}
+        ],
         'email': params.email ?? '',
-        'password': params.password ?? '', // Ensure backend hashes this
+        'password': md5.convert(utf8.encode(params.password ?? '')).toString(),
         ...deviceInfo,
       };
 
       final response = await _apiClient.post(ApiUrls.signUp, body: body);
 
       if (kDebugMode) {
+        print('Sign up req body: $body');
         print('Sign up response: $response');
       }
 
@@ -321,7 +328,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       };
 
       // Note: Consider using PUT instead of POST for updates if backend supports it.
-      final response = await _apiClient.post(ApiUrls.editProfile, body: body); // Or apiClient.put if available
+      final response = await _apiClient.put(ApiUrls.editProfile, body: body); // Or apiClient.put if available
 
       if (kDebugMode) {
         print('Update profile response: $response');

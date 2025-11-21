@@ -3,17 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
 import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
+import 'features/dashboard/domain/entities/livemessage_entity.dart';
 import 'features/dashboard/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import 'features/dashboard/presentation/bloc/dashboard_event.dart';
@@ -32,9 +28,13 @@ import 'features/side_drawer/groups/presentation/bloc/group_event.dart';
 import 'features/side_drawer/groups/presentation/pages/chat.dart';
 import 'features/side_drawer/groups/presentation/pages/groups.dart';
 import 'features/side_drawer/groups/presentation/widgets/app_drawer.dart';
+import 'features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
+import 'features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 import 'features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
+import 'features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
 import 'features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
 import 'features/side_drawer/sub_users/presentation/bloc/sub_users_event.dart';
+import 'features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
 import 'features/side_drawer/sub_users/presentation/pages/sub_users.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -66,24 +66,28 @@ class AppRouter {
         final isLoggedIn = authState is Authenticated;
         final isOtpSent = authState is OtpSent;
 
-        if (isOtpSent && state.matchedLocation != RouteConstants.verifyOtp) {
+        final location = state.matchedLocation;
+
+        final isPublicRoute = location == RouteConstants.login ||
+            location == RouteConstants.verifyOtp ||
+            location == RouteConstants.signUp;
+
+        if (isOtpSent && location != RouteConstants.verifyOtp) {
           return RouteConstants.verifyOtp;
         }
-        if (isLoggedIn &&
-            (state.matchedLocation == RouteConstants.login ||
-                state.matchedLocation == RouteConstants.verifyOtp)) {
+
+        if (isLoggedIn && (location == RouteConstants.login || location == RouteConstants.verifyOtp)) {
           if (authState.user.userDetails.userType == 2) {
             return RouteConstants.dealerDashboard;
           } else if (authState.user.userDetails.userType == 1) {
             return RouteConstants.dashboard;
           }
         }
-        if (!isLoggedIn &&
-            !isOtpSent &&
-            state.matchedLocation != RouteConstants.login &&
-            state.matchedLocation != RouteConstants.verifyOtp) {
+
+        if (!isLoggedIn && !isOtpSent && !isPublicRoute) {
           return RouteConstants.login;
         }
+
         return null;
       },
       routes: [
@@ -161,10 +165,15 @@ class AppRouter {
           builder: (context, state, child) {
             final location = state.matchedLocation;
             String title = 'Dealer Dashboard';
-            if (location == RouteConstants.groups) title = 'Groups';
-            else if (location == RouteConstants.subUsers) title = 'Sub Users';
-            else if (location == RouteConstants.chat) title = 'Chat';
-            else if (location == RouteConstants.subUserDetails) title = 'Sub User Details';
+            if (location == RouteConstants.groups) {
+              title = 'Groups';
+            } else if (location == RouteConstants.subUsers) {
+              title = 'Sub Users';
+            } else if (location == RouteConstants.chat) {
+              title = 'Chat';
+            } else if (location == RouteConstants.subUserDetails) {
+              title = 'Sub User Details';
+            }
 
             return BlocProvider.value(
               value: authBloc,
