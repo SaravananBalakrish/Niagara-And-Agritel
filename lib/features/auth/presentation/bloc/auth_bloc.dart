@@ -2,10 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/error/failures.dart';
 import '../../../../core/services/notification_service.dart';
-import '../../data/datasources/auth_local_data_source.dart';
-import '../../domain/usecases/login_usecase.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
+import '../../auth.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginWithPassword loginWithPassword;
@@ -29,7 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<LoginWithPasswordEvent>((event, emit) async {
       emit(AuthLoading());
-      final result = await loginWithPassword(event.params);
+      final result = await loginWithPassword(LoginParams(phone: event.phone, password: event.password));
       result.fold(
         (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)
@@ -47,9 +44,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<SendOtpEvent>((event, emit) async {
-      print('Processing SendOtpEvent: phone=${event.params.phone}');
       emit(AuthLoading());
-      final result = await sendOtp(event.params);
+      final result = await sendOtp(PhoneParams(event.phone, event.countryCode));
       result.fold(
             (failure) {
           print('SendOtpEvent failed: $failure');
@@ -67,12 +63,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             (verificationId) {
           emit(OtpSent(
             verificationId: verificationId,
-            phone: event.params.phone,
-            countryCode: event.params.countryCode,
+            phone: event.phone,
+            countryCode: event.countryCode,
           ));
           _notificationService.showNotification(
             title: 'OTP Sent',
-            body: 'An OTP has been sent to ${event.params.phone}',
+            body: 'An OTP has been sent to ${event.phone}',
             payload: 'otp_sent',
           );
         },
@@ -81,9 +77,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // Similar changes for VerifyOtpEvent:
     on<VerifyOtpEvent>((event, emit) async {
-      print('Processing VerifyOtpEvent: verificationId=${event.params.verificationId}, otp=${event.params.otp}');
+      // print('Processing VerifyOtpEvent: verificationId=${event.params.verificationId}, otp=${event.params.otp}');
       emit(AuthLoading());
-      final result = await verifyOtp(event.params);
+      final result = await verifyOtp(
+          VerifyOtpParams(
+              verificationId: event.verificationId,
+              otp: event.otp,
+              countryCode: event.countryCode
+          )
+      );
       result.fold(
         (failure) {
           print('VerifyOtpEvent failed: $failure');
@@ -144,9 +146,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<CheckPhoneNumberEvent>((event, emit) async {
-      print('Processing CheckPhoneNumberEvent: phone=${event.params.phone}');
+      // print('Processing CheckPhoneNumberEvent: phone=${event.params.phone}');
       emit(AuthLoading());
-      final result = await checkPhoneNumber(event.params);
+      final result = await checkPhoneNumber(PhoneParams(event.phone, event.countryCode));
       result.fold(
         (failure) {
           print('CheckPhoneNumberEvent failed: $failure');
@@ -160,12 +162,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
         },
         (exists) {
-          emit(PhoneNumberChecked(exists: exists, phone: event.params.phone, countryCode: event.params.countryCode));
+          emit(PhoneNumberChecked(exists: exists, phone: event.phone, countryCode: event.countryCode));
           _notificationService.showNotification(
             title: exists ? 'Phone Number Found' : 'Phone Number Not Found',
             body: exists
-                ? 'Phone number ${event.params.phone} is registered.'
-                : 'Phone number ${event.params.phone} is not registered.',
+                ? 'Phone number ${event.phone} is registered.'
+                : 'Phone number ${event.phone} is not registered.',
             payload: 'check_phone_result',
           );
         },
@@ -174,7 +176,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<SignUpEvent>((event, emit) async {
       emit(AuthLoading());
-      final result = await signUp(event.params);
+      final result = await signUp(
+          SignUpParams(
+              mobile: event.mobile,
+              name: event.name,
+              userType: event.userType,
+              addressOne: event.addressOne,
+              addressTwo: event.addressTwo,
+              town: event.town,
+              village: event.village,
+              country: event.country,
+              state: event.state,
+              city: event.city,
+              postalCode: event.postalCode,
+              altPhone: event.altPhone,
+              email: event.email,
+              password: event.password
+          )
+      );
       result.fold(
             (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)
@@ -192,7 +211,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<UpdateProfileEvent>((event, emit) async {
       emit(AuthLoading());
-      final result = await updateProfile(event.params);
+      final result = await updateProfile(
+          UpdateProfileParams(
+              addressOne: event.addressOne,
+              mobile: event.mobile,
+              userType: event.userType,
+              addressTwo: event.addressTwo,
+              town: event.town,
+              village: event.village,
+              country: event.country,
+              state: event.state,
+              city: event.city,
+              postalCode: event.postalCode,
+              altPhone: event.altPhone,
+              email: event.email,
+              password: event.password,
+              id: event.id,
+              name: event.name
+          )
+      );
       result.fold(
             (failure) => emit(failure is AuthFailure
             ? AuthError(message: failure.message, code: failure.code)

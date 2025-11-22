@@ -1,3 +1,5 @@
+// features/auth/presentation/pages/login_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,12 +8,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
-import '../../domain/usecases/login_usecase.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
-import '../cubit/login_ui_cubit.dart';
-import '../widgets/custom_button.dart';
+import '../../auth.dart';
 import 'login_page_listener.dart';
 
 class LoginPage extends StatelessWidget {
@@ -47,15 +44,11 @@ class LoginPage extends StatelessWidget {
 
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (child, animation) =>
-                        FadeTransition(opacity: animation, child: child),
+                    transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
                     child: authState is AuthLoading
                         ? const Center(
                       key: ValueKey('loading'),
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 6,
-                      ),
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 6),
                     )
                         : SingleChildScrollView(
                       key: const ValueKey('form'),
@@ -85,12 +78,11 @@ class LoginPage extends StatelessWidget {
                                   height: 140,
                                   width: 140,
                                   fit: BoxFit.contain,
-                                ).animate().slideY(
-                                  begin: 1,
-                                  end: 0,
-                                  duration: 1200.ms,
-                                  curve: Curves.easeOut,
-                                ).then().shimmer(duration: 2000.ms),
+                                )
+                                    .animate()
+                                    .slideY(begin: 1, end: 0, duration: 1200.ms, curve: Curves.easeOut)
+                                    .then()
+                                    .shimmer(duration: 2000.ms),
                               ),
                             ),
                           ),
@@ -156,8 +148,7 @@ class LoginPage extends StatelessWidget {
                                       onCountryChanged: (country) {
                                         cubit.updateCountryCode('+${country.dialCode}');
                                       },
-                                      validator: (value) =>
-                                      value?.number.isEmpty ?? true ? 'Please enter a valid phone number' : null,
+                                      validator: (value) => value?.number.isEmpty ?? true ? 'Please enter a valid phone number' : null,
                                     ),
                                     if (!state.useOtpLogin) ...[
                                       const SizedBox(height: 16),
@@ -217,7 +208,8 @@ class LoginPage extends StatelessWidget {
                               if (state.formKey.currentState!.validate()) {
                                 context.read<AuthBloc>().add(
                                   CheckPhoneNumberEvent(
-                                    PhoneParams(state.phoneController.text, state.countryCode),
+                                    phone: state.phoneController.text,
+                                    countryCode: state.countryCode,
                                   ),
                                 );
                               }

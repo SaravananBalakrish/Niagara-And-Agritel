@@ -10,8 +10,8 @@ class GroupAddingUsecase extends UseCase<dynamic, GroupAddingParams> {
   GroupAddingUsecase(this.fetchGroupRepository);
 
   @override
-  Future<Either<Failure, dynamic>> call(GroupAddingParams updateSubUserDetailsParams) {
-    return fetchGroupRepository.addGroup(updateSubUserDetailsParams.userId, updateSubUserDetailsParams.groupName);
+  Future<Either<Failure, dynamic>> call(GroupAddingParams params) {
+    return fetchGroupRepository.addGroup(params.userId, params.groupName);
   }
 }
 

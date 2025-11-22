@@ -10,8 +10,8 @@ class EditGroupUsecase extends UseCase<dynamic, EditGroupParams> {
   EditGroupUsecase(this.fetchGroupRepository);
 
   @override
-  Future<Either<Failure, dynamic>> call(EditGroupParams updateSubUserDetailsParams) {
-    return fetchGroupRepository.editGroup(updateSubUserDetailsParams.userId, updateSubUserDetailsParams.groupName, updateSubUserDetailsParams.groupId);
+  Future<Either<Failure, dynamic>> call(EditGroupParams params) {
+    return fetchGroupRepository.editGroup(params.userId, params.groupName, params.groupId);
   }
 }
 

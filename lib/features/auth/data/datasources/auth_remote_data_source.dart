@@ -12,7 +12,7 @@ import '../../../../core/di/injection.dart' as di;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/utils/api_urls.dart';
-import '../../domain/usecases/login_usecase.dart';
+import '../../domain/auth_domain.dart';
 import '../models/user_model.dart';
 import 'auth_local_data_source.dart';
 

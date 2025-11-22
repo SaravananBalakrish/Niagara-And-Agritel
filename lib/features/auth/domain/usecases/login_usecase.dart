@@ -1,27 +1,16 @@
 import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../entities/user_entity.dart';
-import '../repositories/auth_repository.dart';
+import '../auth_domain.dart';
 
 class LoginWithPassword extends UseCase<RegisterDetailsEntity, LoginParams> {
   final AuthRepository repository;
   LoginWithPassword(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(LoginParams updateSubUserDetailsParams) {
-    return repository.loginWithPassword(updateSubUserDetailsParams.phone, updateSubUserDetailsParams.password);
+  Future<Either<Failure, RegisterDetailsEntity>> call(LoginParams params) {
+    return repository.loginWithPassword(params.phone, params.password);
   }
-}
-
-class LoginParams extends Equatable {
-  final String phone;
-  final String password;
-  const LoginParams({required this.phone, required this.password});
-
-  @override
-  List<Object?> get props => [phone, password];
 }
 
 class SendOtp extends UseCase<String, PhoneParams> {
@@ -29,19 +18,10 @@ class SendOtp extends UseCase<String, PhoneParams> {
   SendOtp(this.repository);
 
   @override
-  Future<Either<Failure, String>> call(PhoneParams updateSubUserDetailsParams) {
-    final fullPhone = updateSubUserDetailsParams.phone.startsWith('+') ? updateSubUserDetailsParams.phone : updateSubUserDetailsParams.countryCode + updateSubUserDetailsParams.phone;
+  Future<Either<Failure, String>> call(PhoneParams params) {
+    final fullPhone = params.phone.startsWith('+') ? params.phone : params.countryCode + params.phone;
     return repository.sendOtp(fullPhone);
   }
-}
-
-class PhoneParams extends Equatable {
-  final String phone;
-  final String countryCode;
-  const PhoneParams(this.phone, this.countryCode);
-
-  @override
-  List<Object?> get props => [phone, countryCode];
 }
 
 class VerifyOtp extends UseCase<RegisterDetailsEntity, VerifyOtpParams> {
@@ -49,19 +29,9 @@ class VerifyOtp extends UseCase<RegisterDetailsEntity, VerifyOtpParams> {
   VerifyOtp(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(VerifyOtpParams updateSubUserDetailsParams) {
-    return repository.verifyOtp(updateSubUserDetailsParams.verificationId, updateSubUserDetailsParams.otp, updateSubUserDetailsParams.countryCode);
+  Future<Either<Failure, RegisterDetailsEntity>> call(VerifyOtpParams params) {
+    return repository.verifyOtp(params.verificationId, params.otp, params.countryCode);
   }
-}
-
-class VerifyOtpParams extends Equatable {
-  final String verificationId;
-  final String otp;
-  final String countryCode;
-
-  const VerifyOtpParams({required this.verificationId, required this.otp, required this.countryCode});
-  @override
-  List<Object?> get props => [verificationId, otp, countryCode];
 }
 
 /// Logout use case
@@ -70,7 +40,7 @@ class Logout extends UseCase<void, NoParams> {
   Logout(this.repository);
 
   @override
-  Future<Either<Failure, void>> call(NoParams updateSubUserDetailsParams) {
+  Future<Either<Failure, void>> call(NoParams params) {
     return repository.logout();
   }
 }
@@ -81,8 +51,8 @@ class CheckPhoneNumber extends UseCase<bool, PhoneParams> {
   CheckPhoneNumber(this.repository);
 
   @override
-  Future<Either<Failure, bool>> call(PhoneParams updateSubUserDetailsParams) {
-    return repository.checkPhoneNumber(updateSubUserDetailsParams.phone, updateSubUserDetailsParams.countryCode);
+  Future<Either<Failure, bool>> call(PhoneParams params) {
+    return repository.checkPhoneNumber(params.phone, params.countryCode);
   }
 }
 
@@ -91,46 +61,9 @@ class SignUp extends UseCase<RegisterDetailsEntity, SignUpParams> {
   SignUp(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(SignUpParams updateSubUserDetailsParams) {
-    return repository.signUp(updateSubUserDetailsParams);
+  Future<Either<Failure, RegisterDetailsEntity>> call(SignUpParams params) {
+    return repository.signUp(params);
   }
-}
-
-class SignUpParams extends Equatable {
-  final String mobile;
-  final String name;
-  final int? userType; // e.g., from dropdown 'option'
-  final String? addressOne;
-  final String? addressTwo;
-  final String? town;
-  final String? village;
-  final String? country;
-  final String? state;
-  final String? city;
-  final String? postalCode;
-  final String? altPhone;
-  final String? email;
-  final String? password;
-
-  const SignUpParams({
-    required this.mobile,
-    required this.name,
-    required this.userType,
-    required this.addressOne,
-    required this.addressTwo,
-    required this.town,
-    required this.village,
-    required this.country,
-    required this.state,
-    required this.city,
-    required this.postalCode,
-    required this.altPhone,
-    required this.email,
-    required this.password,
-  });
-
-  @override
-  List<Object?> get props => [mobile, name, userType, addressOne, addressTwo, town, village, country, state, city, postalCode, altPhone, email, password];
 }
 
 class UpdateProfile extends UseCase<RegisterDetailsEntity, UpdateProfileParams> {
@@ -138,60 +71,7 @@ class UpdateProfile extends UseCase<RegisterDetailsEntity, UpdateProfileParams> 
   UpdateProfile(this.repository);
 
   @override
-  Future<Either<Failure, RegisterDetailsEntity>> call(UpdateProfileParams updateSubUserDetailsParams) {
-    return repository.updateProfile(updateSubUserDetailsParams);
+  Future<Either<Failure, RegisterDetailsEntity>> call(UpdateProfileParams params) {
+    return repository.updateProfile(params);
   }
-}
-
-class UpdateProfileParams extends Equatable {
-  final int id;
-  final String name;
-  final String? addressOne;
-  final String mobile;
-  final int? userType;
-  final String? addressTwo;
-  final String? town;
-  final String? village;
-  final String? country;
-  final String? state;
-  final String? city;
-  final String? postalCode;
-  final String? altPhone;
-  final String? email;
-  final String? password;
-  const UpdateProfileParams({
-    required this.addressOne,
-    required this.mobile,
-    required this.userType,
-    required this.addressTwo,
-    required this.town,
-    required this.village,
-    required this.country,
-    required this.state,
-    required this.city,
-    required this.postalCode,
-    required this.altPhone,
-    required this.email,
-    required this.password,
-    required this.id,
-    required this.name});
-
-  @override
-  List<Object?> get props => [
-    addressOne,
-    mobile,
-    userType,
-    addressTwo,
-    town,
-    village,
-    country,
-    state,
-    city,
-    postalCode,
-    altPhone,
-    email,
-    password,
-    id,
-    name
-  ];
 }

@@ -1,56 +1,34 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/auth_domain.dart';
-import '../../../../core/usecases/usecase.dart';
 
-abstract class AuthEvent extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
-
-class LoginWithPasswordEvent extends AuthEvent {
+class LoginParams extends Equatable {
   final String phone;
   final String password;
-  LoginWithPasswordEvent({required this.phone, required this.password});
+  const LoginParams({required this.phone, required this.password});
 
   @override
   List<Object?> get props => [phone, password];
 }
 
-class SendOtpEvent extends AuthEvent {
+class PhoneParams extends Equatable {
   final String phone;
   final String countryCode;
-  SendOtpEvent({required this.phone, required this.countryCode});
+  const PhoneParams(this.phone, this.countryCode);
 
   @override
   List<Object?> get props => [phone, countryCode];
 }
 
-class VerifyOtpEvent extends AuthEvent {
+class VerifyOtpParams extends Equatable {
   final String verificationId;
   final String otp;
   final String countryCode;
-  VerifyOtpEvent({required this.otp, required this.countryCode, required this.verificationId});
 
+  const VerifyOtpParams({required this.verificationId, required this.otp, required this.countryCode});
   @override
-  List<Object?> get props => [otp, countryCode, verificationId];
+  List<Object?> get props => [verificationId, otp, countryCode];
 }
 
-class LogoutEvent extends AuthEvent {
-  final NoParams params = const NoParams();
-}
-
-class CheckCachedUserEvent extends AuthEvent {}
-
-class CheckPhoneNumberEvent extends AuthEvent {
-  final String phone;
-  final String countryCode;
-  CheckPhoneNumberEvent({required this.phone, required this.countryCode});
-
-  @override
-  List<Object?> get props => [phone, countryCode];
-}
-
-class SignUpEvent extends AuthEvent {
+class SignUpParams extends Equatable {
   final String mobile;
   final String name;
   final int? userType; // e.g., from dropdown 'option'
@@ -66,7 +44,7 @@ class SignUpEvent extends AuthEvent {
   final String? email;
   final String? password;
 
-  SignUpEvent({
+  const SignUpParams({
     required this.mobile,
     required this.name,
     required this.userType,
@@ -84,10 +62,10 @@ class SignUpEvent extends AuthEvent {
   });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [mobile, name, userType, addressOne, addressTwo, town, village, country, state, city, postalCode, altPhone, email, password];
 }
 
-class UpdateProfileEvent extends AuthEvent {
+class UpdateProfileParams extends Equatable {
   final int id;
   final String name;
   final String? addressOne;
@@ -103,8 +81,7 @@ class UpdateProfileEvent extends AuthEvent {
   final String? altPhone;
   final String? email;
   final String? password;
-
-  UpdateProfileEvent({
+  const UpdateProfileParams({
     required this.addressOne,
     required this.mobile,
     required this.userType,
@@ -119,9 +96,24 @@ class UpdateProfileEvent extends AuthEvent {
     required this.email,
     required this.password,
     required this.id,
-    required this.name
-  });
+    required this.name});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [
+    addressOne,
+    mobile,
+    userType,
+    addressTwo,
+    town,
+    village,
+    country,
+    state,
+    city,
+    postalCode,
+    altPhone,
+    email,
+    password,
+    id,
+    name
+  ];
 }

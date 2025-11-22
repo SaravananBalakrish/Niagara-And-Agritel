@@ -112,7 +112,7 @@ class _UserProfileFormBody extends StatelessWidget {
       final mobileToSend = phoneWithoutCountry ?? phoneNumber!.replaceAll(RegExp(r'\D'), '');
 
       if (isEdit) {
-        context.read<AuthBloc>().add(UpdateProfileEvent(UpdateProfileParams(
+        context.read<AuthBloc>().add(UpdateProfileEvent(
           id: initialData!.id,
           name: nameCtrl.text.trim(),
           mobile: mobileToSend,
@@ -128,9 +128,9 @@ class _UserProfileFormBody extends StatelessWidget {
           altPhone: altPhoneCtrl.text.trim(),
           email: emailCtrl.text.trim(),
           password: passwordCtrl.text.isEmpty ? null : passwordCtrl.text,
-        )));
+        ));
       } else {
-        context.read<AuthBloc>().add(SignUpEvent(SignUpParams(
+        context.read<AuthBloc>().add(SignUpEvent(
           mobile: mobileToSend,
           name: nameCtrl.text.trim(),
           userType: userTypeInt,
@@ -144,8 +144,7 @@ class _UserProfileFormBody extends StatelessWidget {
           postalCode: postalCodeCtrl.text.trim(),
           altPhone: altPhoneCtrl.text.trim(),
           email: emailCtrl.text.trim(),
-          password: passwordCtrl.text,
-        )));
+          password: passwordCtrl.text,));
       }
     }
 

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/auth/di/auth.di.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -30,12 +31,6 @@ import '../../features/side_drawer/sub_users/domain/usecases/update_sub_user_use
 import '../../features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
 import '../flavor/flavor_config.dart';
 import '../flavor/flavor_di.dart';
-import '../../features/auth/data/datasources/auth_local_data_source.dart';
-import '../../features/auth/data/datasources/auth_remote_data_source.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/domain/usecases/login_usecase.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../services/api_client.dart';
 import '../services/get_credentials.dart';
 import '../services/mqtt_service.dart';
@@ -57,6 +52,13 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
 
   // External / third-party
   sl.registerLazySingleton<http.Client>(() => httpClient ?? http.Client());
+
+  sl.registerLazySingleton<ApiClient>(
+        () => ApiClient(
+      baseUrl: FlavorConfig.instance.values.apiBaseUrl,
+      client: sl(),
+    ),
+  );
 
   final actualPrefs = prefs ?? await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(actualPrefs);
@@ -82,38 +84,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   // Core services
   sl.registerLazySingleton(() => ThemeProvider());
 
-  // Feature: Auth
-  sl.registerLazySingleton<AuthLocalDataSource>(
-        () => AuthLocalDataSourceImpl(prefs: sl()),
-  );
-
-  sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => AuthRemoteDataSourceImpl(apiClient: ApiClient(baseUrl: FlavorConfig.instance.values.apiBaseUrl, client: sl())),
-  );
-
-  sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(remote: sl(), local: sl()),
-  );
-
-  // Use cases
-  sl.registerLazySingleton(() => LoginWithPassword(sl()));
-  sl.registerLazySingleton(() => SendOtp(sl()));
-  sl.registerLazySingleton(() => VerifyOtp(sl()));
-  sl.registerLazySingleton(() => Logout(sl()));
-  sl.registerLazySingleton(() => CheckPhoneNumber(sl()));
-  sl.registerLazySingleton(() => SignUp(sl()));
-  sl.registerLazySingleton(() => UpdateProfile(sl()));
-
-  // Bloc
-  sl.registerLazySingleton(() => AuthBloc(
-    loginWithPassword: sl(),
-    sendOtp: sl(),
-    verifyOtp: sl(),
-    logout: sl(),
-    checkPhoneNumber: sl(),
-    signUp: sl(),
-    updateProfile: sl(),
-  ));
+  //Auth Dependencies
+  initAuthDependencies();
 
   sl.registerSingleton<NotificationService>(NotificationService());
 

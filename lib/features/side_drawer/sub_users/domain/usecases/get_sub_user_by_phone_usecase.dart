@@ -10,8 +10,8 @@ class GetSubUserByPhoneUsecase extends UseCase<dynamic, GetSubUserByPhoneParams>
   GetSubUserByPhoneUsecase({required this.subUserRepo});
 
   @override
-  Future<Either<Failure, dynamic>> call(GetSubUserByPhoneParams updateSubUserDetailsParams) {
-    return subUserRepo.getSubUserByPhone(updateSubUserDetailsParams);
+  Future<Either<Failure, dynamic>> call(GetSubUserByPhoneParams params) {
+    return subUserRepo.getSubUserByPhone(params);
   }
 }
 

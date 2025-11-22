@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/route_constants.dart';
-import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/login_params.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -17,10 +17,10 @@ class LoginPageListener {
       if (state.exists) {
         final useOtp = cubit.state.useOtpLogin;
         if (useOtp) {
-          context.read<AuthBloc>().add(SendOtpEvent(PhoneParams(state.phone, state.countryCode)));
+          context.read<AuthBloc>().add(SendOtpEvent(phone: state.phone, countryCode: state.countryCode));
         } else {
           final loginParams = LoginParams(phone: state.phone, password: cubit.state.passwordController.text);
-          context.read<AuthBloc>().add(LoginWithPasswordEvent(loginParams));
+          context.read<AuthBloc>().add(LoginWithPasswordEvent(phone: state.phone, password: cubit.state.passwordController.text));
         }
       } else {
         cubit.setError('Phone number not registered. Please sign up.');

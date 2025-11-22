@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../../core/utils/route_constants.dart';
+import '../../domain/usecases/login_params.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -254,11 +255,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                         if (_formKey.currentState!.validate()) {
                                           context.read<AuthBloc>().add(
                                                 VerifyOtpEvent(
-                                                  VerifyOtpParams(
-                                                    verificationId: widget.verificationId,
-                                                    otp: otpController.text,
-                                                    countryCode: widget.countryCode,
-                                                  ),
+                                                  otp: widget.verificationId, countryCode: widget.countryCode, verificationId: otpController.text,
                                                 ),
                                               );
                                         }
@@ -272,7 +269,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                     ? null
                                     : () {
                                         context.read<AuthBloc>().add(
-                                              SendOtpEvent(PhoneParams(widget.phone, widget.countryCode)),
+                                              SendOtpEvent(phone: widget.phone, countryCode: widget.countryCode),
                                             );
                                       },
                                 child: Text(
@@ -313,7 +310,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                 CustomButton(
                                   onPressed: () {
                                     context.read<AuthBloc>().add(
-                                          SendOtpEvent(PhoneParams(widget.phone, widget.countryCode)),
+                                          SendOtpEvent(phone: widget.phone, countryCode: widget.countryCode),
                                         );
                                   },
                                   text: 'Request New OTP',

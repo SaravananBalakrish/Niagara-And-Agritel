@@ -10,8 +10,8 @@ class GetSubUserDetailsUsecase extends UseCase<dynamic, GetSubUserDetailsParams>
   GetSubUserDetailsUsecase({required this.subUserRepo});
 
   @override
-  Future<Either<Failure, dynamic>> call(GetSubUserDetailsParams updateSubUserDetailsParams) {
-    return subUserRepo.getSubUserDetails(updateSubUserDetailsParams);
+  Future<Either<Failure, dynamic>> call(GetSubUserDetailsParams params) {
+    return subUserRepo.getSubUserDetails(params);
   }
 }
 
