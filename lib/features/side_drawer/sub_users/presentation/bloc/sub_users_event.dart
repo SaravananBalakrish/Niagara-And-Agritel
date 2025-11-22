@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
+import '../../domain/sub_users_domain.dart';
 
 abstract class SubUsersEvent extends Equatable {
   @override

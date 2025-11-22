@@ -6,13 +6,8 @@ import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
 import '../../../../../core/utils/api_helper.dart';
 import '../../../../../core/utils/api_urls.dart';
-import '../../domain/entities/sub_user_details_entity.dart';
-import '../../domain/entities/sub_user_entity.dart';
-import '../../domain/usecases/get_sub_user_by_phone_usecase.dart';
-import '../../domain/usecases/get_sub_user_details_usecase.dart';
-import '../../domain/usecases/update_sub_user_usecase.dart';
-import '../model/sub_user_details_model.dart';
-import '../model/sub_user_model.dart';
+import '../sub_user_data.dart';
+import '../../domain/sub_users_domain.dart';
 
 abstract class SubUserDataSources {
   Future<List<SubUserEntity>> getSubUsers(int userId);

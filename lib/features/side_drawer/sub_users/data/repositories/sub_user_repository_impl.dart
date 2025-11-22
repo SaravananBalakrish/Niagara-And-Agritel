@@ -2,13 +2,8 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../../core/error/base_repository.dart';
 import '../../../../../core/error/failures.dart';
-import '../../domain/entities/sub_user_details_entity.dart';
-import '../../domain/entities/sub_user_entity.dart';
-import '../../domain/repositories/sub_user_repo.dart';
-import '../../domain/usecases/get_sub_user_by_phone_usecase.dart';
-import '../../domain/usecases/get_sub_user_details_usecase.dart';
-import '../../domain/usecases/update_sub_user_usecase.dart';
 import '../data_sources/sub_user_data_sources.dart';
+import '../../domain/sub_users_domain.dart';
 
 class SubUserRepositoryImpl extends BaseRepository implements SubUserRepo {
   final SubUserDataSources subUserDataSources;

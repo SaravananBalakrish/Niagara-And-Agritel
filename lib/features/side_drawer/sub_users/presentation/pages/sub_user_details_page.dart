@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/di/injection.dart' as di;
 import '../../../../../core/widgets/custom_phone_field.dart';
 import '../../../../../core/widgets/glass_effect.dart';
 import '../../../../../core/widgets/retry.dart';
-import '../../domain/entities/sub_user_details_entity.dart';
-import '../../domain/usecases/get_sub_user_by_phone_usecase.dart';
-import '../../domain/usecases/get_sub_user_details_usecase.dart';
-import '../../domain/usecases/update_sub_user_usecase.dart';
-import '../bloc/sub_users_bloc.dart';
-import '../bloc/sub_users_event.dart';
-import '../bloc/sub_users_state.dart';
+import '../../sub_users_barrel.dart';
 
 class SubUserDetailsScreen extends StatelessWidget {
   final GetSubUserDetailsParams subUserDetailsParams;

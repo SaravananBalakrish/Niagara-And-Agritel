@@ -3,11 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/utils/route_constants.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
-import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/entities/sub_user_entity.dart';
 
-import '../bloc/sub_users_bloc.dart';
-import '../bloc/sub_users_event.dart';
-import '../bloc/sub_users_state.dart';
+import '../../sub_users_barrel.dart';
 
 class SubUsers extends StatelessWidget {
   final int userId;
