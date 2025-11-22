@@ -1,9 +1,6 @@
-// lib/features/dashboard/data/models/controller_model.dart
 import 'package:equatable/equatable.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/live_message_model.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
-
-import '../../domain/entities/controller_entity.dart';
+import '../../data/dashboard_data.dart';
+import '../../domain/dashboard_domain.dart';
 // Add this import for jsonDecode
 
 class ProgramModel extends ProgramEntity {

@@ -1,11 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/usecases/add_group_usecase.dart';
-import '../../domain/usecases/delete_group_usecase.dart';
-import '../../domain/usecases/edit_group_usecase.dart';
-import '../../domain/usecases/group_fetching_usecase.dart';
-import 'group_event.dart';
-import 'group_state.dart';
+import '../../groups_barrel.dart';
 
 class GroupBloc extends Bloc<GroupEvent, GroupState> {
   final GroupFetchingUsecase groupFetchingUsecase;

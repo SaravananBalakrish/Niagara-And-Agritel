@@ -1,9 +1,7 @@
 import '../../../core/di/injection.dart';
 import '../../mqtt/utils/mqtt_message_helper.dart';
-import '../domain/dashboard_domain.dart';
-import '../data/dashboard_data.dart';
-import '../presentation/bloc/dashboard_bloc.dart';
 import '../utils/dashboard_dispatcher.dart';
+import '../dashboard.dart';
 
 void initDashboardDependencies() {
 // Dashboard Feature

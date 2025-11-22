@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/group_entity.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
-import '../../domain/repositories/dashboard_repository.dart';
 import '../datasources/dashboard_remote_data_source.dart';
+import '../../domain/dashboard_domain.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
   final DashboardRemoteDataSource remote;

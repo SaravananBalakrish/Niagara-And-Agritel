@@ -1,4 +1,3 @@
-// groups.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -9,13 +8,7 @@ import 'package:niagara_smart_drip_irrigation/core/widgets/retry.dart';
 import '../../../../../core/di/injection.dart' as di;
 import '../../../../../core/widgets/action_button.dart';
 import '../../../../../core/widgets/alert_dialog.dart';
-import '../../domain/usecases/add_group_usecase.dart';
-import '../../domain/usecases/delete_group_usecase.dart';
-import '../../domain/usecases/edit_group_usecase.dart';
-import '../../domain/usecases/group_fetching_usecase.dart';
-import '../bloc/group_bloc.dart';
-import '../bloc/group_event.dart';
-import '../bloc/group_state.dart';
+import '../../groups_barrel.dart';
 
 class GroupsPage extends StatelessWidget {
   final int userId;

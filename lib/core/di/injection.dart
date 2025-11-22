@@ -6,14 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/di/auth.di.dart';
 import '../../features/dashboard/di/dashboard_di.dart';
 import '../../features/mqtt/bloc/mqtt_bloc.dart';
-import '../../features/side_drawer/groups/data/datasources/group_data_sources.dart';
-import '../../features/side_drawer/groups/data/repositories/fetch_group_repository_impl.dart';
-import '../../features/side_drawer/groups/domain/repositories/fetch_group_repository.dart';
-import '../../features/side_drawer/groups/domain/usecases/add_group_usecase.dart';
-import '../../features/side_drawer/groups/domain/usecases/delete_group_usecase.dart';
-import '../../features/side_drawer/groups/domain/usecases/edit_group_usecase.dart';
-import '../../features/side_drawer/groups/domain/usecases/group_fetching_usecase.dart';
-import '../../features/side_drawer/groups/presentation/bloc/group_bloc.dart';
+import '../../features/side_drawer/groups/di/groups_di.dart';
 import '../../features/side_drawer/sub_users/data/data_sources/sub_user_data_sources.dart';
 import '../../features/side_drawer/sub_users/data/repositories/sub_user_repository_impl.dart';
 import '../../features/side_drawer/sub_users/domain/repositories/sub_user_repo.dart';
@@ -87,19 +80,9 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   //Dashboard feature
   initDashboardDependencies();
   
-  // AppDrawer Feature
-  sl.registerLazySingleton<GroupDataSources>(() => GroupDataSourcesImpl(apiClient: sl()));
-  sl.registerLazySingleton<GroupRepository>(() => GroupRepositoryImpl(groupDataSources: sl()));
-  sl.registerLazySingleton(() => GroupFetchingUsecase(sl()));
-  sl.registerLazySingleton(() => GroupAddingUsecase(sl()));
-  sl.registerLazySingleton(() => EditGroupUsecase(sl()));
-  sl.registerLazySingleton(() => DeleteGroupUsecase(sl()));
-  sl.registerLazySingleton(() => GroupBloc(
-      groupFetchingUsecase: sl(),
-      groupAddingUsecase: sl(),
-      editGroupUsecase: sl(),
-      deleteGroupUsecase: sl()
-  ));
+  /// App Drawer
+  /// Groups Dependencies
+  initGroupDependencies();
 
   sl.registerLazySingleton<SubUserDataSources>(() => SubUserDataSourceImpl(apiClient: sl(), logger: Logger()));
   sl.registerLazySingleton<SubUserRepo>(() => SubUserRepositoryImpl(subUserDataSources: sl()));

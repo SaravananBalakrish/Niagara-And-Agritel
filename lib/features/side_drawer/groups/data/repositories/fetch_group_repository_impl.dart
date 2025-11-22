@@ -1,9 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:niagara_smart_drip_irrigation/core/error/failures.dart';
 
-import '../../domain/entities/group_entity.dart';
-import '../../domain/repositories/fetch_group_repository.dart';
-import '../datasources/group_data_sources.dart';
+import '../../../groups/groups_barrel.dart';
 
 class GroupRepositoryImpl extends GroupRepository {
   final GroupDataSources groupDataSources;

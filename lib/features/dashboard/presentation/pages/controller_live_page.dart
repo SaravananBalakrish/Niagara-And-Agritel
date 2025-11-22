@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/widgets/fertstatus_section.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/widgets/previousday_section.dart';
@@ -10,7 +9,6 @@ import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/wi
 import 'package:niagara_smart_drip_irrigation/features/dashboard/presentation/widgets/well_level_section.dart';
 import '../widgets/ctrl_display.dart';
 import '../widgets/latestmsg_section.dart';
-import '../widgets/pressure_section.dart';
 import '../widgets/ryb_section.dart';
 import '../widgets/timer_section.dart';
 import '../widgets/livepage_display_values.dart';

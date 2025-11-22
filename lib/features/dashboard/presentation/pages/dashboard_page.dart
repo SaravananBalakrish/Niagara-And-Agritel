@@ -9,9 +9,6 @@ import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
-import '../../../mqtt/bloc/mqtt_bloc.dart';
-import '../../../mqtt/bloc/mqtt_event.dart';
-import '../../../mqtt/utils/mqtt_message_helper.dart';
 import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
 import 'package:get_it/get_it.dart' as di;
 
@@ -23,7 +20,7 @@ import '../widgets/pressure_section.dart';
 import '../widgets/ryb_section.dart';
 import '../widgets/sync_section.dart';
 import '../widgets/timer_section.dart';
-
+import '../../../mqtt/mqtt_barrel.dart';
 import '../../dashboard.dart';
 
 class DashboardPage extends StatelessWidget {

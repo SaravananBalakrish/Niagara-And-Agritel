@@ -1,11 +1,9 @@
-import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/group_model.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/data/models/controller_model.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
 import '../../../../core/utils/api_urls.dart';
-import '../../../../core/utils/api_response_handler.dart'; // New import
-import '../../domain/entities/group_entity.dart';
-import '../../domain/entities/controller_entity.dart';
+import '../../../../core/utils/api_response_handler.dart';
+import '../../domain/dashboard_domain.dart';
+import '../../data/dashboard_data.dart';
 
 abstract class DashboardRemoteDataSource {
   Future<List<GroupDetailsEntity>> fetchDashboardGroups(int userId);

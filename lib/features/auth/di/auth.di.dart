@@ -1,8 +1,6 @@
 import '../../../core/di/injection.dart';
 import '../../../core/services/api_client.dart';
-import '../domain/auth_domain.dart';
-import '../data/auth_data.dart';
-import '../presentation/bloc/auth_bloc.dart';
+import '../auth.dart';
 
 void initAuthDependencies() {
   // ──────────────────────────────────────
