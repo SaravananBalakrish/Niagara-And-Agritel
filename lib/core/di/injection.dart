@@ -4,15 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/di/auth.di.dart';
-import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
-import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
-import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
-import '../../features/dashboard/domain/usecases/fetch_controllers_usecase.dart';
-import '../../features/dashboard/domain/usecases/fetch_dashboard_groups_usecase.dart';
-import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../features/dashboard/utils/dashboard_dispatcher.dart';
+import '../../features/dashboard/di/dashboard_di.dart';
 import '../../features/mqtt/bloc/mqtt_bloc.dart';
-import '../../features/mqtt/utils/mqtt_message_helper.dart';
 import '../../features/side_drawer/groups/data/datasources/group_data_sources.dart';
 import '../../features/side_drawer/groups/data/repositories/fetch_group_repository_impl.dart';
 import '../../features/side_drawer/groups/domain/repositories/fetch_group_repository.dart';
@@ -91,14 +84,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
 
   sl.registerLazySingleton<SomeService>(() => SomeService());
 
-  // Dashboard Feature
-  sl.registerLazySingleton<DashboardRemoteDataSource>(() => DashboardRemoteDataSourceImpl(apiClient: sl()));
-  sl.registerLazySingleton<DashboardRepository>(() => DashboardRepositoryImpl(remote: sl()));
-  sl.registerLazySingleton(() => FetchDashboardGroups(sl()));
-  sl.registerLazySingleton(() => FetchControllers(sl()));
-  sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl(), mqttBloc: sl()));
-
-  sl.registerLazySingleton<MessageDispatcher>(() => DashboardMessageDispatcher(dashboardBloc: sl<DashboardBloc>()));
+  //Dashboard feature
+  initDashboardDependencies();
   
   // AppDrawer Feature
   sl.registerLazySingleton<GroupDataSources>(() => GroupDataSourcesImpl(apiClient: sl()));

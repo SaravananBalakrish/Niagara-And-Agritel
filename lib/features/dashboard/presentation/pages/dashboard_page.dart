@@ -7,17 +7,12 @@ import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/utils/route_constants.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/controller_entity.dart';
-import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/group_entity.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
-import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
-import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/bloc/mqtt_bloc.dart';
 import '../../../mqtt/bloc/mqtt_event.dart';
 import '../../../mqtt/utils/mqtt_message_helper.dart';
 import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
-import '../bloc/dashboard_state.dart';
 import 'package:get_it/get_it.dart' as di;
 
 import '../widgets/actions_section.dart';
@@ -28,6 +23,8 @@ import '../widgets/pressure_section.dart';
 import '../widgets/ryb_section.dart';
 import '../widgets/sync_section.dart';
 import '../widgets/timer_section.dart';
+
+import '../../dashboard.dart';
 
 class DashboardPage extends StatelessWidget {
   final int userId, userType;
