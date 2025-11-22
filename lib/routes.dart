@@ -12,6 +12,9 @@ import 'core/utils/route_constants.dart';
 import 'core/widgets/glassy_wrapper.dart';
 import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
+import 'features/controller_details/domain/usecase/controller_details_params.dart';
+import 'features/controller_details/presentation/bloc/controller_details_bloc.dart';
+import 'features/controller_details/presentation/bloc/controller_details_bloc_event.dart';
 import 'features/controller_details/presentation/pages/controller_details_page.dart';
 import 'features/dashboard/presentation/pages/controller_live_page.dart';
 import 'features/dashboard/domain/entities/controller_entity.dart';
@@ -161,13 +164,20 @@ class AppRouter {
           name: 'ctrlDetailsPage',
           path: RouteConstants.ctrlDetailsPage,
           builder: (context, state) {
-             final selectedController = state.extra as LiveMessageEntity?;
-            return BlocProvider.value(
-              value: authBloc,
-              child: ControllerDetailsPage(),
+            final params = state.extra as GetControllerDetailsParams;
+
+            return BlocProvider(
+              create: (_) => di.sl<ControllerDetailsBloc>()
+                ..add(GetControllerDetailsEvent(
+                  userId: params.userId,
+                  controllerId: params.controllerId,
+                )),
+              child: ControllerDetailsPage(params: params),
             );
           },
         ),
+
+
         ShellRoute(
           builder: (context, state, child) {
             final location = state.matchedLocation;

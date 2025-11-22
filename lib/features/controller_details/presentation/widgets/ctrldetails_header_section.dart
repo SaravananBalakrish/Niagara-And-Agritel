@@ -16,7 +16,8 @@ class ControllerSectionHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
       ),
     );
   }

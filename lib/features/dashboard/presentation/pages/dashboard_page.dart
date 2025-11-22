@@ -11,6 +11,7 @@ import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/group_entity.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/utils/app_images.dart';
+import '../../../controller_details/domain/usecase/controller_details_params.dart';
 import '../../../dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../../dashboard/presentation/bloc/dashboard_event.dart';
 import '../../../mqtt/presentation/bloc/mqtt_bloc.dart';
@@ -370,7 +371,13 @@ class DashboardPage extends StatelessWidget {
             padding: EdgeInsets.all(scale(2)),
             child: GestureDetector(
               onTap: () {
-                context.push(RouteConstants.ctrlDetailsPage, extra: controller.liveMessage);
+                context.pushNamed(
+                  'ctrlDetailsPage',
+                  extra: GetControllerDetailsParams(
+                    userId: controller.userId,
+                    controllerId: controller.userDeviceId,
+                  ),
+                );
               },
               child:  GlassCard(
                 child: Column(

@@ -14,7 +14,7 @@ class CommonDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.bgColor = const Color(0xFF0A4D68),
-    this.borderColor = Colors.white38,
+    this.borderColor = Colors.white,
   });
 
   @override
@@ -22,8 +22,9 @@ class CommonDropdown extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
+        border: Border(
+          bottom: BorderSide(color: borderColor, width: 1.0),
+        ),
       ),
       child: DropdownButton<String>(
         value: value,

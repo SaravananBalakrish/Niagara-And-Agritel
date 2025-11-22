@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:niagara_smart_drip_irrigation/features/controller_details/data/datasources/controller_datasource.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/data_sources/sub_user_data_sources.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/repositories/sub_user_repository_impl.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/repositories/sub_user_repo.dart';
@@ -8,6 +9,11 @@ import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/dom
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/controller_details/data/repositories/controller_details_repositories.dart';
+import '../../features/controller_details/domain/repositories/controller_details_repo.dart';
+import '../../features/controller_details/domain/usecase/controller_details_usercase.dart';
+import '../../features/controller_details/presentation/bloc/controller_details_bloc.dart';
+import '../../features/controller_details/presentation/bloc/controller_details_state.dart';
 import '../../features/dashboard/data/datasources/dashboard_remote_data_source.dart';
 import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart';
 import '../../features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -100,6 +106,9 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => CheckPhoneNumber(sl()));
   sl.registerLazySingleton(() => SignUp(sl()));
   sl.registerLazySingleton(() => UpdateProfile(sl()));
+  sl.registerLazySingleton(
+        () => UpdateControllerUsecase(controllerRepo: sl()),
+  );
 
   // Bloc
   sl.registerLazySingleton(() => AuthBloc(
@@ -124,7 +133,7 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton(() => DashboardBloc(fetchDashboardGroups: sl(), fetchControllers: sl(), mqttBloc: sl()));
 
   sl.registerLazySingleton<MessageDispatcher>(() => DashboardMessageDispatcher(dashboardBloc: sl<DashboardBloc>()));
-  
+
   // AppDrawer Feature
   sl.registerLazySingleton<GroupDataSources>(() => GroupDataSourcesImpl(apiClient: sl()));
   sl.registerLazySingleton<GroupRepository>(() => GroupRepositoryImpl(groupDataSources: sl()));
@@ -147,6 +156,12 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
       getSubUsersUsecase: sl(),
       getSubUserDetailsUsecase: sl(),
   ));
+
+  sl.registerLazySingleton<ControllerRemoteDataSource>(() => ControllerRemoteDataSourceImpl(apiClient: sl()));
+  sl.registerLazySingleton<ControllerRepo>(() => ControllerRepoImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton(() => GetControllerDetailsUsecase(controllerRepo: sl()));
+  sl.registerLazySingleton(() => ControllerDetailsBloc(getControllerDetails: sl(), updateController: sl(),));
+
 }
 
 // Reset all

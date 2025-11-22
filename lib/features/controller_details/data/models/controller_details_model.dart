@@ -1,4 +1,6 @@
 
+import '../../domain/entities/controller_details_entities.dart';
+
 class ControllerResponseModel {
   final int code;
   final String message;
@@ -25,115 +27,61 @@ class ControllerResponseModel {
   }
 }
 
-class ControllerDetails {
-  final String wpsIp;
-  final String wpsPort;
-  final String wapIp;
-  final String wapPort;
-  final String msgDesc;
-  final String motorStatus;
-  final String programNo;
-  final String zoneNo;
-  final String zoneRunTime;
-  final String zoneRemainingTime;
-  final String menuId;
-  final String referenceId;
-  final String setFlow;
-  final String remFlow;
-  final String flowRate;
-  final String programName;
-  final String simNumber;
-  final String deviceName;
-  final String manualStatus;
-  final String dndStatus;
-  final String mobileCountryCode;
-  final int dealerId;
-  final String dealerName;
-  final int productId;
-  final int oldProductId;
-  final int userId;
-  final int userDeviceId;
-  final String dealerNumber;
-  final String dealerCountryCode;
-  final String deviceId;
-  final String productDesc;
-  final String dateOfManufacture;
-  final int warrentyMonths;
-  final String modelName;
-  final int modelId;
-  final String categoryName;
-  final String operationMode;
-  final String gprsMode;
-  final String appSmsMode;
-  final String groupName;
-  final int groupId;
-  final int serviceDealerId;
-  final String serviceDealerName;
-  final String serviceDealerCountryCode;
-  final String serviceDealerMobileNumber;
-  final String emailAddress;
-  final int cctvStatusFlag;
-  final String mobCctv;
-  final String webCctv;
-  final String customerName;
-  final String customerNumber;
-  final String customerCountryCode;
-  final int customerUserId;
-
+class ControllerDetails extends ControllerDetailsEntities {
   ControllerDetails({
-    required this.wpsIp,
-    required this.wpsPort,
-    required this.wapIp,
-    required this.wapPort,
-    required this.msgDesc,
-    required this.motorStatus,
-    required this.programNo,
-    required this.zoneNo,
-    required this.zoneRunTime,
-    required this.zoneRemainingTime,
-    required this.menuId,
-    required this.referenceId,
-    required this.setFlow,
-    required this.remFlow,
-    required this.flowRate,
-    required this.programName,
-    required this.simNumber,
-    required this.deviceName,
-    required this.manualStatus,
-    required this.dndStatus,
-    required this.mobileCountryCode,
-    required this.dealerId,
-    required this.dealerName,
-    required this.productId,
-    required this.oldProductId,
-    required this.userId,
-    required this.userDeviceId,
-    required this.dealerNumber,
-    required this.dealerCountryCode,
-    required this.deviceId,
-    required this.productDesc,
-    required this.dateOfManufacture,
-    required this.warrentyMonths,
-    required this.modelName,
-    required this.modelId,
-    required this.categoryName,
-    required this.operationMode,
-    required this.gprsMode,
-    required this.appSmsMode,
-    required this.groupName,
-    required this.groupId,
-    required this.serviceDealerId,
-    required this.serviceDealerName,
-    required this.serviceDealerCountryCode,
-    required this.serviceDealerMobileNumber,
-    required this.emailAddress,
-    required this.cctvStatusFlag,
-    required this.mobCctv,
-    required this.webCctv,
-    required this.customerName,
-    required this.customerNumber,
-    required this.customerCountryCode,
-    required this.customerUserId,
+    required super.wpsIp,
+    required super.wpsPort,
+    required super.wapIp,
+    required super.wapPort,
+    required super.msgDesc,
+    required super.motorStatus,
+    required super.programNo,
+    required super.zoneNo,
+    required super.zoneRunTime,
+    required super.zoneRemainingTime,
+    required super.menuId,
+    required super.referenceId,
+    required super.setFlow,
+    required super.remFlow,
+    required super.flowRate,
+    required super.programName,
+    required super.simNumber,
+    required super.deviceName,
+    required super.manualStatus,
+    required super.dndStatus,
+    required super.mobileCountryCode,
+    required super.dealerId,
+    required super.dealerName,
+    required super.productId,
+    required super.oldProductId,
+    required super.userId,
+    required super.userDeviceId,
+    required super.dealerNumber,
+    required super.dealerCountryCode,
+    required super.deviceId,
+    required super.productDesc,
+    required super.dateOfManufacture,
+    required super.warrentyMonths,
+    required super.modelName,
+    required super.modelId,
+    required super.categoryName,
+    required super.operationMode,
+    required super.gprsMode,
+    required super.appSmsMode,
+    required super.groupName,
+    required super.groupId,
+    required super.serviceDealerId,
+    required super.serviceDealerName,
+    required super.serviceDealerCountryCode,
+    required super.serviceDealerMobileNumber,
+    required super.emailAddress,
+    required super.cctvStatusFlag,
+    required super.mobCctv,
+    required super.webCctv,
+    required super.customerName,
+    required super.customerNumber,
+    required super.customerCountryCode,
+    required super.customerUserId,
   });
 
   factory ControllerDetails.fromJson(Map<String, dynamic> json) {

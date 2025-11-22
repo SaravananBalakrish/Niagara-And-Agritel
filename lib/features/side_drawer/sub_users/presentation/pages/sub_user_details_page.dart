@@ -199,29 +199,4 @@ class SubUserDetailsScreen extends StatelessWidget {
     );
   }
 
- /* void _handleSubmit(BuildContext context) {
-    final bloc = context.read<SubUserEditBloc>();
-    bloc.add(UpdateSubUserEvent()); // Triggers usecase
-  }
-
-  void _handleDelete(BuildContext context) {
-    final bloc = context.read<SubUserEditBloc>();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this sub-user?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              bloc.add(DeleteSubUserEvent());
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }*/
-}
+ }

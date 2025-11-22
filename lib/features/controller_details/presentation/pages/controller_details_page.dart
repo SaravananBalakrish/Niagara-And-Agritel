@@ -1,304 +1,296 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
-import 'package:niagara_smart_drip_irrigation/features/controller_details/domain/entities/controller_details_entities.dart';
-import 'package:niagara_smart_drip_irrigation/features/controller_details/presentation/widgets/ctrlDetails_actionbtn.dart';
-import 'package:niagara_smart_drip_irrigation/features/controller_details/presentation/widgets/ctrlDetails_infoRow.dart';
-import '../widgets/commondropdown.dart';
+
+import '../../../../../core/di/injection.dart' as di;
+import '../../domain/usecase/controller_details_params.dart';
+import '../bloc/controller_details_bloc.dart';
+import '../bloc/controller_details_bloc_event.dart';
+import '../bloc/controller_details_state.dart';
+
+import '../widgets/ctrlDetails_infoRow.dart';
 import '../widgets/ctrlDetails_switchRow.dart';
-import '../widgets/ctrlDetails_toggleRow.dart';
+import '../widgets/ctrlDetails_actionbtn.dart';
 import '../widgets/ctrldetails_header_section.dart';
+import '../widgets/commondropdown.dart';
 
+class ControllerDetailsPage extends StatelessWidget {
+  final GetControllerDetailsParams params;
 
-
-class ControllerDetailsPage extends StatefulWidget {
-  const ControllerDetailsPage({super.key});
-
-  @override
-  State<ControllerDetailsPage> createState() => _ControllerDetailsPageState();
-}
-
-class _ControllerDetailsPageState extends State<ControllerDetailsPage> {
-  late ControllerDetailsEntities controller;
-  final TextEditingController simController = TextEditingController();
-  String selectedCountryCode = "+91";
-
-  final List<String> countryCodes = ["+91", "+1", "+44", "+61", "+971", "+81"];
-
-  // Dummy group list (from JSON)
-  final List<String> groupList = [
-    "ARGTC",
-    "1 WELL MOTOR 1",
-    "1 WELL MOTOR 2",
-    "A PON 8 Valve",
-    "A PON 2 Valve",
-    "BORE MOTORS",
-    "PON 2 Bore Thotti",
-    "PON 8 Bore Thotti",
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    controller = ControllerDetailsEntities(
-      wpsIp: "",
-      wpsPort: "",
-      wapIp: "",
-      wapPort: "",
-      msgDesc: "",
-      motorStatus: "NA",
-      programNo: "NA",
-      zoneNo: "No Active Zone",
-      zoneRunTime: "NA",
-      zoneRemainingTime: "NA",
-      menuId: "59",
-      referenceId: "2",
-      setFlow: "NA",
-      remFlow: "NA",
-      flowRate: "NA",
-      programName: "No Active Program",
-      simNumber: "7418040896",
-      deviceName: "DURAISAMY",
-      manualStatus: "0",
-      dndStatus: "1",
-      mobileCountryCode: "91",
-      dealerId: 115,
-      dealerName: "Niagara Solutions",
-      productId: 11158,
-      oldProductId: 0,
-      userId: 4056,
-      userDeviceId: 6946,
-      dealerNumber: "7373705105",
-      dealerCountryCode: "91",
-      deviceId: "867624060017414",
-      productDesc: "Smart Drip 4G",
-      dateOfManufacture: "27/05/2022",
-      warrentyMonths: 15,
-      modelName: "Smart Drip 4G",
-      modelId: 5,
-      categoryName: "Controllers",
-      operationMode: "10",
-      gprsMode: "4",
-      appSmsMode: "7",
-      groupName: "ARGTC",
-      groupId: 4609,
-      serviceDealerId: 115,
-      serviceDealerName: "Niagara Solutions",
-      serviceDealerCountryCode: "91",
-      serviceDealerMobileNumber: "7373705105",
-      emailAddress: ",,,,",
-      cctvStatusFlag: 0,
-      mobCctv: "com.appburst.cctvcamerapros",
-      webCctv: "http://www.cctvcamerapros.com/",
-      customerName: "Raju",
-      customerNumber: "9363060896",
-      customerCountryCode: "91",
-      customerUserId: 4056,
-    );
-    simController.text = controller.simNumber;
-  }
+  const ControllerDetailsPage({
+    super.key,
+    required this.params,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A4D68),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0A4D68),
-        title: const Text("CONTROLLER", style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: GlassCard(
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const ControllerSectionHeader(title: "Controller Details"),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "QR Code / Device ID:",
-                    value: controller.deviceId,
-                  ),
-                ),
-                 // Dropdown for Group Name
-                GlassCard(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Group Name",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      DropdownButton<String>(
-                        dropdownColor: const Color(0xFF0A4D68),
-                        value: controller.groupName,
-                        items: groupList.map((name) {
-                          return DropdownMenuItem(
-                            value: name,
-                            child: Text(
-                              name,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          // setState(
-                          //       () => controller.groupName =
-                          //       value ?? controller.groupName,
-                          // );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                 GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Device Name",
-                    value: controller.deviceName,
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Product",
-                    value: controller.productDesc,
-                  ),
-                ),
-                GlassCard(child: ControllerInfoRow(label: "Model", value: controller.modelName)),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Operation Mode",
-                    value: controller.operationMode,
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Program Name",
-                    value: controller.programName,
-                  ),
-                ),
-                 GlassCard(
-                  child: ControllerSwitchRow(
-                    title: "INTERNET 4G",
-                    value: controller.gprsMode == "4",onChanged: (val) {
-                    print("INTERNET 2G/3G & WiFi: $val");
-                  },
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerSwitchRow(
-                    title: "INTERNET 2G/3G & WiFi",
-                    value: controller.gprsMode != "4", onChanged: (val) {
-                    print("INTERNET 2G/3G & WiFi: $val");
-                  },
-                  ),
-                ),
-            GlassCard(
-                    child: Row(
-                      children: [
-                        CommonDropdown(
-                          value: selectedCountryCode,
-                          items: countryCodes,
-                          onChanged: (value) {
-                            setState(() => selectedCountryCode = value ?? "+91");
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: simController,
-                            style: const TextStyle(color: Colors.white),
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(
-                              labelText: "SIM Number",
-                              labelStyle: const TextStyle(color: Colors.white70),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.white38,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                  color: Colors.lightBlueAccent,
-                                ),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-            GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Date of Manufacturing",
-                    value: controller.dateOfManufacture,
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Dealer Name",
-                    value: controller.dealerName,
-                  ),
-                ),
-            GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Dealer Number",
-                    value: controller.dealerNumber,
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Customer Name",
-                    value: controller.customerName,
-                  ),
-                ),
-                GlassCard(
-                  child: ControllerInfoRow(
-                    label: "Customer Number",
-                    value: controller.customerNumber,
-                  ),
-                ),
-
-                GlassCard(
-                  child: ControllerSwitchRow(
-                    title: "DUAL PUMP",
-                    value: controller.dndStatus == "1",
-                    onChanged: (val) {
-                      print("DUAL PUMP switched: $val");
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-              ControllerActionButtons(
-                    buttons: [
-                      ControllerButtonData(
-                        title: "Submit",
-                        color: Colors.grey,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Submitted: SIM ${simController.text}, Group ${controller.groupName}",),
-                            ),
-                          );
-                        },
-                      ),
-                      ControllerButtonData(
-                        title: "Replace",
-                        color: Colors.blue,
-                        onPressed: () {},
-                      ),
-                    ],
-                ),
-
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+    return BlocProvider(
+      create: (_) => di.sl<ControllerDetailsBloc>()
+        ..add(GetControllerDetailsEvent(
+          userId: params.userId,
+          controllerId: params.controllerId,
+        )),
+      child: BlocBuilder<ControllerDetailsBloc, ControllerDetailsState>(
+        builder: (context, state) {
+          return _buildBody(context, state);
+        },
       ),
     );
+  }
+
+
+  Widget _buildBody(BuildContext context, ControllerDetailsState state) {
+    if (state is ControllerDetailsInitial || state is ControllerDetailsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state is ControllerDetailsError) {
+      return Center(
+        child: Text(
+          "Error: ${state.message}",
+          style: const TextStyle(color: Colors.white),
+        ),
+      );
+    }
+
+    if (state is ControllerDetailsLoaded) {
+      final controller = state.data;               // ControllerDetailsEntities
+      final groupList = state.groupDetails;          // List<GroupDetails>
+
+      TextEditingController simController = TextEditingController(text: controller.simNumber);
+      TextEditingController countrycodeController = TextEditingController(text: controller.customerCountryCode);
+      TextEditingController devicenameController = TextEditingController(text: controller.deviceName);
+
+      // String selectedCountry = "+${controller.mobileCountryCode}";
+
+      String selectedCountry = "+91";
+
+      return Scaffold(
+        backgroundColor: const Color(0xFF0A4D68),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF0A4D68),
+          centerTitle: true,
+          title: const Text(
+            "CONTROLLER DETAILS",
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+
+              const Center(
+                child: ControllerSectionHeader(title: "Controller Details"),
+              ),
+              const SizedBox(height: 16),
+
+
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: controller.deviceId));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Copied to clipboard")),
+                  );
+                },
+                child: ControllerInfoRow(
+                  label: "Device ID",
+                  value: controller.deviceId,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Group Name", style: TextStyle(color: Colors.white70)),
+                  DropdownButton<String>(
+                    dropdownColor: const Color(0xFF0A4D68),
+                    value: controller.groupName,
+                    items: groupList.map((g) {
+                      return DropdownMenuItem(
+                        value: g.groupName,
+                        child: Text(g.groupName, style: const TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      // Add event if you want update API
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              TextField(
+                controller: devicenameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: "Device Name",
+                  labelStyle: TextStyle(color: Colors.white70),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white38),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
+                  ),
+                ),
+              ),
+               const SizedBox(height: 20),
+                Row(
+                children: [
+                  Container(width: 100,
+                    child: TextField(
+                      controller: countrycodeController,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: "Country Code",
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white38),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: simController,
+                      style: const TextStyle(color: Colors.white),
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: "SIM Number",
+                        labelStyle: TextStyle(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white38),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+               ControllerInfoRow(
+                label: "Operation Mode",
+                valueWidget: IconButton(
+                  icon: const Icon(Icons.visibility, color: Colors.white),
+                  onPressed: () {},
+                ),
+              ),
+
+              ControllerInfoRow(
+                label: "WiFi Reset",
+                valueWidget: IconButton(
+                  icon: const Icon(Icons.wifi_protected_setup_sharp, color: Colors.white),
+                  onPressed: () {},
+                ),
+              ),
+              //------------------------------------------------
+              ControllerSwitchRow(
+                title: "INTERNET 4G",
+                value: controller.gprsMode == "4",
+                onChanged: (val) {
+                  context.read<ControllerDetailsBloc>().add(
+                    ToggleSwitchEvent(
+                       switchName: "gprsMode",
+                      isOn: val,
+                    ),
+                  );
+                },
+              ),
+
+              ControllerSwitchRow(
+                title: "INTERNET 2G/3G & WiFi",
+                value: controller.gprsMode != "4",
+                onChanged: (val) {
+                  context.read<ControllerDetailsBloc>().add(
+                    ToggleSwitchEvent(
+                       switchName: "gprsMode",
+                      isOn: !val,        // reverse logic
+                    ),
+                  );
+                },
+              ),
+
+        ControllerSwitchRow(
+          title: "DND",
+          value: controller.dndStatus == "1",
+          onChanged: (val) {
+            context.read<ControllerDetailsBloc>().add(
+              ToggleSwitchEvent(
+                 switchName: "dndStatus",
+                isOn: val,
+              ),
+            );
+          },
+        ),
+              const SizedBox(height: 20),
+              ControllerInfoRow(label: "Dealer Name", value: controller.dealerName),
+              ControllerInfoRow(label: "Model", value: controller.modelName),
+              ControllerInfoRow(label: "Customer Name", value: controller.customerName),
+              ControllerInfoRow(label: "Customer Number", value: controller.customerNumber),
+
+              const SizedBox(height: 24),
+
+              ControllerActionButtons(
+                buttons: [
+                  ControllerButtonData(
+                    title: "Submit",
+                    color: Colors.blue,
+                    onPressed: () {
+                      final bloc = context.read<ControllerDetailsBloc>();
+                       bloc.add(
+                        UpdateControllerEvent(
+                          userId: params.userId,
+                          controllerId: params.controllerId,
+                          countryCode: countrycodeController.text,
+                          simNumber: simController.text,
+                          deviceName: devicenameController.text,
+                          groupId: groupList.firstWhere((g) => g.groupName == controller.groupName).userGroupId,
+                          operationMode: controller.operationMode,
+                          gprsMode: controller.gprsMode,
+                          appSmsMode: controller.appSmsMode,
+                        ),
+                      );
+                    },
+                  ),
+                  ControllerButtonData(
+                    title: "Replace",
+                    color: Colors.orange,
+                    onPressed: () {},
+                  ),
+                  ControllerButtonData(
+                    title: "Delete",
+                    color: Colors.red,
+                    onPressed: () {},
+                  ),
+                  ControllerButtonData(
+                    title: "Cancel",
+                    color: Colors.grey,
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 50),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const Center(child: Text("Unexpected Error"));
   }
 }
