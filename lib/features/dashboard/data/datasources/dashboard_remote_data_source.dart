@@ -45,6 +45,8 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         (controllers) => controllers.cast<ControllerEntity>(),
       );
     } catch (e, stackTrace) {
+      print(stackTrace);
+      print("Error :: $e");
       rethrow;
     }
   }

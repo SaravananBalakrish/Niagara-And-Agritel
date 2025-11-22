@@ -158,7 +158,13 @@ class ControllerModel extends Equatable implements ControllerEntity {
     }
 
     // Parse liveMessage
+    // print("liveMessage :: ${json['liveMessage']}");
+    try {
     LiveMessageEntity parsedLiveMessage = LiveMessageModel.fromLiveMessage(json['liveMessage'] ?? {});
+    } catch (e, sta) {
+      print('Error ==> $e');
+      print('Stack trace ==> $sta');
+    }
 
     return ControllerModel(
       userDeviceId: json['userDeviceId'] as int? ?? 0,
@@ -172,7 +178,7 @@ class ControllerModel extends Equatable implements ControllerEntity {
       status1: json['status1'] as String? ?? '',
       msgcode: json['msgcode'] as String? ?? '',
       ctrlLatestMsg: json['ctrlLatestMsg'] as String? ?? '',
-      liveMessage: parsedLiveMessage,
+      liveMessage: LiveMessageModel.fromLiveMessage(json['liveMessage']),
       relaystatus: json['relaystatus'] as String? ?? '',
       operationMode: json['operationMode'] as String? ?? '',
       gprsMode: json['gprsMode'] as String? ?? '',

@@ -141,7 +141,7 @@ class LiveMessageModel extends LiveMessageEntity {
     final flowRateTemp = safeString(25, '0.0:0');
     final flowParts = flowRateTemp.split(':');
     final flowRate = flowParts.isNotEmpty ? flowParts[0] : '0.0';
-    final totalMeterFlow = flowParts.isNotEmpty ? flowParts[1] : '0';
+    final totalMeterFlow = flowParts.isNotEmpty && flowParts.length > 1 ? flowParts[1] : '0';
 
     final result = parseWellLevel(safeString(23, '0'));
     final wellLevel =  result["level"] ?? '0';
@@ -161,9 +161,9 @@ class LiveMessageModel extends LiveMessageEntity {
      final batvolt = fertStatus.length > 8 ? fertStatus[8] : '0.0';
     // List<String> fertStatus = <String>[];
     String runTimePrevious = safeString(28, '00:00:00');
-    List<String> ecph = parts[25].split(':');
+    List<String> ecph = parts.length < 23 ? parts[25].split(':') : ['0:0'];
     final ec = ecph.isNotEmpty ? ecph[0] : "0";
-    final ph = ecph.isNotEmpty ? ecph[1] : "0";
+    final ph = ecph.isNotEmpty && ecph.length > 1 ? ecph[1] : "0";
 
 
      final versionModule = safeString(39, '');

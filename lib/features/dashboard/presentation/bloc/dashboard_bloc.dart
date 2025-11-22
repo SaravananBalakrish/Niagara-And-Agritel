@@ -25,7 +25,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       result.fold(
             (failure) => emit(DashboardError(message: failure.message)),
             (groups) {
-          emit(DashboardGroupsLoaded(groups: groups));
+          emit(DashboardGroupsLoaded(groups: groups, groupControllers: {}));
 
           if (groups.isNotEmpty) {
             add(FetchControllersEvent(event.userId, groups[0].userGroupId));
