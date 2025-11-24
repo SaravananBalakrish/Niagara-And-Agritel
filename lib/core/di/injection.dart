@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/di/auth.di.dart';
 import '../../features/dashboard/di/dashboard_di.dart';
 import '../../features/mqtt/bloc/mqtt_bloc.dart';
+import '../../features/pump_settings/di/pump_settings_di.dart';
 import '../../features/side_drawer/groups/di/groups_di.dart';
 import '../../features/side_drawer/sub_users/di/sub_user_di.dart';
 import '../flavor/flavor_config.dart';
@@ -62,6 +63,9 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   initGroupDependencies();
   /// Sub Users Dependencies
   initSubUsersDependencies();
+
+  /// Pump Settings Dependencies
+  initPumpSettingsDependencies();
 }
 
 // Reset all

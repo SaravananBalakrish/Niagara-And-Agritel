@@ -425,7 +425,10 @@ class DashboardPage extends StatelessWidget {
                         : "${controller.msgDesc}\n${controller.ctrlLatestMsg}",
                   ),
                   SizedBox(height: scale(8)),
-                  ActionsSection(model: controller.modelId),
+                  ActionsSection(
+                    model: controller.modelId,
+                    data: {"userId" : controller.userId, "subUserId" : 0, "controllerId" : controller.userDeviceId},
+                  ),
                 ],
               ),
             ),
