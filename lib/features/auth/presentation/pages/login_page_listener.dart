@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/dashboard/utils/dashboard_routes.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/utils/dealer_routes.dart';
 
 import '../../../../core/utils/route_constants.dart';
 import '../../domain/usecases/login_params.dart';
@@ -36,9 +38,9 @@ class LoginPageListener {
 
     if (state is Authenticated) {
       if (state.user.userDetails.userType == 2) {
-        context.go(RouteConstants.dealerDashboard);
+        context.go(DealerRoutes.dealerDashboard);
       } else if (state.user.userDetails.userType == 1) {
-        context.go(RouteConstants.dashboard);
+        context.go(DashBoardRoutes.dashboard);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

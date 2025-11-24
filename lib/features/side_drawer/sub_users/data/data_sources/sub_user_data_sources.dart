@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:logger/logger.dart';
+import '../../utils/sub_user_urls.dart';
 
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
@@ -24,7 +25,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
   @override
   Future<List<SubUserEntity>> getSubUsers(int userId) async {
     try {
-      final endpoint = ApiUrls.getSubUserList.replaceAll(':userId', userId.toString());
+      final endpoint = SubUserUrls.getSubUserList.replaceAll(':userId', userId.toString());
       final response = await safeApiCall(() => apiClient.get(endpoint));
       // safeApiCall already throws on non-200, so just parse
       final List<dynamic> dataList = response['data']['subUserList'];
@@ -40,7 +41,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
   @override
   Future<SubUserDetailsEntity> getSubUserDetails(GetSubUserDetailsParams subUserDetailsParams) async {
     try {
-      String endpoint = ApiUrls.getSubUserDetails
+      String endpoint = SubUserUrls.getSubUserDetails
           .replaceAll(':userId', subUserDetailsParams.userId.toString())
           .replaceAll(':mSubUserCode', subUserDetailsParams.subUserCode.toString());
       if (subUserDetailsParams.isNewSubUser) {
@@ -81,7 +82,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
 
     try {
       if (updateSubUserDetailsParams.isNewSubUser) {
-        final endpoint = ApiUrls.addSubUser;
+        final endpoint = SubUserUrls.addSubUser;
         final controllerListData = selectedControllers.map((controller) => {
           'userDeviceId': controller.userDeviceId,
           'sms': '${subUserDetail.subUserCode},${subUserDetail.mobileCountryCode},${subUserDetail.mobileNumber},',
@@ -98,7 +99,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
         final response = await safeApiCall(() => apiClient.post(endpoint, body: reqBody));
         return response['message'] ?? 'Update successful';
       } else if(updateSubUserDetailsParams.isDelete){
-        final endpoint = ApiUrls.deleteSubUserDetails
+        final endpoint = SubUserUrls.deleteSubUserDetails
             .replaceAll(":userId", updateSubUserDetailsParams.userId.toString())
             .replaceAll(":shareUserId", subUserDetail.sharedUserId.toString());
 
@@ -116,7 +117,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
         logger.i('delete response: ${response['message']}');
         return response['message'] ?? 'delete successful';
       } else {
-        final endpoint = ApiUrls.updateSubUserDetails;
+        final endpoint = SubUserUrls.updateSubUserDetails;
         final controllerListData = selectedControllers.map((controller) => {
           'userDeviceId': controller.userDeviceId,
           'dndStatus': controller.dndStatus,
@@ -151,7 +152,7 @@ class SubUserDataSourceImpl extends SubUserDataSources {
   @override
   Future<dynamic> getSubUserByPhone(GetSubUserByPhoneParams geSubUserByPhoneParams) async {
     try {
-      final endpoint = ApiUrls.getSubUSer.replaceAll(':mobileno', geSubUserByPhoneParams.phoneNumber);
+      final endpoint = SubUserUrls.getSubUSer.replaceAll(':mobileno', geSubUserByPhoneParams.phoneNumber);
       final response = await safeApiCall(() => apiClient.get(endpoint));
       logger.d('Response for phone lookup: $response');
       return response['data'];

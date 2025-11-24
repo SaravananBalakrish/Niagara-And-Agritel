@@ -1,5 +1,3 @@
-// features/auth/presentation/pages/login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 import '../../../../core/utils/app_images.dart';
-import '../../../../core/utils/route_constants.dart';
 import '../../auth.dart';
+import '../../utils/auth_routes.dart';
 import 'login_page_listener.dart';
 
 class LoginPage extends StatelessWidget {
@@ -220,7 +218,7 @@ class LoginPage extends StatelessWidget {
 
                           const SizedBox(height: 20),
                           TextButton(
-                            onPressed: () => context.push(RouteConstants.signUp),
+                            onPressed: () => context.push(AuthRoutes.signUp),
                             child: RichText(
                               text: const TextSpan(
                                 text: 'Not registered? ',

@@ -1,23 +1,4 @@
 class ApiUrls {
-  //TODO: AUTH URLs
-  /// Get methods
-  static const String getAddress = '/maps/api/geocode/json?';
-  static const String simVerification = 'verifysim';
-  static const String getProfile = 'user/:userId';
-
-  /// Post methods
-  static const String signUp = 'user';
-  static const String loginWithOtpUrl = 'signin1';
-  static const String loginWithPasswordUrl = 'signin';
-  static const String verifyUserUrl = 'verifyUser';
-  static const String smsVerification = 'controller';
-
-  /// Put methods
-  static const String logOutUrl = 'signout';
-  static const String forgotPassword = 'forgotpassword';
-  static const String editProfile = 'user';
-
-
   //TODO: DEALER URLs
   /// Get methods
   static const String getSellingUnit = 'dealer/:userId/category/:categoryId';
@@ -29,34 +10,6 @@ class ApiUrls {
   /// Post methods
   static const String getSales = 'dealer/sales';
   static const String addController = 'dealer/controller';
-
-
-  //TODO: SUBUSER URLs
-  /// Get methods
-  static const String getSubUSer = 'user/:mobileno/details';
-  static const String getSubUserDetails = 'user/:userId/shareuser/:mSubUserCode/details';
-  static const String getSubUserList = 'user/:userId/shareuser/list';
-
-  /// Post methods
-  static const String addSubUser = 'user/share/controller';
-
-  /// Put methods
-  static const String updateSubUserDetails = 'user/share/controller';
-  static const String deleteSubUserDetails = 'user/:userId/shareuser/:shareUserId';
-
-
-  //TODO: GROUP URLs
-  /// Get methods
-  static const String getGroupValues = 'user/:userId/cluster';
-
-  /// Post methods
-  static const String addGroupValues = 'user/:userId/cluster';
-
-  /// Put methods
-  static const String updateGroupValues = 'user/:userId/cluster';
-
-  /// Delete methods
-  static const String deleteGroupValues = 'user/:userId/cluster/:groupId';
 
 
   //TODO: SHARED URLs
@@ -257,9 +210,7 @@ class ApiUrls {
 
 
   //TODO: DASHBOARD URLS (Additional from partial)
-  /// Get methods
-  static const String dashboardForGroupUrl = 'controller/user/:userId/cluster';
-  static const String dashboardUrl = 'user/:userId/cluster/:groupId/controller';
+
 }
 
 // Simple utility function for basic replacement.
@@ -267,18 +218,6 @@ String buildUrl(String urlTemplate, Map<String, String> params) {
   String url = urlTemplate;
   for (final entry in params.entries) {
     url = url.replaceAll(':${entry.key}', entry.value);
-  }
-  return url;
-}
-
-// Optional: Add query params if your URL ends with '?'.
-String buildUrlWithQuery(String urlTemplate, Map<String, String> pathParams, Map<String, String>? queryParams) {
-  String url = buildUrl(urlTemplate, pathParams);
-  if (queryParams != null && queryParams.isNotEmpty) {
-    final queryString = queryParams.entries
-        .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
-        .join('&');
-    url += (url.contains('?') ? '&' : '?') + queryString;
   }
   return url;
 }

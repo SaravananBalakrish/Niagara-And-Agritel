@@ -3,11 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
+import 'package:niagara_smart_drip_irrigation/features/auth/utils/auth_routes.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/utils/dealer_routes.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/groups/utils/group_routes.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/utils/sub_user_routes.dart';
 
 import '../../../../../core/utils/route_constants.dart';
 import '../../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../../auth/presentation/bloc/auth_event.dart';
 import '../../../../auth/presentation/bloc/auth_state.dart';
+import '../../../../dashboard/utils/dashboard_routes.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -77,7 +82,7 @@ class AppDrawer extends StatelessWidget {
                       TextButton.icon(
                         onPressed: () {
                           Navigator.pop(context);
-                          context.push(RouteConstants.editProfile);
+                          context.push(AuthRoutes.editProfile);
                         },
                         icon: const Icon(Icons.edit, size: 16, color: Colors.white70),
                         label: const Text(
@@ -103,9 +108,9 @@ class AppDrawer extends StatelessWidget {
                 String? homeRoute;
                 if (authState is Authenticated) {
                   final userType = authState.user.userDetails.userType;
-                  homeRoute = userType == 2 ? RouteConstants.dealerDashboard : RouteConstants.dashboard;
+                  homeRoute = userType == 2 ? DealerRoutes.dealerDashboard : DashBoardRoutes.dashboard;
                 } else {
-                  homeRoute = RouteConstants.login;
+                  homeRoute = AuthRoutes.login;
                 }
         
                 return _buildDrawerItem(
@@ -121,7 +126,7 @@ class AppDrawer extends StatelessWidget {
               context,
               icon: Icons.group_work,
               title: 'Groups',
-              route: RouteConstants.groups,
+              route: GroupRoutes.groups,
             ),
             const Divider(color: Colors.white54,),
             // Sub Users
@@ -129,7 +134,7 @@ class AppDrawer extends StatelessWidget {
               context,
               icon: Icons.group,
               title: 'Sub Users',
-              route: RouteConstants.subUsers,
+              route: SubUserRoutes.subUsers,
             ),
             // Chat
             _buildDrawerItem(
@@ -156,7 +161,7 @@ class AppDrawer extends StatelessWidget {
                     title: 'Logout',
                     onTap: () {
                       context.read<AuthBloc>().add(LogoutEvent());
-                      context.go(RouteConstants.login);
+                      context.go(AuthRoutes.login);
                       // context.pop();
                     },
                   );
@@ -165,7 +170,7 @@ class AppDrawer extends StatelessWidget {
                   context,
                   icon: Icons.login,
                   title: 'Login',
-                  route: RouteConstants.login,
+                  route: AuthRoutes.login,
                 );
               },
             ),

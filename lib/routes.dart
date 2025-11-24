@@ -3,39 +3,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/utils/dealer_routes.dart';
+import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/utils/sub_user_routes.dart';
+import 'features/dashboard/utils/dashboard_routes.dart';
+import 'features/side_drawer/groups/utils/group_routes.dart';
+import 'features/auth/utils/auth_routes.dart';
 
 import 'core/di/injection.dart' as di;
 import 'core/utils/route_constants.dart';
 import 'core/widgets/glassy_wrapper.dart';
-import 'features/auth/domain/entities/user_entity.dart';
-import 'features/auth/presentation/pages/sign_up_page.dart';
-import 'features/dashboard/domain/entities/livemessage_entity.dart';
-import 'features/dashboard/presentation/pages/controller_live_page.dart';
-import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'features/dashboard/presentation/bloc/dashboard_event.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
-import 'features/auth/presentation/pages/login_page.dart';
-import 'features/auth/presentation/pages/otp_page.dart';
-import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
-import 'features/side_drawer/groups/domain/usecases/add_group_usecase.dart';
-import 'features/side_drawer/groups/domain/usecases/delete_group_usecase.dart';
-import 'features/side_drawer/groups/domain/usecases/edit_group_usecase.dart';
-import 'features/side_drawer/groups/domain/usecases/group_fetching_usecase.dart';
-import 'features/side_drawer/groups/presentation/bloc/group_bloc.dart';
-import 'features/side_drawer/groups/presentation/bloc/group_event.dart';
 import 'features/side_drawer/groups/presentation/pages/chat.dart';
-import 'features/side_drawer/groups/presentation/pages/groups.dart';
 import 'features/side_drawer/groups/presentation/widgets/app_drawer.dart';
-import 'features/side_drawer/sub_users/domain/usecases/get_sub_user_by_phone_usecase.dart';
-import 'features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
-import 'features/side_drawer/sub_users/domain/usecases/get_sub_users_usecase.dart';
-import 'features/side_drawer/sub_users/domain/usecases/update_sub_user_usecase.dart';
-import 'features/side_drawer/sub_users/presentation/bloc/sub_users_bloc.dart';
-import 'features/side_drawer/sub_users/presentation/bloc/sub_users_event.dart';
-import 'features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
-import 'features/side_drawer/sub_users/presentation/pages/sub_users.dart';
+import 'features/auth/auth.dart';
+import 'features/dashboard/dashboard.dart';
+import 'features/side_drawer/sub_users/sub_users_barrel.dart';
+import 'features/side_drawer/groups/groups_barrel.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream stream) {
@@ -58,7 +41,7 @@ class AppRouter {
 
   AppRouter({required this.authBloc}) {
     router = GoRouter(
-      initialLocation: RouteConstants.login,
+      initialLocation: AuthRoutes.login,
       debugLogDiagnostics: true,
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (context, state) {
@@ -68,24 +51,24 @@ class AppRouter {
 
         final location = state.matchedLocation;
 
-        final isPublicRoute = location == RouteConstants.login ||
-            location == RouteConstants.verifyOtp ||
-            location == RouteConstants.signUp;
+        final isPublicRoute = location == AuthRoutes.login ||
+            location == AuthRoutes.verifyOtp ||
+            location == AuthRoutes.signUp;
 
-        if (isOtpSent && location != RouteConstants.verifyOtp) {
-          return RouteConstants.verifyOtp;
+        if (isOtpSent && location != AuthRoutes.verifyOtp) {
+          return AuthRoutes.verifyOtp;
         }
 
-        if (isLoggedIn && (location == RouteConstants.login || location == RouteConstants.verifyOtp)) {
+        if (isLoggedIn && (location == AuthRoutes.login || location == AuthRoutes.verifyOtp)) {
           if (authState.user.userDetails.userType == 2) {
-            return RouteConstants.dealerDashboard;
+            return DealerRoutes.dealerDashboard;
           } else if (authState.user.userDetails.userType == 1) {
-            return RouteConstants.dashboard;
+            return DashBoardRoutes.dashboard;
           }
         }
 
         if (!isLoggedIn && !isOtpSent && !isPublicRoute) {
-          return RouteConstants.login;
+          return AuthRoutes.login;
         }
 
         return null;
@@ -93,17 +76,17 @@ class AppRouter {
       routes: [
         _authRoute(
           name: 'login',
-          path: RouteConstants.login,
+          path: AuthRoutes.login,
           builder: (context, state) => const LoginPage(),
         ),
         _authRoute(
           name: 'signUp',
-          path: RouteConstants.signUp,
+          path: AuthRoutes.signUp,
           builder: (context, state) => UserProfileForm(isEdit: false),
         ),
         _authRoute(
           name: 'editProfile',
-          path: RouteConstants.editProfile,
+          path: AuthRoutes.editProfile,
           builder: (context, state) {
             final authState = authBloc.state;
             final initialData = authState is Authenticated ? authState.user.userDetails : null;
@@ -116,7 +99,7 @@ class AppRouter {
         ),
         _authRoute(
           name: 'verifyOtp',
-          path: RouteConstants.verifyOtp,
+          path: AuthRoutes.verifyOtp,
           builder: (context, state) {
             final authState = authBloc.state;
             final params = state.extra is Map ? state.extra as Map : null;
@@ -137,7 +120,7 @@ class AppRouter {
         ),
         GoRoute(
           name: 'dashboard',
-          path: RouteConstants.dashboard,
+          path: DashBoardRoutes.dashboard,
           builder: (context, state) {
             final authData = _getAuthData();
             final bloc = BlocProvider(
@@ -151,7 +134,7 @@ class AppRouter {
         ),
         GoRoute(
           name: 'ctrlLivePage',
-          path: RouteConstants.ctrlLivePage,
+          path: DashBoardRoutes.ctrlLivePage,
           builder: (context, state) {
             print('Building ctrlLivePage, AuthBloc state: ${authBloc.state}');
             final selectedController = state.extra as LiveMessageEntity?;
@@ -165,13 +148,13 @@ class AppRouter {
           builder: (context, state, child) {
             final location = state.matchedLocation;
             String title = 'Dealer Dashboard';
-            if (location == RouteConstants.groups) {
+            if (location == GroupRoutes.groups) {
               title = 'Groups';
-            } else if (location == RouteConstants.subUsers) {
+            } else if (location == SubUserRoutes.subUsers) {
               title = 'Sub Users';
             } else if (location == RouteConstants.chat) {
               title = 'Chat';
-            } else if (location == RouteConstants.subUserDetails) {
+            } else if (location == SubUserRoutes.subUserDetails) {
               title = 'Sub User Details';
             }
 
@@ -195,7 +178,7 @@ class AppRouter {
           routes: [
             GoRoute(
               name: 'dealerDashboard',
-              path: RouteConstants.dealerDashboard,
+              path: DealerRoutes.dealerDashboard,
               builder: (context, state) => BlocProvider.value(
                 value: authBloc,
                 child: const DealerDashboardPage(),
@@ -203,7 +186,7 @@ class AppRouter {
             ),
             GoRoute(
               name: 'groups',
-              path: RouteConstants.groups,
+              path: GroupRoutes.groups,
               builder: (context, state) {
                 final authData = _getAuthData();
                 final groupFetchingUseCase = di.sl<GroupFetchingUsecase>();
@@ -223,7 +206,7 @@ class AppRouter {
             ),
             _authRoute(
               name: 'subUsers',
-              path: RouteConstants.subUsers,
+              path: SubUserRoutes.subUsers,
               builder: (context, state) {
                 final authData = _getAuthData();
                 final getSubUserUsecase = di.sl<GetSubUsersUsecase>();
@@ -243,7 +226,7 @@ class AppRouter {
             ),
             _authRoute(
               name: 'subUserDetails',
-              path: RouteConstants.subUserDetails,
+              path: SubUserRoutes.subUserDetails,
               builder: (context, state) {
                 final params = state.extra is Map ? state.extra as Map : null;
                 final SubUsersBloc existingBloc = params?['existingBloc'] as SubUsersBloc;

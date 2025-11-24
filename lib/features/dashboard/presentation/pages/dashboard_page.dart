@@ -12,6 +12,7 @@ import '../../../../core/utils/app_images.dart';
 import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
 import 'package:get_it/get_it.dart' as di;
 
+import '../../utils/dashboard_routes.dart';
 import '../widgets/actions_section.dart';
 import '../widgets/ctrl_display.dart';
 import '../widgets/latestmsg_section.dart';
@@ -385,7 +386,7 @@ class DashboardPage extends StatelessWidget {
                   SizedBox(height: scale(8)),
                   GestureDetector(
                     onTap: () {
-                      context.push(RouteConstants.ctrlLivePage, extra: controller.liveMessage);
+                      context.push(DashBoardRoutes.ctrlLivePage, extra: controller.liveMessage);
                     },
                     child: RYBSection(
                       r: controller.liveMessage.rVoltage,

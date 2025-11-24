@@ -2,22 +2,24 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/auth/utils/auth_routes.dart';
 
 import '../../../../core/utils/route_constants.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../dashboard/utils/dashboard_routes.dart';
 
 class DealerDashboardPage extends StatelessWidget {
   const DealerDashboardPage({super.key});
 
   static const _tabs = [
-    {'icon': Icons.build, 'label': 'Service Request', 'route': RouteConstants.dashboard},
-    {'icon': Icons.sell, 'label': 'Selling Device', 'route': RouteConstants.dashboard},
-    {'icon': Icons.person_search, 'label': 'Customer Device', 'route': RouteConstants.dashboard},
-    {'icon': Icons.devices, 'label': 'My Device', 'route': RouteConstants.dashboard},
-    {'icon': Icons.group_work, 'label': 'Shared Device', 'route': RouteConstants.dashboard},
-    {'icon': Icons.check_box, 'label': 'Selected Customer', 'route': RouteConstants.dashboard},
+    {'icon': Icons.build, 'label': 'Service Request', 'route': DashBoardRoutes.dashboard},
+    {'icon': Icons.sell, 'label': 'Selling Device', 'route': DashBoardRoutes.dashboard},
+    {'icon': Icons.person_search, 'label': 'Customer Device', 'route': DashBoardRoutes.dashboard},
+    {'icon': Icons.devices, 'label': 'My Device', 'route': DashBoardRoutes.dashboard},
+    {'icon': Icons.group_work, 'label': 'Shared Device', 'route': DashBoardRoutes.dashboard},
+    {'icon': Icons.check_box, 'label': 'Selected Customer', 'route': DashBoardRoutes.dashboard},
   ];
 
   @override
@@ -25,7 +27,7 @@ class DealerDashboardPage extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoggedOut) {
-          context.go(RouteConstants.login);
+          context.go(AuthRoutes.login);
         }
       },
       child: BlocBuilder<AuthBloc, AuthState>(

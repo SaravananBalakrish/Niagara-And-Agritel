@@ -6,12 +6,12 @@ import 'package:flutter/foundation.dart';
 // For platform-specific handling if needed
 import 'package:get_it/get_it.dart';
 import 'package:crypto/crypto.dart';
+import 'package:niagara_smart_drip_irrigation/features/auth/utils/api_urls.dart';
 import 'dart:convert';
 
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/services/api_client.dart';
-import '../../../../core/utils/api_urls.dart';
 import '../../domain/auth_domain.dart';
 import '../models/user_model.dart';
 import 'auth_local_data_source.dart';
@@ -70,8 +70,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final deviceInfo = await _getDeviceInfo();
 
       final response = await _apiClient.post(
-        ApiUrls.loginWithOtpUrl,
-        // ApiUrls.loginWithPasswordUrl,
+        AuthUrls.loginWithOtpUrl,
+        // AuthUrls.loginWithPasswordUrl,
         body: {
           'mobileNumber': mobileNumber,
           'password': password,
@@ -182,7 +182,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final mobileNumber = _normalizePhoneNumber(firebaseUser.phoneNumber ?? '', countryCode: countryCode);
 
       final response = await _apiClient.post(
-        ApiUrls.loginWithOtpUrl,
+        AuthUrls.loginWithOtpUrl,
         headers: {'Authorization': 'Bearer $idToken'},
         body: {
           'mobileNumber': mobileNumber,
@@ -247,7 +247,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         print('Check phone body: $body');
       }
 
-      final response = await _apiClient.post(ApiUrls.verifyUserUrl, body: body);
+      final response = await _apiClient.post(AuthUrls.verifyUserUrl, body: body);
 
       if (kDebugMode) {
         print('Check phone response: $response');
@@ -289,7 +289,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ...deviceInfo,
       };
 
-      final response = await _apiClient.post(ApiUrls.signUp, body: body);
+      final response = await _apiClient.post(AuthUrls.signUp, body: body);
 
       if (kDebugMode) {
         print('Sign up req body: $body');
@@ -328,7 +328,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       };
 
       // Note: Consider using PUT instead of POST for updates if backend supports it.
-      final response = await _apiClient.put(ApiUrls.editProfile, body: body); // Or apiClient.put if available
+      final response = await _apiClient.put(AuthUrls.editProfile, body: body); // Or apiClient.put if available
 
       if (kDebugMode) {
         print('Update profile response: $response');
@@ -355,7 +355,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await authLocalDataSource.clearAuthData();
       await di.sl.reset();
       await di.init();
-      await _apiClient.put(ApiUrls.logOutUrl, body: {});
+      await _apiClient.put(AuthUrls.logOutUrl, body: {});
       if (kDebugMode) {
         print('User logged out successfully');
       }

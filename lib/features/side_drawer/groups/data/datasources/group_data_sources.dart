@@ -1,6 +1,6 @@
+import '../../../groups/utils/groups_urls.dart';
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
-import '../../../../../core/utils/api_urls.dart';
 import '../../domain/entities/group_entity.dart';
 import '../model/group_details.dart';
 
@@ -18,7 +18,7 @@ class GroupDataSourcesImpl extends GroupDataSources {
   @override
   Future<List<GroupEntity>> fetchGroups(int userId) async {
     try {
-      final endpoint = ApiUrls.getGroupValues.replaceAll(':userId', userId.toString());
+      final endpoint = GroupsUrls.getGroupValues.replaceAll(':userId', userId.toString());
       final response = await apiClient.get(endpoint);
       if (response['code'] == 200) {
         final List<dynamic> dataList = response['data'];
@@ -39,7 +39,7 @@ class GroupDataSourcesImpl extends GroupDataSources {
   @override
   Future<String> addGroups(int userId, String groupName) async {
     try {
-      final endpoint = ApiUrls.addGroupValues.replaceAll(':userId', userId.toString());
+      final endpoint = GroupsUrls.addGroupValues.replaceAll(':userId', userId.toString());
       final response = await apiClient.post(
         endpoint,
         body: {
@@ -64,7 +64,7 @@ class GroupDataSourcesImpl extends GroupDataSources {
   @override
   Future<String> editGroups(int userId, String groupName, int groupId) async {
     try {
-      final endpoint = ApiUrls.updateGroupValues.replaceAll(':userId', userId.toString());
+      final endpoint = GroupsUrls.updateGroupValues.replaceAll(':userId', userId.toString());
       Map<String, dynamic> body = {
         'userId': userId,
         'groupId': groupId,
@@ -92,7 +92,7 @@ class GroupDataSourcesImpl extends GroupDataSources {
   @override
   Future<String> deleteGroup(int userId, int groupId) async {
     try {
-      final endpoint = ApiUrls.deleteGroupValues.replaceAll(':userId', userId.toString()).replaceAll(':groupId', groupId.toString());
+      final endpoint = GroupsUrls.deleteGroupValues.replaceAll(':userId', userId.toString()).replaceAll(':groupId', groupId.toString());
       final response = await apiClient.delete(
         endpoint,
       );
