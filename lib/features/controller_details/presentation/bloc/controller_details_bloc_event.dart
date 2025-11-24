@@ -33,7 +33,7 @@ class ToggleSwitchEvent extends ControllerDetailsEvent {
 }
 
 class UpdateControllerEvent extends ControllerDetailsEvent {
-  final int userId;
+  final String userId;
   final int controllerId;
   final String countryCode;
   final String simNumber;
@@ -42,6 +42,8 @@ class UpdateControllerEvent extends ControllerDetailsEvent {
   final String operationMode;
   final String gprsMode;
   final String appSmsMode;
+  final String sentSms;
+  final String editType;
 
   UpdateControllerEvent({
     required this.userId,
@@ -53,6 +55,8 @@ class UpdateControllerEvent extends ControllerDetailsEvent {
     required this.operationMode,
     required this.gprsMode,
     required this.appSmsMode,
+    required this.sentSms,
+    required this.editType,
   });
 
   @override
@@ -66,5 +70,7 @@ class UpdateControllerEvent extends ControllerDetailsEvent {
     operationMode,
     gprsMode,
     appSmsMode,
+    sentSms,
+    editType,
   ];
 }

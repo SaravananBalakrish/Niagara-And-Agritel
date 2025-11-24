@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class UpdateControllerDetailsParams extends Equatable {
-  final int userId;
+  final String userId;
   final int controllerId;
   final String countryCode;
   final String simNumber;
@@ -10,6 +10,8 @@ class UpdateControllerDetailsParams extends Equatable {
   final String operationMode;
   final String gprsMode;
   final String appSmsMode;
+  final String sentSms;
+  final String editType;
 
   const UpdateControllerDetailsParams({
     required this.userId,
@@ -21,6 +23,8 @@ class UpdateControllerDetailsParams extends Equatable {
     required this.operationMode,
     required this.gprsMode,
     required this.appSmsMode,
+    required this.sentSms,
+    required this.editType,
   });
 
   @override
@@ -34,5 +38,7 @@ class UpdateControllerDetailsParams extends Equatable {
     operationMode,
     gprsMode,
     appSmsMode,
+    sentSms,
+    editType,
   ];
 }

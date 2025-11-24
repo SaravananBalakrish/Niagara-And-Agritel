@@ -74,12 +74,14 @@ class ControllerDetailsBloc
         operationMode: event.operationMode,
         gprsMode: event.gprsMode,
         appSmsMode: event.appSmsMode,
+        sentSms: event.sentSms,
+        editType: event.editType,
       ),
     );
 
     result.fold(
           (failure) => emit(ControllerDetailsError(failure.message)),
-          (success) => emit(UpdateControllerSuccess(success)),
+          (success) => emit(UpdateControllerSuccess(success.toString())),
     );
   }
 

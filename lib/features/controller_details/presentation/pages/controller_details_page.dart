@@ -253,7 +253,7 @@ class ControllerDetailsPage extends StatelessWidget {
                       final bloc = context.read<ControllerDetailsBloc>();
                        bloc.add(
                         UpdateControllerEvent(
-                          userId: params.userId,
+                          userId: '${params.userId}',
                           controllerId: params.controllerId,
                           countryCode: countrycodeController.text,
                           simNumber: simController.text,
@@ -262,6 +262,8 @@ class ControllerDetailsPage extends StatelessWidget {
                           operationMode: controller.operationMode,
                           gprsMode: controller.gprsMode,
                           appSmsMode: controller.appSmsMode,
+                          sentSms: "",
+                          editType: "0",
                         ),
                       );
                     },

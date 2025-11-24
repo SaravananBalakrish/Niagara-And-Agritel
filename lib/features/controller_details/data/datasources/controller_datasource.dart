@@ -65,25 +65,25 @@ class ControllerRemoteDataSourceImpl extends ControllerRemoteDataSource {
     try {
       final endpoint = ApiUrls.updateController;
 
-      print("➡️ PUT API: $endpoint");
-      // print("➡️ BODY: $body");
+       // print("➡️ BODY: $body");
       Map<String, dynamic> body = {
         "userId" : params.userId,
-        "controllerId" : params.controllerId,
+        "userDeviceId" : params.controllerId,
         "countryCode" : params.countryCode,
         "simNumber" : params.simNumber,
         "deviceName" : params.deviceName,
         "groupId" : params.groupId,
         "operationMode" : params.operationMode,
         "gprsMode" : params.gprsMode,
-        "appSmsMode" : params.appSmsMode
+        "appSmsMode" : params.appSmsMode,
+        "sentSms" : params.sentSms,
+        "editType" : params.editType
       };
 
-      print(" ️ body RESPONSE: $body");
-
+       print(" ️ body RESPONSE: ${jsonEncode(body)}");
       final response = await apiClient.put(
         endpoint,
-        body: jsonEncode(body),
+        body: body,
         headers: {
           "Content-Type": "application/json",
           "deviceType": "web",
@@ -106,6 +106,7 @@ class ControllerRemoteDataSourceImpl extends ControllerRemoteDataSource {
       );
     } catch (e) {
       print("❌ updateController ERROR: $e");
+      print("❌  error ${e.toString()}");
       throw ServerException(statusCode: 500, message: e.toString());
     }
   }
