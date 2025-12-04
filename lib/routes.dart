@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/dealer_dashboard/utils/dealer_routes.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/bloc/pump_settings_bloc.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/bloc/pump_settings_event.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/pages/water_pump_settings.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/utils/pump_settings_page_routes.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/utils/sub_user_routes.dart';
 import 'features/dashboard/utils/dashboard_routes.dart';
@@ -148,19 +145,7 @@ class AppRouter {
             );
           },
         ),
-        GoRoute(
-          name: 'settingMenuList',
-          path: PumpSettingsPageRoutes.settingMenuList,
-          builder: (context, state) {
-            final credential = state.extra as Map<String, dynamic>;
-            final bloc = BlocProvider(
-              create: (context) => di.sl<PumpSettingsBloc>()
-                ..add(GetPumpSettingsMenuEvent(userId: credential['userId'], subUserId: credential['subUserId'], controllerId: credential['controllerId'])),
-              child: PumpSettingsMenu(userId: credential['userId'], subUserId: credential['subUserId'], controllerId: credential['controllerId']),
-            );
-            return bloc;
-          },
-        ),
+        ...pumpSettingsRoutes,
         ShellRoute(
           builder: (context, state, child) {
             final location = state.matchedLocation;

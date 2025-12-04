@@ -1,30 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
-import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/settings_menu_entity.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/bloc/pump_settings_event.dart';
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/bloc/pump_settings_state.dart';
+import 'package:go_router/go_router.dart';
+import 'package:niagara_smart_drip_irrigation/features/pump_settings/utils/pump_settings_page_routes.dart';
+import '../../../../core/widgets/glass_effect.dart';
+import '../../../../core/widgets/glassy_wrapper.dart';
+import '../../domain/entities/settings_menu_entity.dart';
+import '../../presentation/bloc/pump_settings_event.dart';
+import '../../presentation/bloc/pump_settings_state.dart';
 
 import '../../../../core/di/injection.dart' as di;
 import '../../../../core/widgets/retry.dart';
-import '../../domain/usecsases/get_settings_menu_usecase.dart';
-import '../bloc/pump_settings_bloc.dart';
+import '../bloc/pump_settings_menu_bloc.dart';
 
-class PumpSettingsMenu extends StatelessWidget {
+class PumpSettingsMenuPage extends StatelessWidget {
   final int userId, subUserId, controllerId;
-  const PumpSettingsMenu({super.key, required this.userId, required this.subUserId, required this.controllerId});
+  const PumpSettingsMenuPage({super.key, required this.userId, required this.subUserId, required this.controllerId});
 
   @override
   Widget build(BuildContext context) {
-    final getSettingsMenuUsecase = di.sl<GetPumpSettingsMenuUsecase>();
     return BlocProvider(
-        create: (context) => PumpSettingsBloc(
-            getSettingsMenuUsecase: getSettingsMenuUsecase
-        )..add(GetPumpSettingsMenuEvent(userId: userId, subUserId: subUserId, controllerId: controllerId)),
+        create: (context) => di.sl<PumpSettingsMenuBloc>()
+          ..add(GetPumpSettingsMenuEvent(userId: userId, subUserId: subUserId, controllerId: controllerId)),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: Text("Pump Settings"),),
+        appBar: AppBar(
+          title: Text("Pump Settings Menu"),
+          actions: [
+            IconButton(
+                onPressed: null,
+                icon: Icon(Icons.hide_source, color: Colors.white,)
+            )
+          ],
+        ),
         body: GlassyWrapper(
             child: NotificationListener<OverscrollIndicatorNotification>(
                 onNotification: (notification) {
@@ -39,7 +46,7 @@ class PumpSettingsMenu extends StatelessWidget {
   }
 
   Widget _buildBody (BuildContext context) {
-    return BlocBuilder<PumpSettingsBloc, PumpSettingsState>(
+    return BlocBuilder<PumpSettingsMenuBloc, PumpSettingsState>(
         builder: (context, state) {
           if(state is GetPumpSettingsMenuInitial) {
             return Center(
@@ -52,7 +59,7 @@ class PumpSettingsMenu extends StatelessWidget {
             return Center(
               child: Retry(
                 message: state.message,
-                onPressed: () => context.read<PumpSettingsBloc>().add(
+                onPressed: () => context.read<PumpSettingsMenuBloc>().add(
                     GetPumpSettingsMenuEvent(userId: userId, subUserId: subUserId, controllerId: controllerId)
                 ),
               ),
@@ -72,17 +79,23 @@ class PumpSettingsMenu extends StatelessWidget {
         return GlassCard(
           child: InkWell(
             onTap: () {
-              print(item.menuItem);
+              context.push(
+                  PumpSettingsPageRoutes.pumpSettingsPage,
+                  extra: {
+                    'userId' : userId,
+                    'controllerId': controllerId,
+                    'subUserId' : subUserId,
+                    'menuId': item.menuSettingId,
+                    'menuName': item.templateName
+                  }
+              );
             },
             borderRadius: BorderRadius.circular(12.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 10,
               children: [
-                Icon(
-                  Icons.settings,
-                  size: 25.0,
-                ),
+                Icon(Icons.settings, size: 25.0,),
                 Text(
                   item.menuItem,
                   style: Theme.of(context).textTheme.titleSmall,

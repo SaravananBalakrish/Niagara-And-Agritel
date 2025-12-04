@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/menu_item_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/settings_menu_entity.dart';
 
 class PumpSettingsState extends Equatable {
@@ -17,6 +18,22 @@ class GetPumpSettingsMenuLoaded extends PumpSettingsState {
 class GetPumpSettingsMenuError extends PumpSettingsState {
   final String message;
   GetPumpSettingsMenuError({required this.message});
+
+  @override List<Object?> get props => [message];
+}
+
+class GetPumpSettingsInitial extends PumpSettingsState {}
+
+class GetPumpSettingsLoaded extends PumpSettingsState {
+  final MenuItemEntity settings;
+  GetPumpSettingsLoaded({required this.settings});
+
+  @override List<Object?> get props => [settings];
+}
+
+class GetPumpSettingsError extends PumpSettingsState {
+  final String message;
+  GetPumpSettingsError({required this.message});
 
   @override List<Object?> get props => [message];
 }

@@ -31,7 +31,7 @@ Future<void> appMain() async {
 }
 
 class RootApp extends StatelessWidget {
-  final AuthBloc authBloc; // NEW: Pass from appMain
+  final AuthBloc authBloc;
   final ThemeProvider _themeProvider = di.sl<ThemeProvider>();
 
   RootApp({super.key, required this.authBloc});

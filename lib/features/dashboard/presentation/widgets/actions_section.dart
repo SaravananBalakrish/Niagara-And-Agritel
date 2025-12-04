@@ -19,7 +19,7 @@ class ActionsSection extends StatelessWidget {
               icon: Icons.settings,
               title: "Pump\nSettings",
               onTap: () {
-                context.push(PumpSettingsPageRoutes.settingMenuList, extra: data);
+                context.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
               },
             ),
           ),
@@ -61,7 +61,7 @@ class ActionsSection extends StatelessWidget {
               icon: Icons.settings,
               title: "Pump\nSettings",
               onTap: () {
-                context.push(PumpSettingsPageRoutes.settingMenuList, extra: data);
+                context.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
               },
             ),
           ),
