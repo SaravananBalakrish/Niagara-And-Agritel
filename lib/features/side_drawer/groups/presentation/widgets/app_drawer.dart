@@ -18,8 +18,8 @@ class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext dialogContext) {
+    final theme = Theme.of(dialogContext);
 
     return Drawer(
       child: GlassyWrapper(
@@ -123,7 +123,7 @@ class AppDrawer extends StatelessWidget {
             ),
             // Groups (Dynamic Content)
             _buildDrawerItem(
-              context,
+              dialogContext,
               icon: Icons.group_work,
               title: 'Groups',
               route: GroupRoutes.groups,
@@ -131,21 +131,21 @@ class AppDrawer extends StatelessWidget {
             const Divider(color: Colors.white54,),
             // Sub Users
             _buildDrawerItem(
-              context,
+              dialogContext,
               icon: Icons.group,
               title: 'Sub Users',
               route: SubUserRoutes.subUsers,
             ),
             // Chat
             _buildDrawerItem(
-              context,
+              dialogContext,
               icon: Icons.chat,
               title: 'Chat',
               route: RouteConstants.chat,
             ),
             // Reminder
             _buildDrawerItem(
-              context,
+              dialogContext,
               icon: Icons.alarm,
               title: 'Reminder',
               // route: RouteConstants.reminder, // Add this route

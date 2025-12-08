@@ -26,8 +26,8 @@ class SettingListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext dialogContext) {
+    final theme = Theme.of(dialogContext);
 
     Widget? trailingWidget;
 
@@ -69,12 +69,11 @@ class SettingListTile extends StatelessWidget {
           : null,
       title: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
       ),
       subtitle: subtitle != null
           ? Text(
         subtitle!,
-        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        // style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
       )
           : null,
       trailing: IntrinsicWidth(child: trailingWidget),

@@ -6,15 +6,14 @@ import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/enti
 
 class MenuItemModel extends MenuItemEntity {
   MenuItemModel({
-    required super.settingsMenuEntity,
-    required super.templateJsonEntity,
+    required super.menu,
+    required super.template,
   });
 
   factory MenuItemModel.fromJson(Map<String, dynamic> json, List<Map<String, dynamic>> staticJson) {
-    print("json in the MenuItemModel :: $json");
     return MenuItemModel(
-        settingsMenuEntity: SettingsMenuModel.fromJson(json),
-        templateJsonEntity: TemplateJsonModel.fromJson(jsonDecode(json['templateJson']), staticJson)
+        menu: SettingsMenuModel.fromJson(json),
+        template: TemplateJsonModel.fromJson(jsonDecode(json['templateJson']), staticJson)
     );
   }
 }

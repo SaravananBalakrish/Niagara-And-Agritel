@@ -43,8 +43,8 @@ class SettingTextFormField extends StatelessWidget {
   final VoidCallback? onEditingComplete;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext dialogContext) {
+    final theme = Theme.of(dialogContext);
 
     return TextFormField(
       controller: controller,

@@ -29,13 +29,13 @@ class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key, required this.userId, required this.userType});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     if (userId <= 0) {
       return const Center(child: Text('Invalid user session. Please log in again.'));
     }
 
     final bloc = di.GetIt.instance.get<DashboardBloc>();
-    _initializeBloc(bloc, context);
+    _initializeBloc(bloc, dialogContext);
 
     return BlocProvider.value(
       value: bloc,
@@ -454,7 +454,7 @@ class _Divider extends StatelessWidget {
   const _Divider();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Container(width: 1, height: 20, color: Colors.white54);
   }
 }

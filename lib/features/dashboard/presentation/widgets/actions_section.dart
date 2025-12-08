@@ -9,7 +9,7 @@ class ActionsSection extends StatelessWidget {
   const ActionsSection({super.key, required this.model, required this.data});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return ([1, 5].contains(model)) ? Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
@@ -19,7 +19,7 @@ class ActionsSection extends StatelessWidget {
               icon: Icons.settings,
               title: "Pump\nSettings",
               onTap: () {
-                context.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
+                dialogContext.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
               },
             ),
           ),
@@ -61,7 +61,7 @@ class ActionsSection extends StatelessWidget {
               icon: Icons.settings,
               title: "Pump\nSettings",
               onTap: () {
-                context.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
+                dialogContext.push(PumpSettingsPageRoutes.pumpSettingMenuList, extra: data);
               },
             ),
           ),
@@ -108,7 +108,7 @@ class MenuButton extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return GestureDetector(
       onTap: isEnabled ? onTap : null,
       child: GlassCard(

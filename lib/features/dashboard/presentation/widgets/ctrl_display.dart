@@ -15,7 +15,7 @@ class CtrlDisplay extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(

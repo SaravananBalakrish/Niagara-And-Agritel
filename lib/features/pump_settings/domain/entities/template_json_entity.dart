@@ -1,4 +1,4 @@
-// features/pump_settings/domain/entities/template_json_entity.dart
+import 'package:collection/collection.dart';
 
 class TemplateJsonEntity {
   final String type;
@@ -8,12 +8,35 @@ class TemplateJsonEntity {
   const TemplateJsonEntity({
     required this.type,
     required this.groups,
-    required this.sections
+    required this.sections,
   });
+
+  TemplateJsonEntity copyWith({
+    String? type,
+    List<ParameterGroupEntity>? groups,
+    List<SettingSectionEntity>? sections,
+  }) {
+    return TemplateJsonEntity(
+      type: type ?? this.type,
+      groups: groups ?? this.groups,
+      sections: sections ?? this.sections,
+    );
+  }
+
+  TemplateJsonEntity copyWithSettingValue({
+    required int serialNumber,
+    required String newValue,
+  }) {
+    final updatedSections = sections.map((section) {
+      return section.copyWithSetting(serialNumber, newValue);
+    }).toList();
+
+    return copyWith(sections: updatedSections);
+  }
 }
 
 class ParameterGroupEntity {
-  final String groupName; // e.g. "Dry Run Settings", "LOW VOLT"
+  final String groupName;
   final List<ParameterItemEntity> items;
 
   const ParameterGroupEntity({
@@ -23,7 +46,7 @@ class ParameterGroupEntity {
 }
 
 class ParameterItemEntity {
-  // Common
+  // Common fields
   final String? toggleType;
   final String? toggleStatus;
   final String? delayTime;
@@ -35,14 +58,12 @@ class ParameterItemEntity {
   final String? toValue;
   final String? progNumber;
 
-  // Voltage Settings
   final String? phaseValue;
   final String? voltageValue;
   final String? voltageDifferenceValue;
   final String? voltagePlaceHolder;
   final String? differencePlaceHolder;
 
-  // Current Settings (Dry Run / Overload)
   final String? phase2Value;
   final String? phase3Value;
 
@@ -75,7 +96,7 @@ class SettingsEntity {
   final String title;
   final String hiddenFlag;
 
-  SettingsEntity({
+  const SettingsEntity({
     required this.serialNumber,
     required this.widgetType,
     required this.value,
@@ -83,6 +104,17 @@ class SettingsEntity {
     required this.title,
     required this.hiddenFlag,
   });
+
+  SettingsEntity copyWith({String? value}) {
+    return SettingsEntity(
+      serialNumber: serialNumber,
+      widgetType: widgetType,
+      value: value ?? this.value,
+      smsFormat: smsFormat,
+      title: title,
+      hiddenFlag: hiddenFlag,
+    );
+  }
 }
 
 class SettingSectionEntity {
@@ -90,9 +122,25 @@ class SettingSectionEntity {
   final String sectionName;
   final List<SettingsEntity> settings;
 
-  SettingSectionEntity({
+  const SettingSectionEntity({
     required this.typeId,
     required this.sectionName,
     required this.settings,
   });
+
+  SettingSectionEntity copyWith({List<SettingsEntity>? settings,}) {
+    return SettingSectionEntity(
+      typeId: typeId,
+      sectionName: sectionName,
+      settings: settings ?? this.settings,
+    );
+  }
+
+  SettingSectionEntity copyWithSetting(int serialNumber, String newValue) {
+    return copyWith(
+      settings: settings.map((s) {
+        return s.serialNumber == serialNumber ? s.copyWith(value: newValue) : s;
+      }).toList(),
+    );
+  }
 }

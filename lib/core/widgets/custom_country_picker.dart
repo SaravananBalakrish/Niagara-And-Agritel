@@ -155,7 +155,7 @@ class CustomCountryPicker {
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: buildGlassyActionButton(
+                              child: ActionButton(
                                   onPressed: () => Navigator.pop(context),
                                   child: Text('Cancel')
                               ),

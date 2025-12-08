@@ -22,7 +22,7 @@ class DealerDashboardPage extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is LoggedOut) {

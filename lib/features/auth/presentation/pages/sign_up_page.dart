@@ -19,7 +19,7 @@ class UserProfileForm extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     // Reuse existing AuthBloc from DI instead of creating new one
     return _UserProfileFormBody(isEdit: isEdit, initialData: initialData);
   }
@@ -32,7 +32,7 @@ class _UserProfileFormBody extends StatelessWidget {
   const _UserProfileFormBody({required this.isEdit, this.initialData});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     final formKey = GlobalKey<FormState>();
 
     // Controllers
@@ -86,21 +86,21 @@ class _UserProfileFormBody extends StatelessWidget {
       if (!formKey.currentState!.validate()) return;
 
       if (phoneNumber == null || phoneNumber!.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
           const SnackBar(content: Text('Please enter a valid mobile number')),
         );
         return;
       }
 
       if (!isEdit && passwordCtrl.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
           const SnackBar(content: Text('Password is required for signup')),
         );
         return;
       }
 
       if (selectedUserType.value == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(dialogContext).showSnackBar(
           const SnackBar(content: Text('Please select User Type')),
         );
         return;
@@ -112,7 +112,7 @@ class _UserProfileFormBody extends StatelessWidget {
       final mobileToSend = phoneWithoutCountry ?? phoneNumber!.replaceAll(RegExp(r'\D'), '');
 
       if (isEdit) {
-        context.read<AuthBloc>().add(UpdateProfileEvent(
+        dialogContext.read<AuthBloc>().add(UpdateProfileEvent(
           id: initialData!.id,
           name: nameCtrl.text.trim(),
           mobile: mobileToSend,
@@ -130,7 +130,7 @@ class _UserProfileFormBody extends StatelessWidget {
           password: passwordCtrl.text.isEmpty ? null : passwordCtrl.text,
         ));
       } else {
-        context.read<AuthBloc>().add(SignUpEvent(
+        dialogContext.read<AuthBloc>().add(SignUpEvent(
           mobile: mobileToSend,
           name: nameCtrl.text.trim(),
           userType: userTypeInt,
@@ -155,7 +155,7 @@ class _UserProfileFormBody extends StatelessWidget {
         leading: isEdit
             ? IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(dialogContext),
         )
             : null,
       ),
@@ -308,7 +308,7 @@ class _UserProfileFormBody extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: Theme.of(dialogContext).primaryColor,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
                       child: Text(

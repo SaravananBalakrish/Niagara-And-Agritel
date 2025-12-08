@@ -37,8 +37,8 @@ class GlassyAlertDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext dialogContext) {
+    final theme = Theme.of(dialogContext);
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
       child: Dialog(

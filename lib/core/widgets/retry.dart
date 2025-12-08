@@ -6,7 +6,7 @@ class Retry extends StatelessWidget {
   const Retry({super.key, required this.message, required this.onPressed});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

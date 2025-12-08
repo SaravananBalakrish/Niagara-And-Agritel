@@ -15,7 +15,7 @@ class GroupsPage extends StatelessWidget {
   const GroupsPage({super.key, required this.userId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     final groupFetchingUseCase = di.sl<GroupFetchingUsecase>();
     final addGroupUseCase = di.sl<GroupAddingUsecase>();
     final editGroupUsecase = di.sl<EditGroupUsecase>();
@@ -37,7 +37,7 @@ class _GroupsView extends StatelessWidget {
   const _GroupsView({required this.userId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: BlocBuilder<GroupBloc, GroupState>(
@@ -56,7 +56,7 @@ class _GroupsView extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showGroupDialog(context, userId, isEdit: false, isDelete: false),
+        onPressed: () => _showGroupDialog(dialogContext, userId, isEdit: false, isDelete: false),
         child: const Icon(Icons.add),
       ),
     );
@@ -279,14 +279,15 @@ class _GroupDialogState extends State<GroupDialog> {
           ),
         ),
         actions: [
-          buildGlassyActionButton(
+          ActionButton(
             onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
             isPrimary: false,
+            child: const Text('Cancel'),
           ),
           const SizedBox(width: 16),
-          buildGlassyActionButton(
+          ActionButton(
             onPressed: _isLoading ? null : _handleSave,
+            isPrimary: true,
             child: _isLoading
                 ? const SizedBox(
               width: 20,
@@ -294,7 +295,6 @@ class _GroupDialogState extends State<GroupDialog> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
                 : Text(widget.isDelete ? 'Delete' : 'Save'),
-            isPrimary: true,
           ),
         ],
         barrierDismissible: false,
@@ -313,15 +313,4 @@ class _GroupDialogState extends State<GroupDialog> {
     ),
     onPressed: _controller.clear,
   );
-}
-
-@deprecated
-class Groups extends StatelessWidget {
-  final int userId;
-  const Groups({super.key, required this.userId});
-
-  @override
-  Widget build(BuildContext context) {
-    throw UnimplementedError('Use GroupsPage instead for Clean Architecture compliance');
-  }
 }

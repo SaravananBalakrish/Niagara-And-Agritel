@@ -9,7 +9,7 @@ class GlassyWrapper extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     List<Widget> stackChildren = [
       Positioned.fill(
         child: Container(
@@ -18,7 +18,7 @@ class GlassyWrapper extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomRight,
               colors: [
-                Theme.of(context).colorScheme.primaryContainer,
+                Theme.of(dialogContext).colorScheme.primaryContainer,
                 Colors.black87,
               ],
             ),

@@ -10,7 +10,7 @@ class MsgDescSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return  Center(child: Text(msg.isEmpty ? "No Message" : msg, textAlign: TextAlign.center,style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white,)));
   }
 }

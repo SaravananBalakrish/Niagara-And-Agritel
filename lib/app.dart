@@ -37,7 +37,7 @@ class RootApp extends StatelessWidget {
   RootApp({super.key, required this.authBloc});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _themeProvider),

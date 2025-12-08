@@ -11,7 +11,7 @@ class SettingSwitch extends StatelessWidget {
   final ValueChanged<bool>? onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Switch(
       value: value,
       onChanged: onChanged,

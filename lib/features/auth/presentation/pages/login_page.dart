@@ -13,14 +13,14 @@ class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext dialogContext) {
+    final theme = Theme.of(dialogContext);
 
     return BlocProvider(
       create: (_) => LoginPageCubit(),
       child: Scaffold(
         body: Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.of(dialogContext).size.height,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,

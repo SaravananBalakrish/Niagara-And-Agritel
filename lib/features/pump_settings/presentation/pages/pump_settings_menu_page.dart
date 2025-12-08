@@ -17,7 +17,7 @@ class PumpSettingsMenuPage extends StatelessWidget {
   const PumpSettingsMenuPage({super.key, required this.userId, required this.subUserId, required this.controllerId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return BlocProvider(
         create: (context) => di.sl<PumpSettingsMenuBloc>()
           ..add(GetPumpSettingsMenuEvent(userId: userId, subUserId: subUserId, controllerId: controllerId)),
@@ -38,7 +38,7 @@ class PumpSettingsMenuPage extends StatelessWidget {
                   notification.disallowIndicator();
                   return true;
                 },
-                child: _buildBody(context)
+                child: _buildBody(dialogContext)
             )
         ),
       ),

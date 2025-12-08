@@ -4,7 +4,7 @@ class Chat extends StatelessWidget {
   const Chat({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Center(
       child: Text("My Chat"),
     );

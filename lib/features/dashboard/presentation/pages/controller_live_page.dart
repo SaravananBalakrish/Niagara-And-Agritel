@@ -19,7 +19,7 @@ class CtrlLivePage extends StatelessWidget {
   const CtrlLivePage({super.key, this.selectedController});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     print("fertStatus:${selectedController!.fertStatus}");
     print("fertValues:${selectedController!.fertValues}");
     return NotificationListener<OverscrollIndicatorNotification>(

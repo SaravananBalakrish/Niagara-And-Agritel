@@ -235,5 +235,7 @@ class MqttMessageHelper {
 }
 
 class PublishMessageHelper {
-  static const Map<String, dynamic> requestLive = {"sentSms": "#live"};
+  static const String key = "sentSms";
+  static const Map<String, dynamic> requestLive = {key: "#live"};
+  static Map<String, dynamic> settingsPayload(String value) => {key: value};
 }

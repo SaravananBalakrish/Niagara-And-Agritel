@@ -16,12 +16,12 @@ class SubUserDetailsScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    context.read<SubUsersBloc>().add(
+  Widget build(BuildContext dialogContext) {
+    dialogContext.read<SubUsersBloc>().add(
       GetSubUserDetailsEvent(subUserDetailsParams: subUserDetailsParams),
     );
     return BlocConsumer<SubUsersBloc, SubUsersState>(
-      listener: _buildListener(context),  // extract for clarity
+      listener: _buildListener(dialogContext),  // extract for clarity
       builder: (context, state) => _buildBody(context, state),
     );
   }

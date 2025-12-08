@@ -16,7 +16,7 @@ class LiveDisplayObject extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
        child: Row(

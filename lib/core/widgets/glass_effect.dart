@@ -22,7 +22,7 @@ class GlassCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return Container(
       margin: margin ?? const EdgeInsets.all(4),
       decoration: BoxDecoration(

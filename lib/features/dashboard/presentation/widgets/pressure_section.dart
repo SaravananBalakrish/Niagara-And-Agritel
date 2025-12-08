@@ -15,7 +15,7 @@ class PressureSection extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     return  Column(
       children: [
         Text("$fertlizer",style: const TextStyle(fontWeight: FontWeight.bold,color: Colors.white)),

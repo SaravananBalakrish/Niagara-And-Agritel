@@ -11,10 +11,10 @@ class SubUsers extends StatelessWidget {
   const SubUsers({super.key, required this.userId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext dialogContext) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.read<SubUsersBloc>().state is! SubUsersLoaded) {
-        context.read<SubUsersBloc>().add(GetSubUsersEvent(userId: userId));
+      if (dialogContext.read<SubUsersBloc>().state is! SubUsersLoaded) {
+        dialogContext.read<SubUsersBloc>().add(GetSubUsersEvent(userId: userId));
       }
     });
     return BlocBuilder<SubUsersBloc, SubUsersState>(
