@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/mqtt_service.dart';
+import '../../../core/services/selected_controller_persistence.dart';
 import '../utils/mqtt_message_helper.dart';
 import 'mqtt_event.dart';
 import 'mqtt_state.dart';
@@ -20,6 +21,7 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
   static const Duration retryDelay = Duration(seconds: 5);
   String? _currentDeviceId;
   bool get isConnected => mqttService.isConnected;
+  final persistence = sl.get<SelectedControllerPersistence>();
 
   MqttBloc({required this.mqttService}) : super(MqttInitial()) {
     on<ConnectMqttEvent>(_onConnect);
@@ -82,12 +84,12 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
 
   void _onSubscribe(SubscribeMqttEvent event, Emitter<MqttState> emit) {
   if (kDebugMode) {
-    print("_onSubscribe called for deviceId: ${event.deviceId}");
+    print("_onSubscribe called for deviceId: ${persistence.deviceId}");
     print("_onSubscribe current state: ${state.runtimeType}");
   }
   if (mqttService.isConnected) {
-    if (_currentDeviceId == event.deviceId) {
-      if (kDebugMode) print('Already subscribed to ${event.deviceId} - skipping');
+    if (_currentDeviceId == persistence.deviceId) {
+      if (kDebugMode) print('Already subscribed to ${persistence.deviceId} - skipping');
       return;
     }
     if (_currentDeviceId != null) {
@@ -95,13 +97,14 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
       mqttService.unsubscribe(_currentDeviceId!);
     }
 
-    mqttService.subscribe(event.deviceId);
-    _currentDeviceId = event.deviceId;
+    mqttService.subscribe(persistence.deviceId!);
+    _currentDeviceId = persistence.deviceId;
 
-    if (kDebugMode) print('Subscribed to new topic: tweet/${event.deviceId}');
+    if (kDebugMode) print('Subscribed to new topic: tweet/${persistence.deviceId}');
 
     final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
-    mqttService.publish(event.deviceId, publishMessage);
+    mqttService.publish(persistence.deviceId!, publishMessage);
+    // mqttService.publish(persistence.deviceId, publishMessage);
     if (kDebugMode) print('Published message after subscribe: $publishMessage');
   } else {
     if (kDebugMode) print('Skipped subscribe; service not connected');
@@ -114,7 +117,7 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
   void _onPublish(PublishMqttEvent event, Emitter<MqttState> emit) {
     // FIXED: Same service check
     if (mqttService.isConnected) {
-      mqttService.publish(event.deviceId, event.message);
+      mqttService.publish(persistence.deviceId!, event.message);
     } else {
       if (kDebugMode) {
         print('🔵 MqttBloc._onPublish: Skipped; service not connected');

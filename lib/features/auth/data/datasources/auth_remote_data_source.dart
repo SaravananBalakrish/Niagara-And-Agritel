@@ -240,7 +240,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final body = {
         'mobileNumber': phone,
-        'countryCode': countryCode.substring(1), // Remove '+' prefix
+        'countryCode': countryCode.substring(1),
       };
 
       if (kDebugMode) {

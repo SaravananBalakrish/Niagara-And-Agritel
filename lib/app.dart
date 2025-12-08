@@ -43,7 +43,7 @@ class RootApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: _themeProvider),
         BlocProvider<AuthBloc>.value(value: authBloc),
         BlocProvider<MqttBloc>(
-          lazy: false, // Eager creation
+          lazy: false,
           create: (context) {
             final bloc = di.sl<MqttBloc>();
             return bloc;

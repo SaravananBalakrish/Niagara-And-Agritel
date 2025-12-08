@@ -4,13 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:niagara_smart_drip_irrigation/core/utils/route_constants.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/di/injection.dart' as di;
+import '../../../../core/services/selected_controller_persistence.dart';
 import '../../../../core/utils/app_images.dart';
 import '../../../side_drawer/groups/presentation/widgets/app_drawer.dart';
-import 'package:get_it/get_it.dart' as di;
 
 import '../../utils/dashboard_routes.dart';
 import '../widgets/actions_section.dart';
@@ -34,7 +34,7 @@ class DashboardPage extends StatelessWidget {
       return const Center(child: Text('Invalid user session. Please log in again.'));
     }
 
-    final bloc = di.GetIt.instance.get<DashboardBloc>();
+    final bloc = di.sl.get<DashboardBloc>();
     _initializeBloc(bloc, dialogContext);
 
     return BlocProvider.value(
@@ -50,10 +50,21 @@ class DashboardPage extends StatelessWidget {
       if (bloc.state is! DashboardLoading && bloc.state is! DashboardGroupsLoaded) {
         bloc.add(FetchDashboardGroupsEvent(userId));
       }
+
+      // One-time restore + auto-select when groups are loaded
+      bloc.stream
+          .where((state) => state is DashboardGroupsLoaded && (state).groups.isNotEmpty)
+          .take(1)
+          .listen((state) {
+        final loadedState = state as DashboardGroupsLoaded;
+        _restoreLastSelectionIfPossible(loadedState, bloc);
+        _autoSelectGroupIfNeeded(bloc, loadedState);
+      });
+
       await Future.delayed(const Duration(seconds: 5));
       if (!bloc.isClosed) bloc.add(StartPollingEvent());
 
-      final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+      final mqttBloc = di.sl.get<MqttBloc>();
       mqttBloc.setProcessingContext(context);
     });
   }
@@ -138,7 +149,6 @@ class DashboardPage extends StatelessWidget {
     }
 
     final bloc = context.read<DashboardBloc>();
-    _autoSelectGroupIfNeeded(bloc, state);
 
     final (selectedGroup, selectedController, controllers) = _getSelectedGroupAndController(state);
 
@@ -342,7 +352,7 @@ class DashboardPage extends StatelessWidget {
   }
 
   static Future<void> _refreshLiveData(dynamic selectedController) async {
-    final mqttBloc = di.GetIt.instance.get<MqttBloc>();
+    final mqttBloc = di.sl<MqttBloc>();
     final deviceId = selectedController.deviceId;
     final publishMessage = jsonEncode(PublishMessageHelper.requestLive);
     mqttBloc.add(PublishMqttEvent(deviceId: deviceId, message: publishMessage));
@@ -447,6 +457,32 @@ class DashboardPage extends StatelessWidget {
     } catch (e) {
       debugPrint('Error launching call: $e');
     }
+  }
+
+  void _restoreLastSelectionIfPossible(DashboardGroupsLoaded state, DashboardBloc bloc) {
+    final persistence = di.sl<SelectedControllerPersistence>();
+    final savedDeviceId = persistence.deviceId;
+    final savedGroupId = persistence.groupId;
+
+    if (savedDeviceId == null || savedGroupId == null) return;
+
+    // Find and select the saved controller
+    final controllers = state.groupControllers[savedGroupId];
+    if (controllers != null) {
+      final index = controllers.indexWhere((c) => c.deviceId == savedDeviceId);
+      if (index != -1) {
+        bloc.add(SelectGroupEvent(savedGroupId));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!bloc.isClosed) {
+            bloc.add(SelectControllerEvent(index));
+          }
+        });
+        return;
+      }
+    }
+
+    // Fallback: just select the group
+    bloc.add(SelectGroupEvent(savedGroupId));
   }
 }
 
