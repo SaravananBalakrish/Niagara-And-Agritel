@@ -2,6 +2,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:niagara_smart_drip_irrigation/features/controller_details/data/datasources/controller_datasource.dart';
+import 'package:niagara_smart_drip_irrigation/features/setserialsettings/data/repositories/setserial_details_repositories.dart';
+import 'package:niagara_smart_drip_irrigation/features/setserialsettings/domain/usecase/setserial_usercase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/data_sources/sub_user_data_sources.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/data/repositories/sub_user_repository_impl.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/repositories/sub_user_repo.dart';
@@ -23,6 +25,11 @@ import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../features/dashboard/utils/dashboard_dispatcher.dart';
 import '../../features/mqtt/presentation/bloc/mqtt_bloc.dart';
 import '../../features/mqtt/utils/mqtt_message_helper.dart';
+import '../../features/setserialsettings/data/datasources/setserial_datasource.dart';
+import '../../features/setserialsettings/domain/repositories/setserial_details_repo.dart';
+import '../../features/setserialsettings/domain/usecase/setserial_details_params.dart';
+import '../../features/setserialsettings/presentation/bloc/setserial_bloc.dart';
+import '../../features/setserialsettings/presentation/bloc/setserial_bloc_event.dart';
 import '../../features/side_drawer/groups/data/datasources/group_data_sources.dart';
 import '../../features/side_drawer/groups/data/repositories/fetch_group_repository_impl.dart';
 import '../../features/side_drawer/groups/domain/repositories/fetch_group_repository.dart';
@@ -160,7 +167,22 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerLazySingleton<ControllerRemoteDataSource>(() => ControllerRemoteDataSourceImpl(apiClient: sl()));
   sl.registerLazySingleton<ControllerRepo>(() => ControllerRepoImpl(remoteDataSource: sl()));
   sl.registerLazySingleton(() => GetControllerDetailsUsecase(controllerRepo: sl()));
-  sl.registerLazySingleton(() => ControllerDetailsBloc(getControllerDetails: sl(), updateController: sl(),));
+  sl.registerFactory(() => ControllerDetailsBloc(getControllerDetails: sl(), updateController: sl(),));
+
+
+  sl.registerLazySingleton<SetSerialDataSource>(() => SetSerialDataSourceImpl(apiClient: sl()));
+  sl.registerLazySingleton<SetSerialRepository>(() => SetSerialRepositoryImpl(remoteDataSource: sl()));
+  sl.registerFactory(() => SetSerialBloc(sl()));
+  sl.registerFactory(() => SetSerialParams(userId: sl(), controllerId: sl()));
+  sl.registerFactory(() => LoadSerialUsecase(sl()));
+  sl.registerLazySingleton<SetSerialDataSource>(
+        () => SetSerialDataSourceImpl(apiClient: sl()),
+  );
+  sl.registerFactory(() => LoadSerialEvent(userId: sl(), controllerId: sl()));
+
+
+
+
 
 }
 

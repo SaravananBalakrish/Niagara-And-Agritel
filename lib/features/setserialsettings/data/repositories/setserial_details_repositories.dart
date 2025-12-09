@@ -1,49 +1,60 @@
-import 'package:dartz/dartz.dart';
-import 'package:niagara_smart_drip_irrigation/features/controller_details/domain/usecase/update_controllerDetails_params.dart';
-import '../../../../core/error/failures.dart';
-import '../datasources/controller_datasource.dart';
-import '../../domain/usecase/controller_details_params.dart';
-import '../../domain/repositories/controller_details_repo.dart';
 
-class ControllerRepoImpl implements ControllerRepo {
-  final ControllerRemoteDataSource remoteDataSource;
 
-  ControllerRepoImpl({required this.remoteDataSource});
+import '../datasources/setserial_datasource.dart';
 
-  @override
-  Future<Either<Failure, dynamic>> getControllerDetails(
-      int userId,
-      int controllerId,
-      ) async {
-    try {
-      final result = await remoteDataSource.getControllerDetails(
-        GetControllerDetailsParams(
-          userId: userId,
-          controllerId: controllerId,
-        ),
-      );
 
-      return Right(result);
-    } catch (e) {
-      return Left(ServerFailure('Controller Fetching Failure: $e'));
-    }
+class SetSerialRepository {
+  final SetSerialDataSource dataSource;
+
+  SetSerialRepository(this.dataSource);
+
+  Future<String> sendSerial({
+    required int userId,
+    required int controllerId,
+    required List<Map<String, dynamic>> sendList,
+    required String sentSms,
+  }) {
+    return dataSource.sendSerial(
+      userId: userId,
+      controllerId: controllerId,
+      sendList: sendList,
+      sentSms: sentSms,
+    );
   }
 
-  // ⭐⭐⭐ NEW: UPDATE CONTROLLER USING PUT API ⭐⭐⭐
-  @override
-  Future<Either<Failure, dynamic>> updateControllerDetails(
-      UpdateControllerDetailsParams params) async {
-    try {
-      final result = await remoteDataSource.updateController(params);
-      return Right(result);
-    } catch (e) {
-      return Left(ServerFailure('Controller Update Failure: $e'));
-    }
+  Future<String> resetSerial({
+    required int userId,
+    required int controllerId,
+    required List<int> nodeIds,
+    required String sentSms,
+  }) {
+    return dataSource.resetSerial(
+      userId: userId,
+      controllerId: controllerId,
+      nodeIds: nodeIds,
+      sentSms: sentSms,
+    );
   }
 
-  /*@override
-  Future<Either<Failure, dynamic>> updateControllerDetails(UpdateControllerDetailsParams params) {
-    // TODO: implement updateControllerDetails
-    throw UnimplementedError();
-  }*/
+  Future<String> viewSerial({
+    required int userId,
+    required int controllerId,
+    required String sentSms,
+  }) {
+    return dataSource.viewSerial(
+      userId: userId,
+      controllerId: controllerId,
+      sentSms: sentSms,
+    );
+  }
+
+  Future<List<dynamic>> loadSerial({
+    required int userId,
+    required int controllerId,
+  }) {
+    return dataSource.loadSerial(
+      userId: userId,
+      controllerId: controllerId,
+    );
+  }
 }

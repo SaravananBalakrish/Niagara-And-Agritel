@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/features/dashboard/domain/entities/livemessage_entity.dart';
+import 'package:niagara_smart_drip_irrigation/features/setserialsettings/presentation/pages/setserial_page.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/domain/usecases/get_sub_user_details_usecase.dart';
 import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/presentation/pages/sub_user_details_page.dart';
 
@@ -26,6 +27,9 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/otp_page.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/dealer_dashboard/presentation/pages/dealer_dashboard_page.dart';
+import 'features/setserialsettings/domain/usecase/setserial_details_params.dart';
+import 'features/setserialsettings/presentation/bloc/setserial_bloc.dart';
+import 'features/setserialsettings/presentation/bloc/setserial_bloc_event.dart';
 import 'features/side_drawer/groups/domain/usecases/add_group_usecase.dart';
 import 'features/side_drawer/groups/domain/usecases/delete_group_usecase.dart';
 import 'features/side_drawer/groups/domain/usecases/edit_group_usecase.dart';
@@ -176,8 +180,17 @@ class AppRouter {
             );
           },
         ),
-
-
+        GoRoute(
+          name: 'setSerialPage',
+          path: RouteConstants.setSerialPage,
+          builder: (context, state) {
+            final params = state.extra as SetSerialParams;
+            return BlocProvider(create: (_) => di.sl<SetSerialBloc>()
+                ..add(LoadSerialEvent(userId: params.userId,controllerId: params.controllerId,)),
+              child: SerialSetCalibrationPage(userId: params.userId,controllerId: params.controllerId,),
+            );
+          },
+        ),
         ShellRoute(
           builder: (context, state, child) {
             final location = state.matchedLocation;

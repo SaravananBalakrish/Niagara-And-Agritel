@@ -81,7 +81,7 @@ class ControllerDetailsBloc
 
     result.fold(
           (failure) => emit(ControllerDetailsError(failure.message)),
-          (success) => emit(UpdateControllerSuccess(success.toString())),
+          (success) => emit(UpdateControllerSuccess(success)),
     );
   }
 
