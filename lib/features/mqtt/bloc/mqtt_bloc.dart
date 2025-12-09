@@ -115,14 +115,12 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
 }
 
   void _onPublish(PublishMqttEvent event, Emitter<MqttState> emit) {
-    // FIXED: Same service check
     if (mqttService.isConnected) {
       mqttService.publish(persistence.deviceId!, event.message);
     } else {
       if (kDebugMode) {
         print('🔵 MqttBloc._onPublish: Skipped; service not connected');
       }
-      // Optional: Trigger reconnect
       if (_retryAttempts < maxRetries) {
         add(ConnectMqttEvent());
       }
@@ -135,11 +133,11 @@ class MqttBloc extends Bloc<MqttEvent, MqttState> {
       print("Received message :: ${event.message}");
     }
 
-    final dispatcher = sl<MessageDispatcher>(); // From GetIt
+    final dispatcher = sl<MessageDispatcher>();
     MqttMessageHelper.processMessage(
       event.message,
       dispatcher: dispatcher,
-      context: _processingContext, // For toasts only
+      context: _processingContext,
     );
 
     // FIXED: Always accumulate, but initialize if needed (won't overwrite connected)
