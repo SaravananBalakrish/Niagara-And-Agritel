@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/action_button.dart';
+import 'package:niagara_smart_drip_irrigation/core/widgets/alert_dialog.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/retry.dart';
 import 'package:niagara_smart_drip_irrigation/core/services/time_picker_service.dart';
+import 'package:niagara_smart_drip_irrigation/features/auth/auth.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/menu_item_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/template_json_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/cubit/pump_settings_cubit.dart';
@@ -146,7 +149,7 @@ class PumpSettingsPage extends StatelessWidget {
 
     switch (item.widgetType) {
       case 1:
-        return Text(item.value.isEmpty ? "-" : item.value);
+        return Text(item.value.isEmpty ? "-" : item.value, style: Theme.of(context).textTheme.bodyMedium);
       case 2:
         final isOn = item.value == "ON";
         return Switch(value: isOn, onChanged: (newValue) {
@@ -222,6 +225,22 @@ class PumpSettingsPage extends StatelessWidget {
 
   Future<String?> _showTextDialog(BuildContext context, String title, String current) async {
     final controller = TextEditingController(text: current);
+    return GlassyAlertDialog.show(
+        context: context,
+        title: title,
+        content: TextField(controller: controller, keyboardType: TextInputType.number),
+        actions: [
+          ActionButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          ActionButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            isPrimary: true,
+            child: Text("Save"),
+          ),
+        ]
+    );
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(

@@ -66,6 +66,26 @@ class DashboardPage extends StatelessWidget {
 
       final mqttBloc = di.sl.get<MqttBloc>();
       mqttBloc.setProcessingContext(context);
+
+      final router = GoRouter.of(context);
+
+      void pollingListener() {
+        final currentLocation = router.state.matchedLocation;
+
+        if (currentLocation == DashBoardRoutes.dashboard) {
+          // We are ON the dashboard → start/resume polling
+          bloc.add(StartPollingEvent());
+        } else {
+          // We are anywhere else (ctrlLivePage, settings, etc.) → stop polling
+          bloc.add(StopPollingEvent());
+        }
+      }
+
+      router.routerDelegate.removeListener(pollingListener);
+      router.routerDelegate.addListener(pollingListener);
+
+      // Initial check
+      pollingListener();
     });
   }
 
