@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:niagara_smart_drip_irrigation/features/mqtt/bloc/mqtt_bloc.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/template_json_entity.dart';
 
+import '../../../../core/di/injection.dart' as di;
+import '../../../mqtt/bloc/mqtt_event.dart';
+import '../../../mqtt/utils/mqtt_message_helper.dart';
 import '../../domain/usecsases/get_menu_items.dart';
 import '../bloc/pump_settings_state.dart';
 
@@ -53,8 +59,7 @@ class PumpSettingsCubit extends Cubit<PumpSettingsState> {
   }
 
   Future<void> sendSetting(String payload) async {
-    emit(SettingsSendStartedState());
-
-
+    final publishMessage = jsonEncode(PublishMessageHelper.settingsPayload(payload));
+    di.sl.get<MqttBloc>().add(PublishMqttEvent(deviceId: '', message: publishMessage));
   }
 }

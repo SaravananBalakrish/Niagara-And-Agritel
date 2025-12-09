@@ -118,7 +118,7 @@ class PumpSettingsPage extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: SettingListTile(
                   title: item.title,
-                  trailing: _buildTrailing(item, context),
+                  trailing: _buildTrailing(item, context, sectionIndex, index),
                   onTap: () => _handleTap(context, item, sectionIndex, index),
                 ),
               ),
@@ -126,7 +126,12 @@ class PumpSettingsPage extends StatelessWidget {
             CircleAvatar(
               backgroundColor: Colors.white,
               child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  final cubit = context.read<PumpSettingsCubit>();
+                  final String payload = "${settings[index].smsFormat}${settings[index].value}";
+                  String finalPayload = payload.replaceAll(':', '').replaceAll(';', ',');
+                  cubit.sendSetting(finalPayload);
+                },
                 icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
               ),
             ),
@@ -136,13 +141,18 @@ class PumpSettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTrailing(SettingsEntity item, BuildContext context) {
+  Widget _buildTrailing(SettingsEntity item, BuildContext context, int sectionIndex, int settingIndex) {
+    final cubit = context.read<PumpSettingsCubit>();
+
     switch (item.widgetType) {
       case 1:
         return Text(item.value.isEmpty ? "-" : item.value);
       case 2:
         final isOn = item.value == "ON";
-        return Switch(value: isOn, onChanged: (_) {});
+        return Switch(value: isOn, onChanged: (newValue) {
+          final newVal = item.value == "OF" ? "ON" : "OF";
+          cubit.updateSettingValue(newVal, sectionIndex, settingIndex);
+        });
       case 3:
         return Text(item.value.isEmpty ? "00:00:00" : item.value, style: Theme.of(context).textTheme.bodyMedium);
       case 4:
