@@ -1,107 +1,78 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:niagara_smart_drip_irrigation/features/controller_details/domain/usecase/controller_details_usercase.dart';
-import '../../data/models/controller_details_model.dart';
-import '../../domain/usecase/controller_details_params.dart';
-import '../../domain/usecase/update_controllerDetails_params.dart';
-import 'controller_details_bloc_event.dart';
-import 'controller_details_state.dart';
+import 'package:niagara_smart_drip_irrigation/features/setserialsettings/presentation/bloc/setserial_bloc_event.dart';
+import 'package:niagara_smart_drip_irrigation/features/setserialsettings/presentation/bloc/setserial_state.dart';
 
-class ControllerDetailsBloc
-    extends Bloc<ControllerDetailsEvent, ControllerDetailsState> {
+import '../../data/repositories/setserial_details_repositories.dart';
 
-  final GetControllerDetailsUsecase getControllerDetails;
-  final UpdateControllerUsecase updateController;
+class SetSerialBloc extends Bloc<SetSerialEvent, SetSerialState> {
+  final SetSerialRepository repo;
 
-  ControllerDetailsBloc({
-    required this.getControllerDetails,
-    required this.updateController,
-  }) : super(ControllerDetailsInitial()) {
-    on<GetControllerDetailsEvent>(_onGetDetails);
-    on<UpdateControllerEvent>(_onUpdateController);
-    on<ToggleSwitchEvent>(_onToggleSwitch);
+  SetSerialBloc(this.repo) : super(SetSerialInitial()) {
+    on<SendSerialEvent>(_sendSerial);
+    on<ResetSerialEvent>(_resetSerial);
+    on<ViewSerialEvent>(_viewSerial);
+    on<LoadSerialEvent>(_loadSerial);
   }
 
-
-  // --------------------------------------------------
-  // 1) GET CONTROLLER DETAILS
-  // --------------------------------------------------
-  Future<void> _onGetDetails(
-      GetControllerDetailsEvent event,
-      Emitter<ControllerDetailsState> emit,
-      ) async {
-    emit(ControllerDetailsLoading());
-
-    final result = await getControllerDetails(
-      GetControllerDetailsParams(
+  Future<void> _sendSerial(
+      SendSerialEvent event, Emitter<SetSerialState> emit) async {
+    emit(SetSerialLoading());
+    try {
+      final msg = await repo.sendSerial(
         userId: event.userId,
         controllerId: event.controllerId,
-      ),
-    );
-
-    result.fold(
-          (failure) => emit(ControllerDetailsError(failure.message)),
-          (success) {
-        final model = success as ControllerResponseModel;
-
-        emit(
-          ControllerDetailsLoaded(
-            model.controllerDetails,
-            model.groupDetails,
-          ),
-        );
-      },
-    );
-  }
-
-
-  // --------------------------------------------------
-  // 2) UPDATE CONTROLLER
-  // --------------------------------------------------
-  Future<void> _onUpdateController(
-      UpdateControllerEvent event,
-      Emitter<ControllerDetailsState> emit,
-      ) async {
-    emit(ControllerDetailsLoading());
-
-    final result = await updateController(
-      UpdateControllerDetailsParams(
-        userId: event.userId,
-        controllerId: event.controllerId,
-        countryCode: event.countryCode,
-        simNumber: event.simNumber,
-        deviceName: event.deviceName,
-        groupId: event.groupId,
-        operationMode: event.operationMode,
-        gprsMode: event.gprsMode,
-        appSmsMode: event.appSmsMode,
+        sendList: event.sendList,
         sentSms: event.sentSms,
-        editType: event.editType,
-      ),
-    );
+      );
+      emit(SendSerialSuccess(msg));
+    } catch (e) {
+      emit(SendSerialError(e.toString()));
+    }
+  }
 
-    result.fold(
-          (failure) => emit(ControllerDetailsError(failure.message)),
-          (success) => emit(UpdateControllerSuccess(success)),
-    );
+  Future<void> _resetSerial(
+      ResetSerialEvent event, Emitter<SetSerialState> emit) async {
+    emit(SetSerialLoading());
+    try {
+      final msg = await repo.resetSerial(
+        userId: event.userId,
+        controllerId: event.controllerId,
+        nodeIds: event.nodeIds,
+        sentSms: event.sentSms,
+      );
+      emit(ResetSerialSuccess(msg));
+    } catch (e) {
+      emit(ResetSerialError(e.toString()));
+    }
+  }
+
+  Future<void> _viewSerial(
+      ViewSerialEvent event, Emitter<SetSerialState> emit) async {
+    emit(SetSerialLoading());
+    try {
+      final msg = await repo.viewSerial(
+        userId: event.userId,
+        controllerId: event.controllerId,
+        sentSms: event.sentSms,
+      );
+      emit(ViewSerialSuccess(msg));
+    } catch (e) {
+      emit(ViewSerialError(e.toString()));
+    }
   }
 
 
-  // --------------------------------------------------
-  // 3) TOGGLE SWITCH (OPTIONAL)
-  // --------------------------------------------------
-  Future<void> _onToggleSwitch(
-      ToggleSwitchEvent event,
-      Emitter<ControllerDetailsState> emit,
-      ) async {
-    emit(SwitchToggleLoading());
-
-    // TODO: Implement API
-
-    emit(
-      SwitchToggleSuccess(
-        switchName: event.switchName,
-        newValue: event.isOn,
-      ),
-    );
+  Future<void> _loadSerial(
+      LoadSerialEvent event, Emitter<SetSerialState> emit) async {
+    emit(SetSerialLoading());
+    try {
+      final list = await repo.loadSerial(
+        userId: event.userId,
+        controllerId: event.controllerId,
+      );
+      emit(SerialDataLoaded(list));
+    } catch (e) {
+      emit(LoadSerialError(e.toString()));
+    }
   }
 }

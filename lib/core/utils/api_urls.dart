@@ -261,6 +261,22 @@ class ApiUrls {
   /// Get methods
   static const String dashboardForGroupUrl = 'controller/user/:userId/cluster';
   static const String dashboardUrl = 'user/:userId/cluster/:groupId/controller';
+
+  //TODO: SetSerial URLS (Additional from partial)
+  /// Get methods
+  /// //%@/api/v1/user/%@/subuser/%d/controller/%d/menu/92/settings/481
+  /// %@/api/v1/user/%@/subuser/0/controller/%d/view/messages/
+
+
+  static const String getsetserialUrl = 'user/:userId/subuser/:subuserId/controller/:controllerId/menu/92/settings/481';
+  static const String postsetserialUrl = 'user/:userId/cluster/:groupId/controller';
+  static const String postsetserialviewUrl = 'user/:userId/cluster/:groupId/controller';
+  static const String putserialsetUrl = 'user/:userId/cluster/:groupId/controller';
+  //TODO: common calibration   URLS (Additional from partial)
+  /// Get methods
+  static const String getcommncalUrl = 'user/:userId/subuser/:subuserId/controller/:controllerId/menu/92/settings/481';
+  static const String putcommncalUrl = 'user/:userId/cluster/:groupId/controller';
+  static const String getcommncalviewUrl = 'user/:userId/cluster/:groupId/controller';
 }
 
 // Simple utility function for basic replacement.

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../core/di/injection.dart' as di;
+import '../../../setserialsettings/domain/usecase/setserial_details_params.dart';
+import '../../../setserialsettings/presentation/pages/setserial_page.dart';
 import '../../domain/usecase/controller_details_params.dart';
 import '../bloc/controller_details_bloc.dart';
 import '../bloc/controller_details_bloc_event.dart';
@@ -81,14 +84,22 @@ class ControllerDetailsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-
               const Center(
                 child: ControllerSectionHeader(title: "Controller Details"),
               ),
               const SizedBox(height: 16),
-
-
+              GestureDetector(
+                onTap: () {
+                  context.pushNamed(
+                    'setSerialPage',
+                    extra: SetSerialParams(userId: params.userId, controllerId: params.controllerId),
+                  );
+                },
+                child: const Center(
+                  child: Text("Set Serial"),
+                ),
+              ),
+              const SizedBox(height: 16),
               GestureDetector(
                 onTap: () {
                   Clipboard.setData(ClipboardData(text: controller.deviceId));
@@ -103,28 +114,28 @@ class ControllerDetailsPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Group Name", style: TextStyle(color: Colors.white70)),
-                  DropdownButton<String>(
-                    dropdownColor: const Color(0xFF0A4D68),
-                    value: controller.groupName,
-                    items: groupList.map((g) {
-                      return DropdownMenuItem(
-                        value: g.groupName,
-                        child: Text(g.groupName, style: const TextStyle(color: Colors.white)),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      // Add event if you want update API
-                    },
-                  ),
-                ],
+                  Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Group Name", style: TextStyle(color: Colors.white70)),
+                    DropdownButton<String>(
+                      dropdownColor: const Color(0xFF0A4D68),
+                      value: controller.groupName,
+                      items: groupList.map((g) {
+                        return DropdownMenuItem(
+                          value: g.groupName,
+                          child: Text(g.groupName, style: const TextStyle(color: Colors.white)),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        // Add event if you want update API
+                      },
+                    ),
+                  ],
+
               ),
 
               const SizedBox(height: 16),
-
               TextField(
                 controller: devicenameController,
                 style: const TextStyle(color: Colors.white),
@@ -293,6 +304,14 @@ class ControllerDetailsPage extends StatelessWidget {
       );
     }
 
-    return const Center(child: Text("Unexpected Error"));
+    return const Scaffold(
+      backgroundColor: Color(0xFF0A4D68),
+      body: Center(
+        child: Text(
+          "Unexpected Error",
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
   }
 }

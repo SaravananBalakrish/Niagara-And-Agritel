@@ -1,76 +1,69 @@
 import 'package:equatable/equatable.dart';
 
-abstract class ControllerDetailsEvent extends Equatable {
+abstract class SetSerialEvent extends Equatable {
   @override
   List<Object?> get props => [];
 }
 
-class GetControllerDetailsEvent extends ControllerDetailsEvent {
+/// LOAD SERIAL LIST
+class LoadSerialEvent extends SetSerialEvent {
   final int userId;
   final int controllerId;
 
-  GetControllerDetailsEvent({
-    required this.userId,
-    required this.controllerId,
-  });
+  LoadSerialEvent({required this.userId, required this.controllerId});
 
   @override
   List<Object?> get props => [userId, controllerId];
 }
-class ToggleSwitchEvent extends ControllerDetailsEvent {
-  // final int controllerId;
-  final String switchName;  // Example: "motor", "pump", "valve"
-  final bool isOn;
 
-  ToggleSwitchEvent({
-    // required this.controllerId,
-    required this.switchName,
-    required this.isOn,
-  });
-
-  @override
-  List<Object?> get props => [ switchName, isOn];
-}
-
-class UpdateControllerEvent extends ControllerDetailsEvent {
-  final String userId;
+/// SEND SERIAL
+class SendSerialEvent extends SetSerialEvent {
+  final int userId;
   final int controllerId;
-  final String countryCode;
-  final String simNumber;
-  final String deviceName;
-  final int groupId;
-  final String operationMode;
-  final String gprsMode;
-  final String appSmsMode;
+  final List<Map<String, dynamic>> sendList;
   final String sentSms;
-  final String editType;
 
-  UpdateControllerEvent({
+  SendSerialEvent({
     required this.userId,
     required this.controllerId,
-    required this.countryCode,
-    required this.simNumber,
-    required this.deviceName,
-    required this.groupId,
-    required this.operationMode,
-    required this.gprsMode,
-    required this.appSmsMode,
+    required this.sendList,
     required this.sentSms,
-    required this.editType,
   });
 
   @override
-  List<Object?> get props => [
-    userId,
-    controllerId,
-    countryCode,
-    simNumber,
-    deviceName,
-    groupId,
-    operationMode,
-    gprsMode,
-    appSmsMode,
-    sentSms,
-    editType,
-  ];
+  List<Object?> get props => [userId, controllerId, sendList, sentSms];
+}
+
+/// RESET SERIAL
+class ResetSerialEvent extends SetSerialEvent {
+  final int userId;
+  final int controllerId;
+  final List<int> nodeIds;
+  final String sentSms;
+
+  ResetSerialEvent({
+    required this.userId,
+    required this.controllerId,
+    required this.nodeIds,
+    required this.sentSms,
+  });
+
+  @override
+  List<Object?> get props => [userId, controllerId, nodeIds, sentSms];
+}
+
+/// VIEW SERIAL
+class ViewSerialEvent extends SetSerialEvent {
+  final int userId;
+  final int controllerId;
+  final String sentSms;
+
+  ViewSerialEvent({
+    required this.userId,
+    required this.controllerId,
+    required this.sentSms,
+  });
+
+  @override
+  List<Object?> get props => [userId, controllerId, sentSms];
 }

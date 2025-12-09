@@ -14,4 +14,5 @@ class RouteConstants {
   static const String myDevicePage = "/myDevicePage";
   static const String ctrlLivePage = "/ctrlLivePage";
   static const String ctrlDetailsPage = "/ctrlDetailsPage";
+  static const String setSerialPage = "/menu/92/settings/481";
 }

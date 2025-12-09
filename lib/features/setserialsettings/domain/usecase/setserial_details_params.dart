@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-class GetControllerDetailsParams extends Equatable {
+class SetSerialParams extends Equatable {
   final int userId;
   final int controllerId;
 
-  const GetControllerDetailsParams({
+  const SetSerialParams({
     required this.userId,
     required this.controllerId,
   });

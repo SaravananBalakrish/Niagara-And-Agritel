@@ -3,113 +3,206 @@ import 'dart:convert';
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
 import '../../../../../core/utils/api_urls.dart';
-import '../../domain/entities/controller_details_entities.dart';
-import '../../domain/usecase/controller_details_params.dart';
-import '../../domain/usecase/update_controllerDetails_params.dart';
-import '../models/controller_details_model.dart';
 
-abstract class ControllerRemoteDataSource {
-  Future<ControllerResponseModel> getControllerDetails(
-      GetControllerDetailsParams params);
-  Future<Map<String, dynamic>> updateController(UpdateControllerDetailsParams params);
- }
+abstract class SetSerialDataSource {
+  Future<String> sendSerial({
+    required int userId,
+    required int controllerId,
+    required List<Map<String, dynamic>> sendList,
+    required String sentSms,
+  });
 
-class ControllerRemoteDataSourceImpl extends ControllerRemoteDataSource {
+  Future<String> resetSerial({
+    required int userId,
+    required int controllerId,
+    required List<int> nodeIds,
+    required String sentSms,
+  });
+
+  Future<String> viewSerial({
+    required int userId,
+    required int controllerId,
+    required String sentSms,
+  });
+
+  Future<List<dynamic>> loadSerial({
+    required int userId,
+    required int controllerId,
+  });
+}
+
+
+class SetSerialDataSourceImpl extends SetSerialDataSource {
   final ApiClient apiClient;
 
-  ControllerRemoteDataSourceImpl({required this.apiClient});
+  SetSerialDataSourceImpl({required this.apiClient});
 
+  // SEND SERIAL
   @override
-  Future<ControllerResponseModel> getControllerDetails(
-      GetControllerDetailsParams params) async {
+  Future<String> sendSerial({
+    required int userId,
+    required int controllerId,
+    required List<Map<String, dynamic>> sendList,
+    required String sentSms,
+  }) async {
     try {
-      if (params.userId == null || params.controllerId == null) {
-        throw ServerException(
-          statusCode: 400,
-          message: "Invalid parameters! userId/controllerId missing.",
-        );
-      }
+      final endpoint = ApiUrls.postsetserialUrl
+          .replaceAll(':userId', userId.toString())
+          .replaceAll(':controllerId', controllerId.toString());
 
-      final endpoint = ApiUrls.getViewControllerCustomerDetails
-          .replaceAll(':userId', params.userId.toString())
-          .replaceAll(':userDeviceId', params.controllerId.toString());
-
-      print("➡️ GET API: $endpoint");
-
-      final response = await apiClient.get(endpoint);
-
-      print("⬅️ GET RESPONSE: $response");
-
-      if (response == null) {
-        throw ServerException(statusCode: 500, message: "Empty server response");
-      }
-
-      if (response['code'] == 200) {
-        return ControllerResponseModel.fromJson(response);
-      }
-
-      throw ServerException(
-        statusCode: response['code'],
-        message: response['message'] ?? "Unknown server error",
-      );
-    } catch (e) {
-      print("❌ getControllerDetails ERROR: $e");
-      throw ServerException(statusCode: 500, message: e.toString());
-    }
-  }
-
-  //   NEW PUT UPDATE API
-  @override
-  Future<Map<String, dynamic>> updateController(
-      UpdateControllerDetailsParams params) async {
-    try {
-      final endpoint = ApiUrls.updateController;
-
-       // print("➡️ BODY: $body");
-      Map<String, dynamic> body = {
-        "userId" : params.userId,
-        "userDeviceId" : params.controllerId,
-        "countryCode" : params.countryCode,
-        "simNumber" : params.simNumber,
-        "deviceName" : params.deviceName,
-        "groupId" : params.groupId,
-        "operationMode" : params.operationMode,
-        "gprsMode" : params.gprsMode,
-        "appSmsMode" : params.appSmsMode,
-        "sentSms" : params.sentSms,
-        "editType" : params.editType
+      final body = {
+        "menuSettingId": 2,
+        "sendData": sendList,
+        "sentSms": sentSms,
+        "receivedData": ""
       };
 
-       print(" ️ body RESPONSE: ${jsonEncode(body)}");
-      final response = await apiClient.put(
+      print("➡️ POST URL: $endpoint");
+      print("➡️ REQUEST BODY: ${jsonEncode(body)}");
+
+      final response = await apiClient.post(
         endpoint,
         body: body,
-        headers: {
-          "Content-Type": "application/json",
-          "deviceType": "web",
-        },
+        headers: {"Content-Type": "application/json", "deviceType": "web"},
       );
 
-      print("⬅️ PUT RESPONSE: $response");
+      print("⬅️ RESPONSE: $response");
 
       if (response == null) {
         throw ServerException(statusCode: 500, message: "Empty server response");
       }
 
       if (response["code"] == 200) {
-        return response;
+        return response["message"] ?? "Success";
       }
 
       throw ServerException(
         statusCode: response["code"] ?? 500,
-        message: response["message"] ?? "Update failed",
+        message: response["message"] ?? "Send serial failed",
       );
     } catch (e) {
-      print("❌ updateController ERROR: $e");
-      print("❌  error ${e.toString()}");
+      print("❌ sendSerial ERROR: $e");
+      throw ServerException(statusCode: 500, message: e.toString());
+    }
+  }
+
+  // RESET SERIAL
+  @override
+  Future<String> resetSerial({
+    required int userId,
+    required int controllerId,
+    required List<int> nodeIds,
+    required String sentSms,
+  }) async {
+    try {
+      final endpoint = ApiUrls.putserialsetUrl
+          .replaceAll(':userId', userId.toString())
+          .replaceAll(':controllerId', controllerId.toString());
+
+      final body = {
+        "nodeList": nodeIds.map((id) => {"nodeId": id}).toList(),
+        "sentSms": sentSms,
+      };
+
+      print("➡️ PUT URL: $endpoint");
+      print("➡️ REQUEST BODY: ${jsonEncode(body)}");
+
+      final response = await apiClient.put(
+        endpoint,
+        body: body,
+        headers: {"Content-Type": "application/json", "deviceType": "web"},
+      );
+
+      print("⬅️ RESPONSE: $response");
+
+      if (response == null) {
+        throw ServerException(statusCode: 500, message: "Empty server response");
+      }
+
+      if (response["code"] == 200) return response["message"];
+
+      throw ServerException(
+        statusCode: response["code"] ?? 500,
+        message: response["message"] ?? "Reset failed",
+      );
+    } catch (e) {
+      print("❌ resetSerial ERROR: $e");
+      throw ServerException(statusCode: 500, message: e.toString());
+    }
+  }
+
+  // VIEW SERIAL MESSAGE
+  @override
+  Future<String> viewSerial({
+    required int userId,
+    required int controllerId,
+    required String sentSms,
+  }) async {
+    try {
+      final endpoint = ApiUrls.postsetserialviewUrl
+          .replaceAll(':userId', userId.toString())
+          .replaceAll(':controllerId', controllerId.toString());
+
+      print("➡️ POST URL: $endpoint");
+
+      final response = await apiClient.post(
+        endpoint,
+        body: {"sentSms": sentSms},
+        headers: {"Content-Type": "application/json", "deviceType": "web"},
+      );
+
+      print("⬅️ RESPONSE: $response");
+
+      if (response == null) {
+        throw ServerException(statusCode: 500, message: "Empty server response");
+      }
+
+      if (response["code"] == 200) {
+        return response["message"] ?? "";
+      }
+
+      throw ServerException(
+        statusCode: response["code"] ?? 500,
+        message: response["message"] ?? "View failed",
+      );
+    } catch (e) {
+      print("❌ viewSerial ERROR: $e");
+      throw ServerException(statusCode: 500, message: e.toString());
+    }
+  }
+
+  // LOAD SERIAL
+  @override
+  Future<List<dynamic>> loadSerial({
+    required int userId,
+    required int controllerId,
+  }) async {
+    try {
+      final endpoint = ApiUrls.getsetserialUrl
+          .replaceAll(':userId', userId.toString())
+          .replaceAll(':controllerId', controllerId.toString());
+
+      print("➡️ GET URL: $endpoint");
+
+      final response = await apiClient.get(endpoint);
+
+      print("⬅️ RESPONSE: $response");
+
+      if (response == null) {
+        throw ServerException(statusCode: 500, message: "Empty server response");
+      }
+
+      if (response["code"] == 200) {
+        return response["data"][0]["sendData"]["nodeList"];
+      }
+
+      throw ServerException(
+        statusCode: response["code"] ?? 500,
+        message: response["message"] ?? "Load serial failed",
+      );
+    } catch (e) {
+      print("❌ loadSerial ERROR: $e");
       throw ServerException(statusCode: 500, message: e.toString());
     }
   }
 }
-
-

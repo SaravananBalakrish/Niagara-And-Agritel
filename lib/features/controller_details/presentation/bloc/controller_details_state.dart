@@ -68,7 +68,6 @@ class SwitchToggleFailed extends ControllerDetailsState {
   List<Object?> get props => [message];
 }
 class UpdateControllerSuccess extends ControllerDetailsState {
-  final String message;
-
+   final Map<String, dynamic> message;
   UpdateControllerSuccess(this.message);
 }
