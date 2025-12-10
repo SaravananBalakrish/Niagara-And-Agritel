@@ -74,155 +74,151 @@ class PumpSettingsDataSourcesImpl implements PumpSettingsDataSources {
 
           final staticJson = [
             {
-              "TID": 4491,
-              "NAME": "Dry Run Settings",
+              "TID": 4521,
+              "NAME": "Cyclic Timer Settings",
               "SETS": [
                 {
                   "SN": 1,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "DRYRUN",
-                  "TT": "Dry Run Scan",
+                  "SF": "CYCLIC",
+                  "TT": "Cyclic Timer",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "CYCLICTIMONOF",
+                  "TT": "On Time ; Off Time",
+                  "HF": "1"
+                },
+                {
+                  "SN": 3,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "CYCLICCHOVR",
+                  "TT": "Change Over",
+                  "HF": "1"
+                },
+                {
+                  "SN": 4,
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00 ; 00:00:00",
+                  "SF": "CYCLICTIMONOF",
+                  "TT": "Motor 1 On Time ; Motor 2 On Time ; Off Time",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4522,
+              "NAME": "Dry Run Restart Timer",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "DRRESTARTTIM",
+                  "TT": "Dry Run Restart Timer",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "DRRESTARTTIM",
+                  "TT": "Motor 1 ; Motor 2",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4523,
+              "NAME": "Maximum Runtime Settings",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "MAXTIM",
+                  "TT": "Maximum Runtime",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
                   "WT": 3,
                   "VAL": "00:00:00",
-                  "SF": "DRSCAN",
-                  "TT": "Dry Run Scan Timer",
+                  "SF": "MAXTIM",
+                  "TT": "Delay Timer",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4524,
+              "NAME": "Night Light RTC Settings",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "NIGHTLIGHTRTC",
+                  "TT": "Night Light RTC",
+                  "HF": "1"
+                },
+                {
+                  "SN": 1,
+                  "WT": 5,
+                  "VAL": "00:00 ; 00:00",
+                  "SF": "NIGHTLIGHTRTCTIM",
+                  "TT": "From ; To",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4525,
+              "NAME": "RTC Timer Settings",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "RTC",
+                  "TT": "RTC Timer",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "RTCTIMONOF1",
+                  "TT": "On Time ; Off Time",
                   "HF": "1"
                 },
                 {
                   "SN": 3,
-                  "WT": 1,
-                  "VAL": "0",
-                  "SF": "DRAMPS2",
-                  "TT": "Dry Run Amps 2PH",
-                  "HF": "0"
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "RTCTIMONOF2",
+                  "TT": "On Time ; Off Time",
+                  "HF": "1"
                 },
                 {
                   "SN": 4,
-                  "WT": 1,
-                  "VAL": "0",
-                  "SF": "DRAMPS3",
-                  "TT": "Dry Run Amps 3PH",
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "RTCTIMONOF3",
+                  "TT": "On Time ; Off Time",
                   "HF": "1"
                 },
                 {
                   "SN": 5,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "DRRESTART",
-                  "TT": "Dry Run Restart",
-                  "HF": "0"
-                },
-                {
-                  "SN": 6,
-                  "WT": 3,
-                  "VAL": "00:00:00",
-                  "SF": "DRRESTART",
-                  "TT": "Dry Run Restart Timer",
-                  "HF": "0"
-                },
-                {
-                  "SN": 7,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "DRYRUN",
-                  "TT": "Dry Run Occurance",
-                  "HF": "0"
-                },
-                {
-                  "SN": 8,
-                  "WT": 3,
-                  "VAL": "00:00:00",
-                  "SF": "DROCCURTIM",
-                  "TT": "Dry Run Occurance Timer",
-                  "HF": "0"
-                },
-                {
-                  "SN": 9,
-                  "WT": 1,
-                  "VAL": "0",
-                  "SF": "DROCCURNBR",
-                  "TT": "Dry Run Occurance Count",
-                  "HF": "0"
-                }
-              ]
-            },
-            {
-              "TID": 4492,
-              "NAME": "Overload Settings",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "OL",
-                  "TT": "Overload Scan",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 3,
-                  "VAL": "00:00:00",
-                  "SF": "OLSCAN",
-                  "TT": "Overload Scan Timer",
-                  "HF": "1"
-                },
-                {
-                  "SN": 3,
-                  "WT": 1,
-                  "VAL": "0",
-                  "SF": "OLAMPS2",
-                  "TT": "Overload Amps 2PH",
-                  "HF": "0"
-                },
-                {
-                  "SN": 4,
-                  "WT": 1,
-                  "VAL": "0",
-                  "SF": "OLAMPS3",
-                  "TT": "Overload Amps 3PH",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4493,
-              "NAME": "Power on reset Settings",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "DRRESTART",
-                  "TT": "Dry Run Power ON Reset",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "OLRST",
-                  "TT": "Overload Power ON Reset",
-                  "HF": "1"
-                },
-                {
-                  "SN": 3,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "MOBILERST",
-                  "TT": "Auto Restart",
-                  "HF": "0"
-                },
-                {
-                  "SN": 4,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "AUTORST2",
-                  "TT": "Auto Restart 2PH",
+                  "WT": 4,
+                  "VAL": "00:00:00 ; 00:00:00",
+                  "SF": "RTCTIMONOF4",
+                  "TT": "On Time ; Off Time",
                   "HF": "1"
                 }
               ]

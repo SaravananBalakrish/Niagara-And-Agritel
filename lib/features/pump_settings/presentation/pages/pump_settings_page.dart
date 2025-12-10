@@ -6,7 +6,6 @@ import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glassy_wrapper.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/retry.dart';
 import 'package:niagara_smart_drip_irrigation/core/services/time_picker_service.dart';
-import 'package:niagara_smart_drip_irrigation/features/auth/auth.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/menu_item_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/template_json_entity.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/presentation/cubit/pump_settings_cubit.dart';
@@ -115,24 +114,68 @@ class PumpSettingsPage extends StatelessWidget {
         return Row(
           spacing: 8,
           children: [
-            Expanded(
-              child: GlassCard(
-                margin: const EdgeInsets.symmetric(vertical: 5),
-                padding: EdgeInsets.zero,
-                child: SettingListTile(
-                  title: item.title,
-                  trailing: _buildTrailing(item, context, sectionIndex, index),
-                  onTap: () => _handleTap(context, item, sectionIndex, index),
+            if([4,5].contains(item.widgetType))
+              Expanded(
+                child: GlassCard(
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for(int i = 0 ; i < item.title.split(';').length; i++)
+                        SettingListTile(
+                          title: item.title.split(';')[i].trim(),
+                          trailing: Text(item.value.split(';')[i].trim(), style: Theme.of(context).textTheme.bodyMedium,),
+                          onTap: () async {
+                            final cubit = context.read<PumpSettingsCubit>();
+                            final times = item.value.split(';');
+
+                            final newTime = await TimePickerService.show(
+                                title: item.title.split(';')[i].trim(),
+                                context: context,
+                                initialTime: times[i].trim()
+                            );
+                            if (newTime == null) return;
+                            final List<String> newValues = List<String>.from(times);
+                            newValues[i] = newTime.trim();
+
+                            final newValue = newValues.join(';');
+                            if (newValue != item.value) {
+                              cubit.updateSettingValue(newValue, sectionIndex, index);
+                            }
+                          },
+                        )
+                    ],
+                  ),
+                ),
+              )
+            else
+              Expanded(
+                child: GlassCard(
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: EdgeInsets.zero,
+                  child: SettingListTile(
+                    title: item.title,
+                    trailing: _buildTrailing(item, context, sectionIndex, index),
+                    onTap: () => _handleTap(context, item, sectionIndex, index),
+                  ),
                 ),
               ),
-            ),
             CircleAvatar(
               backgroundColor: Colors.white,
               child: IconButton(
                 onPressed: () {
                   final cubit = context.read<PumpSettingsCubit>();
-                  final String payload = "${settings[index].smsFormat}${settings[index].value}";
-                  String finalPayload = payload.replaceAll(':', '').replaceAll(';', ',');
+                  String cleanedValue = settings[index].value.trim();
+
+                  String payload;
+                  if ([4, 5].contains(item.widgetType)) {
+                    payload = "${settings[index].smsFormat},$cleanedValue";
+                  } else {
+                    payload = "${settings[index].smsFormat}$cleanedValue";
+                  }
+
+                  String finalPayload = payload.replaceAll(':', '').replaceAll(';', ',').replaceAll(RegExp(r'\s+'), '').trim();
                   cubit.sendSetting(finalPayload);
                 },
                 icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
@@ -152,25 +195,15 @@ class PumpSettingsPage extends StatelessWidget {
         return Text(item.value.isEmpty ? "-" : item.value, style: Theme.of(context).textTheme.bodyMedium);
       case 2:
         final isOn = item.value == "ON";
-        return Switch(value: isOn, onChanged: (newValue) {
-          final newVal = item.value == "OF" ? "ON" : "OF";
-          cubit.updateSettingValue(newVal, sectionIndex, settingIndex);
-        });
+        return Switch(
+            value: isOn,
+            onChanged: (newValue) {
+              final newVal = item.value == "OF" ? "ON" : "OF";
+              cubit.updateSettingValue(newVal, sectionIndex, settingIndex);
+            }
+        );
       case 3:
         return Text(item.value.isEmpty ? "00:00:00" : item.value, style: Theme.of(context).textTheme.bodyMedium);
-      case 4:
-      case 5:
-        final times = item.value.split(';');
-        final t1 = times.isNotEmpty ? times[0].trim() : "00:00:00";
-        final t2 = times.length > 1 ? times[1].trim() : "00:00:00";
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(t1),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 4), child: Text("→")),
-            Text(t2),
-          ],
-        );
       default:
         return Text(item.value);
     }
@@ -194,30 +227,12 @@ class PumpSettingsPage extends StatelessWidget {
 
       case 3:
         final newTime = await TimePickerService.show(
+          title: item.title,
           context: context,
           initialTime: item.value,
-          showSeconds: true,
         );
         if (newTime != null && newTime != item.value) {
           cubit.updateSettingValue(newTime, sectionIndex, settingIndex);
-        }
-        break;
-
-      case 4:
-      case 5:
-        final times = item.value.contains(';') ? item.value.split(';') : ["00:00:00 ; 00:00:00"];
-        final onTime = times[0].trim();
-        final offTime = times.length > 1 ? times[1].trim() : "00:00:00";
-
-        final newOn = await TimePickerService.show(context: context, initialTime: onTime);
-        if (newOn == null) return;
-
-        final newOff = await TimePickerService.show(context: context, initialTime: offTime);
-        if (newOff == null) return;
-
-        final newValue = "$newOn;$newOff";
-        if (newValue != item.value) {
-          cubit.updateSettingValue(newValue, sectionIndex, settingIndex);
         }
         break;
     }
@@ -225,32 +240,37 @@ class PumpSettingsPage extends StatelessWidget {
 
   Future<String?> _showTextDialog(BuildContext context, String title, String current) async {
     final controller = TextEditingController(text: current);
-    return GlassyAlertDialog.show(
-        context: context,
-        title: title,
-        content: TextField(controller: controller, keyboardType: TextInputType.number),
-        actions: [
-          ActionButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
-          ),
-          ActionButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            isPrimary: true,
-            child: Text("Save"),
-          ),
-        ]
+
+    controller.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: controller.text.length,
     );
-    return showDialog<String>(
+
+    return await GlassyAlertDialog.show<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: TextField(controller: controller, keyboardType: TextInputType.number),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Cancel")),
-          TextButton(onPressed: () => Navigator.pop(ctx, controller.text.trim()), child: const Text("Save")),
-        ],
+      title: title,
+      content: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        autofocus: true,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (_) => Navigator.pop(context, controller.text.trim()),
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        ),
       ),
+      actions: [
+        ActionButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        ActionButton(
+          onPressed: () => Navigator.pop(context, controller.text.trim()),
+          isPrimary: true,
+          child: const Text("Save"),
+        ),
+      ],
     );
   }
 }
