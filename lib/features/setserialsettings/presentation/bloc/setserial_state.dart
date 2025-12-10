@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../data/models/setserial_details_model.dart';
+
 abstract class SetSerialState extends Equatable {
   @override
   List<Object?> get props => [];
@@ -11,7 +13,7 @@ class SetSerialLoading extends SetSerialState {}
 
 /// ---------- LOAD SERIAL (LIST) ----------
 class SerialDataLoaded extends SetSerialState {
-  final List<dynamic> nodeList;
+  final List<SetSerialNodeList> nodeList;
 
   SerialDataLoaded(this.nodeList);
 

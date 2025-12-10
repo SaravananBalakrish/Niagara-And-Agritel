@@ -1,6 +1,7 @@
 
 
 import '../datasources/setserial_datasource.dart';
+import '../models/setserial_details_model.dart';
 
 
 class SetSerialRepository {
@@ -48,7 +49,7 @@ class SetSerialRepository {
     );
   }
 
-  Future<List<dynamic>> loadSerial({
+  Future<List<SetSerialNodeList>> loadSerial({
     required int userId,
     required int controllerId,
   }) {

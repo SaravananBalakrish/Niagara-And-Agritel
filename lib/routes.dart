@@ -187,10 +187,12 @@ class AppRouter {
             final params = state.extra as SetSerialParams;
             return BlocProvider(create: (_) => di.sl<SetSerialBloc>()
                 ..add(LoadSerialEvent(userId: params.userId,controllerId: params.controllerId,)),
-              child: SerialSetCalibrationPage(userId: params.userId,controllerId: params.controllerId,),
+              child: SerialSetCalibrationPage(userId: params.userId,controllerId: params.controllerId, type: params.type,),
             );
           },
         ),
+
+        //
         ShellRoute(
           builder: (context, state, child) {
             final location = state.matchedLocation;

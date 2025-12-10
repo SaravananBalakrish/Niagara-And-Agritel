@@ -88,16 +88,32 @@ class ControllerDetailsPage extends StatelessWidget {
                 child: ControllerSectionHeader(title: "Controller Details"),
               ),
               const SizedBox(height: 16),
-              GestureDetector(
-                onTap: () {
-                  context.pushNamed(
-                    'setSerialPage',
-                    extra: SetSerialParams(userId: params.userId, controllerId: params.controllerId),
-                  );
-                },
-                child: const Center(
-                  child: Text("Set Serial"),
-                ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(
+                        'setSerialPage',
+                        extra: SetSerialParams(userId: params.userId, controllerId: params.controllerId,type: 1),
+                      );
+                    },
+                    child: const Center(
+                      child: Text("Set Serial"),
+                    ),
+                  ),
+                  SizedBox(width: 20,),
+                  GestureDetector(
+                    onTap: () {
+                      context.pushNamed(
+                        'setSerialPage',
+                        extra: SetSerialParams(userId: params.userId, controllerId: params.controllerId,type: 2),
+                      );
+                    },
+                    child: const Center(
+                      child: Text("Common Calibration"),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               GestureDetector(

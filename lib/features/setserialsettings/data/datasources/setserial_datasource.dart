@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/services/api_client.dart';
 import '../../../../../core/utils/api_urls.dart';
+import '../models/setserial_details_model.dart';
 
 abstract class SetSerialDataSource {
   Future<String> sendSerial({
@@ -25,7 +26,7 @@ abstract class SetSerialDataSource {
     required String sentSms,
   });
 
-  Future<List<dynamic>> loadSerial({
+  Future<List<SetSerialNodeList>> loadSerial({
     required int userId,
     required int controllerId,
   });
@@ -170,10 +171,70 @@ class SetSerialDataSourceImpl extends SetSerialDataSource {
       throw ServerException(statusCode: 500, message: e.toString());
     }
   }
-
-  // LOAD SERIAL
   @override
-  Future<List<dynamic>> loadSerial({
+  Future<List<SetSerialNodeList>> loadSerial({
+    required int userId,
+    required int controllerId,
+  }) async {
+    try {
+      // Build endpoint
+      final endpoint = ApiUrls.getsetserialUrl
+          .replaceAll(':userId', userId.toString())
+          .replaceAll(':controllerId', controllerId.toString());
+
+      // API CALL
+      final response = await apiClient.get(endpoint);
+
+      if (response == null) {
+        throw ServerException(
+          statusCode: 500,
+          message: "Empty response from server",
+        );
+      }
+
+      // Check response code
+      final code = response["code"];
+      if (code != 200) {
+        throw ServerException(
+          statusCode: code ?? 500,
+          message: response["message"] ?? "Load serial failed",
+        );
+      }
+
+      // Validate data
+      final dataList = response["data"];
+      if (dataList == null || dataList.isEmpty) {
+        return []; // no records
+      }
+
+      final data = dataList[0];
+
+      // Check for sendData availability
+      final sendData = jsonDecode(data["sendData"]);
+      if (sendData == null || sendData.toString().trim().isEmpty) {
+        return [];
+      }
+      else if (!sendData.containsKey("nodeList")) {
+        return [];
+      }
+
+      // Parse your model
+      final model = SetSerialData.fromJson(sendData);
+
+      return model.nodeList;
+    } catch (e, stack) {
+      print("❌ loadSerial ERROR: $e");
+      print("STACK: $stack");
+      throw ServerException(
+        statusCode: 500,
+        message: e.toString(),
+      );
+    }
+  }
+
+
+  @override
+  Future<List<SetSerialNodeList>> loadSeria1l({
     required int userId,
     required int controllerId,
   }) async {
@@ -182,18 +243,22 @@ class SetSerialDataSourceImpl extends SetSerialDataSource {
           .replaceAll(':userId', userId.toString())
           .replaceAll(':controllerId', controllerId.toString());
 
-      print("➡️ GET URL: $endpoint");
-
       final response = await apiClient.get(endpoint);
 
-      print("⬅️ RESPONSE: $response");
-
       if (response == null) {
-        throw ServerException(statusCode: 500, message: "Empty server response");
+        throw ServerException(statusCode: 500, message: "Empty response");
       }
 
       if (response["code"] == 200) {
-        return response["data"][0]["sendData"]["nodeList"];
+        final data = response["data"][0];
+
+        final model = SetSerialData.fromJson(data);
+
+        if (data["sendData"] == null || data["sendData"] == "") {
+          return []; // no serial found
+        }
+
+        return model.nodeList;
       }
 
       throw ServerException(
@@ -205,4 +270,5 @@ class SetSerialDataSourceImpl extends SetSerialDataSource {
       throw ServerException(statusCode: 500, message: e.toString());
     }
   }
+
 }
