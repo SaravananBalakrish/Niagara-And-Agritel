@@ -175,14 +175,7 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerFactory(() => SetSerialBloc(sl()));
   sl.registerFactory(() => SetSerialParams(userId: sl(), controllerId: sl()));
   sl.registerFactory(() => LoadSerialUsecase(sl()));
-  sl.registerLazySingleton<SetSerialDataSource>(
-        () => SetSerialDataSourceImpl(apiClient: sl()),
-  );
   sl.registerFactory(() => LoadSerialEvent(userId: sl(), controllerId: sl()));
-
-
-
-
 
 }
 

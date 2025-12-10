@@ -29,6 +29,7 @@ class SerialSetCalibrationPage extends StatelessWidget {
         ),
 
         body: BlocConsumer<SetSerialBloc, SetSerialState>(
+
           listener: (context, state) {
             if (state is SendSerialSuccess ||
                 state is ResetSerialSuccess ||
