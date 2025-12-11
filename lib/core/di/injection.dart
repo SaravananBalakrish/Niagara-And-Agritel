@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/di/auth.di.dart';
+import '../../features/controller_settings/presentaion/cubit/controller_tab_cubit.dart';
 import '../../features/dashboard/di/dashboard_di.dart';
 import '../../features/mqtt/bloc/mqtt_bloc.dart';
 import '../../features/pump_settings/di/pump_settings_di.dart';
@@ -66,6 +67,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
 
   /// Pump Settings Dependencies
   initPumpSettingsDependencies();
+
+  sl.registerFactory(() => ControllerTabCubit());
 }
 
 // Reset all

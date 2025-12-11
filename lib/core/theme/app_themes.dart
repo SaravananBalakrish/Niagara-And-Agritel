@@ -61,6 +61,7 @@ class AppThemes {
     brightness: Brightness.light,
     primarySwatch: primarySwatch,
     primaryColor: primaryColor,
+    primaryColorLight: Color(0xff6DA8F5),
     iconTheme: IconThemeData(color: Colors.white),
     colorScheme: ColorScheme.light(
       primary: primaryColor,
@@ -82,6 +83,7 @@ class AppThemes {
     ),
     listTileTheme: ListTileThemeData(
       textColor: Colors.white,
+      titleTextStyle: TextStyle(color: Colors.black, fontSize: 20)
     ),
     textTheme: TextTheme(
       titleMedium: TextStyle(color: Colors.white),
@@ -184,6 +186,7 @@ class AppThemes {
       }),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     ),
+
   );
 
   // Dark Theme
