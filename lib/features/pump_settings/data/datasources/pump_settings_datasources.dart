@@ -73,143 +73,155 @@ class PumpSettingsDataSourcesImpl implements PumpSettingsDataSources {
 
           final staticJson = [
             {
-              "TID": 4581,
-              "NAME": "VOLTAGE CALIBRATION",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 7,
-                  "VAL": "0 ; 0 ; 0",
-                  "SF": "VOLTCAL",
-                  "TT": "VR ; VY ; VB",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 7,
-                  "VAL": "0.00 ; 0.00 ; 0.00",
-                  "SF": "VOLTAGCAL",
-                  "TT": "",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4582,
-              "NAME": "CURRENT CALIBRATION",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 7,
-                  "VAL": "0 ; 0 ; 0",
-                  "SF": "CURCAL",
-                  "TT": "CURRENT CALIBRATION",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 7,
-                  "VAL": "0.00 ; 0.00 ; 0.00",
-                  "SF": "CURRENTCAL",
-                  "TT": "",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4583,
-              "NAME": "POWER FACTOR",
+              "TID": 4491,
+              "NAME": "Dry Run Settings",
               "SETS": [
                 {
                   "SN": 1,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "PFCSET",
-                  "TT": "PF CORRECTION SCAN",
+                  "SF": "DRYRUN",
+                  "TT": "Dry Run Scan",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
                   "WT": 3,
                   "VAL": "00:00:00",
-                  "SF": "POSCDDELAY",
-                  "TT": "PF CORRECTION TIMER",
+                  "SF": "DRSCAN",
+                  "TT": "Dry Run Scan Timer",
                   "HF": "1"
                 },
                 {
                   "SN": 3,
                   "WT": 1,
-                  "VAL": "000",
-                  "SF": "PFCVOLT",
-                  "TT": "PF VOLT",
+                  "VAL": "0",
+                  "SF": "DRAMPS2",
+                  "TT": "Dry Run Amps 2PH",
+                  "HF": "0"
+                },
+                {
+                  "SN": 4,
+                  "WT": 1,
+                  "VAL": "0",
+                  "SF": "DRAMPS3",
+                  "TT": "Dry Run Amps 3PH",
                   "HF": "1"
+                },
+                {
+                  "SN": 5,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "DRRESTART",
+                  "TT": "Dry Run Restart",
+                  "HF": "0"
+                },
+                {
+                  "SN": 6,
+                  "WT": 3,
+                  "VAL": "00:00:00",
+                  "SF": "DRRESTART",
+                  "TT": "Dry Run Restart Timer",
+                  "HF": "0"
+                },
+                {
+                  "SN": 7,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "DRYRUN",
+                  "TT": "Dry Run Occurance",
+                  "HF": "0"
+                },
+                {
+                  "SN": 8,
+                  "WT": 3,
+                  "VAL": "00:00:00",
+                  "SF": "DROCCURTIM",
+                  "TT": "Dry Run Occurance Timer",
+                  "HF": "0"
+                },
+                {
+                  "SN": 9,
+                  "WT": 1,
+                  "VAL": "0",
+                  "SF": "DROCCURNBR",
+                  "TT": "Dry Run Occurance Count",
+                  "HF": "0"
                 }
               ]
             },
             {
-              "TID": 4584,
-              "NAME": "CURRENT SENSING R-Y-B",
+              "TID": 4492,
+              "NAME": "Overload Settings",
               "SETS": [
                 {
                   "SN": 1,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "CTR",
-                  "TT": "R SCAN",
+                  "SF": "OL",
+                  "TT": "Overload Scan",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 3,
+                  "VAL": "00:00:00",
+                  "SF": "OLSCAN",
+                  "TT": "Overload Scan Timer",
+                  "HF": "1"
+                },
+                {
+                  "SN": 3,
+                  "WT": 1,
+                  "VAL": "0",
+                  "SF": "OLAMPS2",
+                  "TT": "Overload Amps 2PH",
+                  "HF": "0"
+                },
+                {
+                  "SN": 4,
+                  "WT": 1,
+                  "VAL": "0",
+                  "SF": "OLAMPS3",
+                  "TT": "Overload Amps 3PH",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4493,
+              "NAME": "Power on reset Settings",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "DRRESTART",
+                  "TT": "Dry Run Power ON Reset",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "CTY",
-                  "TT": "Y SCAN",
+                  "SF": "OLRST",
+                  "TT": "Overload Power ON Reset",
                   "HF": "1"
                 },
                 {
                   "SN": 3,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "CTB",
-                  "TT": "B SCAN",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4585,
-              "NAME": "OTHERS",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "CTCURRENTSPP",
-                  "TT": "CURRENT SPP SCAN",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "DOUBLEPUMP",
-                  "TT": "DUAL PUMP",
-                  "HF": "1"
-                },
-                {
-                  "SN": 3,
-                  "WT": 7,
-                  "VAL": "0 ; 0",
-                  "SF": "SETMAXLEVEL",
-                  "TT": "MIN ; MAX",
-                  "HF": "1"
+                  "SF": "MOBILERST",
+                  "TT": "Auto Restart",
+                  "HF": "0"
                 },
                 {
                   "SN": 4,
                   "WT": 2,
-                  "VAL": "CURRENTCAL/VOLTAGCAL",
-                  "SF": "CTY",
-                  "TT": "WIRELESS",
+                  "VAL": "OF",
+                  "SF": "AUTORST2",
+                  "TT": "Auto Restart 2PH",
                   "HF": "1"
                 }
               ]

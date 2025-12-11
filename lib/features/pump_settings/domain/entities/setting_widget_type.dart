@@ -5,6 +5,7 @@ enum SettingWidgetType {
   multiTime, // 4
   fullText,  // 5
   phone,     // 6
+  multiText, // 7
   unknown;
 
   factory SettingWidgetType.fromInt(int value) {
@@ -22,6 +23,8 @@ enum SettingWidgetType {
         return fullText;
       case 6:
         return phone;
+      case 7:
+        return multiText;
       default:
         return unknown;
     }

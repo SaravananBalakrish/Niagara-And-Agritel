@@ -71,4 +71,8 @@ class PumpSettingsCubit extends Cubit<PumpSettingsState> {
     final publishMessage = jsonEncode(PublishMessageHelper.settingsPayload(payload));
     di.sl.get<MqttBloc>().add(PublishMqttEvent(deviceId: '', message: publishMessage));
   }
+
+  void updateHiddenFlag() {
+
+  }
 }

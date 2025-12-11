@@ -9,7 +9,7 @@ class SmsPayloadBuilder {
 
     return switch (setting.widgetType) {
       SettingWidgetType.phone => _buildPhonePayload(setting, value),
-      SettingWidgetType.multiTime => _buildMultiTimePayload(setting, value),
+      SettingWidgetType.multiTime || SettingWidgetType.multiText => _buildMultiTimePayload(setting, value),
       SettingWidgetType.toggle when setting.title == 'DND' => _buildDndPayload(setting),
       _ => _buildDefaultPayload(setting, value),
     };

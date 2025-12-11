@@ -41,7 +41,15 @@ class PumpSettingsPage extends StatelessWidget {
         ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(title: Text(menuName ?? 'Pump Settings')),
+        appBar: AppBar(
+            title: Text(menuName ?? 'Pump Settings'),
+          actions: [
+            IconButton(
+                onPressed: (){},
+                icon: Icon(Icons.hide_source)
+            )
+          ],
+        ),
         body: GlassyWrapper(
           child: NotificationListener<OverscrollIndicatorNotification>(
             onNotification: (n) {
@@ -52,9 +60,6 @@ class PumpSettingsPage extends StatelessWidget {
               builder: (context, state) {
                 if (state is GetPumpSettingsInitial) {
                   return const Center(child: CircularProgressIndicator());
-                }
-                if (state is GetPumpSettingsLoaded) {
-                  return _SettingsList(menu: state.settings);
                 }
                 if (state is GetPumpSettingsError) {
                   return Center(
@@ -69,7 +74,7 @@ class PumpSettingsPage extends StatelessWidget {
                     ),
                   );
                 }
-                return const SizedBox();
+                return _SettingsList(menu: (state as GetPumpSettingsLoaded).settings);
               },
             ),
           ),
@@ -86,22 +91,43 @@ class _SettingsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.all(15),
       itemCount: menu.template.sections.length,
       itemBuilder: (context, sectionIndex) {
         final section = menu.template.sections[sectionIndex];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            Text(section.sectionName, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            ...section.settings.map((setting) => _SettingRow(
-              setting: setting,
-              sectionIndex: sectionIndex,
-              settingIndex: section.settings.indexOf(setting),
-            )),
-          ],
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              Text(section.sectionName, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              GlassCard(
+                margin: EdgeInsetsGeometry.symmetric(horizontal: 0),
+                  padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
+                  child: ListView.separated(
+                    physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                      final SettingsEntity setting = section.settings[index];
+                        return _SettingRow(
+                          setting: setting,
+                          sectionIndex: sectionIndex,
+                          settingIndex: index,
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        if(section.settings[index].widgetType != SettingWidgetType.multiText) {
+                          return Divider(color: Colors.white54,);
+                        } else {
+                          return Container();
+                        }
+                      },
+                      itemCount: section.settings.length
+                  ),
+              )
+            ],
+          ),
         );
       },
     );
@@ -123,21 +149,19 @@ class _SettingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<PumpSettingsCubit>();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(child: GlassCard(padding: EdgeInsets.zero, child: _buildInput(context))),
-          const SizedBox(width: 8),
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            child: IconButton(
-              icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
-              onPressed: () => cubit.sendCurrentSetting(sectionIndex, settingIndex),
-            ),
+    return Row(
+      children: [
+        Expanded(child: _buildInput(context)),
+        const SizedBox(width: 8),
+        CircleAvatar(
+          backgroundColor: Colors.white,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
+            onPressed: () => cubit.sendCurrentSetting(sectionIndex, settingIndex),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -146,6 +170,7 @@ class _SettingRow extends StatelessWidget {
       SettingWidgetType.phone => _PhoneInput(setting: setting, onChanged: _onChanged(context)),
       SettingWidgetType.multiTime => _MultiTimeInput(setting: setting, onChanged: _onChanged(context)),
       SettingWidgetType.fullText => _TextInput(setting: setting, onChanged: _onChanged(context)),
+      SettingWidgetType.multiText => _MultiTextInput(setting: setting, onChanged: _onChanged(context)),
       _ => SettingListTile(
         title: setting.title,
         trailing: _buildTrailing(context),
@@ -156,7 +181,8 @@ class _SettingRow extends StatelessWidget {
 
   Widget _buildTrailing(BuildContext context) {
     return switch (setting.widgetType) {
-      SettingWidgetType.text => Text(setting.value.isEmpty ? "-" : setting.value, style: Theme.of(context).textTheme.bodyMedium,),
+      // SettingWidgetType.text => Text(setting.value.isEmpty ? "-" : setting.value, style: Theme.of(context).textTheme.bodyMedium,),
+      SettingWidgetType.text => _TextInput(setting: setting, onChanged: _onChanged(context)),
       SettingWidgetType.toggle => Switch(
         value: setting.value == "ON",
         onChanged: (_) => _onChanged(context)(setting.value == "ON" ? "OF" : "ON"),
@@ -180,9 +206,9 @@ class _SettingRow extends StatelessWidget {
     String? newValue;
 
     switch (setting.widgetType) {
-      case SettingWidgetType.text:
+      /*case SettingWidgetType.text:
         newValue = await _showTextDialog(context);
-        break;
+        break;*/
 
       case SettingWidgetType.toggle:
         newValue = setting.value == "OF" ? "ON" : "OF";
@@ -236,13 +262,16 @@ class _PhoneInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntlPhoneField(
-      initialValue: setting.value,
-      initialCountryCode: 'IN',
-      style: const TextStyle(color: Colors.white),
-      dropdownTextStyle: const TextStyle(color: Colors.white),
-      dropdownIcon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-      onChanged: (phone) => onChanged(phone.completeNumber),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: IntlPhoneField(
+        initialValue: setting.value,
+        initialCountryCode: 'IN',
+        style: const TextStyle(color: Colors.white),
+        dropdownTextStyle: const TextStyle(color: Colors.white),
+        dropdownIcon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+        onChanged: (phone) => onChanged(phone.completeNumber),
+      ),
     );
   }
 }
@@ -254,14 +283,17 @@ class _TextInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      initialValue: setting.value,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-          labelText: setting.title,
-          contentPadding: EdgeInsetsGeometry.symmetric(horizontal: 10)
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: TextFormField(
+        initialValue: setting.value,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+            labelText: setting.title,
+            contentPadding: EdgeInsetsGeometry.symmetric(horizontal: 10)
+        ),
+        onChanged: onChanged,
       ),
-      onChanged: onChanged,
     );
   }
 }
@@ -288,6 +320,60 @@ class _MultiTimeInput extends StatelessWidget {
           }
         },
       )),
+    );
+  }
+}
+
+class _MultiTextInput extends StatelessWidget {
+  final SettingsEntity setting;
+  final ValueChanged<String> onChanged;
+  const _MultiTextInput({required this.setting, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    final titles = setting.title.split(';').map((e) => e.trim()).toList();
+    final values = setting.value.split(';').map((e) => e.trim()).toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            spacing: 30,
+            children: [
+              for(int i = 0 ; i < titles.length; i++)
+                if(titles[i].isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: Text(titles[i]),
+                  )
+            ],
+          ),
+          // if(setting.title.isEmpty)
+          Row(
+            spacing: 30,
+            children: [
+              for(int i = 0; i < values.length; i++)
+                Flexible(
+                  child: TextFormField(
+                    initialValue: values[i],
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                        contentPadding: EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 0),
+                        isDense: true
+                    ),
+                    onChanged: (newValue) async {
+                      final newValues = [...values]..[i] = newValue;
+                      onChanged(newValues.join(';'));
+                    },
+                  ),
+                ),
+            ],
+          )
+        ],
+      ),
     );
   }
 }
