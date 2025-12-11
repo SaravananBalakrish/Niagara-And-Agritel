@@ -1,7 +1,6 @@
 import 'dart:developer';
 
-import 'package:niagara_smart_drip_irrigation/features/pump_settings/domain/entities/menu_item_entity.dart';
-
+import '../../domain/entities/menu_item_entity.dart';
 import '../models/menu_item_model.dart';
 import '../models/settings_menu_model.dart';
 import '../../utils/pump_settings_urls.dart';
@@ -74,151 +73,143 @@ class PumpSettingsDataSourcesImpl implements PumpSettingsDataSources {
 
           final staticJson = [
             {
-              "TID": 4521,
-              "NAME": "Cyclic Timer Settings",
+              "TID": 4581,
+              "NAME": "VOLTAGE CALIBRATION",
               "SETS": [
                 {
                   "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "CYCLIC",
-                  "TT": "Cyclic Timer",
+                  "WT": 7,
+                  "VAL": "0 ; 0 ; 0",
+                  "SF": "VOLTCAL",
+                  "TT": "VR ; VY ; VB",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "CYCLICTIMONOF",
-                  "TT": "On Time ; Off Time",
-                  "HF": "1"
-                },
-                {
-                  "SN": 3,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "CYCLICCHOVR",
-                  "TT": "Change Over",
-                  "HF": "1"
-                },
-                {
-                  "SN": 4,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00 ; 00:00:00",
-                  "SF": "CYCLICTIMONOF",
-                  "TT": "Motor 1 On Time ; Motor 2 On Time ; Off Time",
+                  "WT": 7,
+                  "VAL": "0.00 ; 0.00 ; 0.00",
+                  "SF": "VOLTAGCAL",
+                  "TT": "",
                   "HF": "1"
                 }
               ]
             },
             {
-              "TID": 4522,
-              "NAME": "Dry Run Restart Timer",
+              "TID": 4582,
+              "NAME": "CURRENT CALIBRATION",
               "SETS": [
                 {
                   "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "DRRESTARTTIM",
-                  "TT": "Dry Run Restart Timer",
+                  "WT": 7,
+                  "VAL": "0 ; 0 ; 0",
+                  "SF": "CURCAL",
+                  "TT": "CURRENT CALIBRATION",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "DRRESTARTTIM",
-                  "TT": "Motor 1 ; Motor 2",
+                  "WT": 7,
+                  "VAL": "0.00 ; 0.00 ; 0.00",
+                  "SF": "CURRENTCAL",
+                  "TT": "",
                   "HF": "1"
                 }
               ]
             },
             {
-              "TID": 4523,
-              "NAME": "Maximum Runtime Settings",
+              "TID": 4583,
+              "NAME": "POWER FACTOR",
               "SETS": [
                 {
                   "SN": 1,
                   "WT": 2,
                   "VAL": "OF",
-                  "SF": "MAXTIM",
-                  "TT": "Maximum Runtime",
+                  "SF": "PFCSET",
+                  "TT": "PF CORRECTION SCAN",
                   "HF": "1"
                 },
                 {
                   "SN": 2,
                   "WT": 3,
                   "VAL": "00:00:00",
-                  "SF": "MAXTIM",
-                  "TT": "Delay Timer",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4524,
-              "NAME": "Night Light RTC Settings",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "NIGHTLIGHTRTC",
-                  "TT": "Night Light RTC",
-                  "HF": "1"
-                },
-                {
-                  "SN": 1,
-                  "WT": 5,
-                  "VAL": "00:00 ; 00:00",
-                  "SF": "NIGHTLIGHTRTCTIM",
-                  "TT": "From ; To",
-                  "HF": "1"
-                }
-              ]
-            },
-            {
-              "TID": 4525,
-              "NAME": "RTC Timer Settings",
-              "SETS": [
-                {
-                  "SN": 1,
-                  "WT": 2,
-                  "VAL": "OF",
-                  "SF": "RTC",
-                  "TT": "RTC Timer",
-                  "HF": "1"
-                },
-                {
-                  "SN": 2,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "RTCTIMONOF1",
-                  "TT": "On Time ; Off Time",
+                  "SF": "POSCDDELAY",
+                  "TT": "PF CORRECTION TIMER",
                   "HF": "1"
                 },
                 {
                   "SN": 3,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "RTCTIMONOF2",
-                  "TT": "On Time ; Off Time",
+                  "WT": 1,
+                  "VAL": "000",
+                  "SF": "PFCVOLT",
+                  "TT": "PF VOLT",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4584,
+              "NAME": "CURRENT SENSING R-Y-B",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "CTR",
+                  "TT": "R SCAN",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "CTY",
+                  "TT": "Y SCAN",
+                  "HF": "1"
+                },
+                {
+                  "SN": 3,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "CTB",
+                  "TT": "B SCAN",
+                  "HF": "1"
+                }
+              ]
+            },
+            {
+              "TID": 4585,
+              "NAME": "OTHERS",
+              "SETS": [
+                {
+                  "SN": 1,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "CTCURRENTSPP",
+                  "TT": "CURRENT SPP SCAN",
+                  "HF": "1"
+                },
+                {
+                  "SN": 2,
+                  "WT": 2,
+                  "VAL": "OF",
+                  "SF": "DOUBLEPUMP",
+                  "TT": "DUAL PUMP",
+                  "HF": "1"
+                },
+                {
+                  "SN": 3,
+                  "WT": 7,
+                  "VAL": "0 ; 0",
+                  "SF": "SETMAXLEVEL",
+                  "TT": "MIN ; MAX",
                   "HF": "1"
                 },
                 {
                   "SN": 4,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "RTCTIMONOF3",
-                  "TT": "On Time ; Off Time",
-                  "HF": "1"
-                },
-                {
-                  "SN": 5,
-                  "WT": 4,
-                  "VAL": "00:00:00 ; 00:00:00",
-                  "SF": "RTCTIMONOF4",
-                  "TT": "On Time ; Off Time",
+                  "WT": 2,
+                  "VAL": "CURRENTCAL/VOLTAGCAL",
+                  "SF": "CTY",
+                  "TT": "WIRELESS",
                   "HF": "1"
                 }
               ]
