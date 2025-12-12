@@ -59,8 +59,7 @@ class AppRouter {
 
   AppRouter({required this.authBloc}) {
     router = GoRouter(
-      // initialLocation: AuthRoutes.login,
-      initialLocation: ControllerSettingsRoutes.program,
+      initialLocation: AuthRoutes.login,
       debugLogDiagnostics: true,
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (context, state) {
