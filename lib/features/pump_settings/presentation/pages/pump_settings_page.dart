@@ -42,12 +42,33 @@ class PumpSettingsPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-            title: Text(menuName ?? 'Pump Settings'),
+          title: Text(menuName ?? 'Pump Settings'),
           actions: [
             IconButton(
-                onPressed: (){},
-                icon: Icon(Icons.hide_source)
-            )
+              onPressed: () {
+                print("IconButton pressed"); // This will print
+
+                final state = context.read<PumpSettingsCubit>().state;
+                print("Current state: $state"); // This WILL print now
+
+                if (state is GetPumpSettingsLoaded) {
+                  GlassyAlertDialog.show(
+                    context: context,
+                    title: "Hide/Show Settings",
+                    content: _SettingsList(
+                      menu: state.settings,
+                      isHiddenFlagPage: true,
+                    ),
+                  );
+                } else {
+                  // Optional: show a message or do nothing
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Settings not loaded yet")),
+                  );
+                }
+              },
+              icon: const Icon(Icons.hide_source),
+            ),
           ],
         ),
         body: GlassyWrapper(
@@ -74,6 +95,7 @@ class PumpSettingsPage extends StatelessWidget {
                     ),
                   );
                 }
+
                 return _SettingsList(menu: (state as GetPumpSettingsLoaded).settings);
               },
             ),
@@ -86,7 +108,8 @@ class PumpSettingsPage extends StatelessWidget {
 
 class _SettingsList extends StatelessWidget {
   final MenuItemEntity menu;
-  const _SettingsList({required this.menu});
+  final bool isHiddenFlagPage;
+  const _SettingsList({required this.menu, this.isHiddenFlagPage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -104,27 +127,44 @@ class _SettingsList extends StatelessWidget {
               const SizedBox(height: 8),
               GlassCard(
                 margin: EdgeInsetsGeometry.symmetric(horizontal: 0),
-                  padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
-                  child: ListView.separated(
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
+                child: ListView.separated(
                     physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
                       final SettingsEntity setting = section.settings[index];
-                        return _SettingRow(
+                      if(isHiddenFlagPage) {
+                        return CheckboxListTile(
+                          contentPadding: EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 0),
+
+                          title: Text(setting.title),
+                            value: setting.hiddenFlag == "1",
+                            onChanged: (newValue) {}
+                        );
+                      }
+                      return Visibility(
+                        visible: setting.hiddenFlag == "1",
+                        child: _SettingRow(
                           setting: setting,
                           sectionIndex: sectionIndex,
                           settingIndex: index,
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      if(section.settings[index].widgetType != SettingWidgetType.multiText) {
+                        final bool isHidden = section.settings[index].hiddenFlag == "1";
+                        final bool isLast = index == section.settings.where((e) => e.hiddenFlag == "1").length;
+                        return Visibility(
+                            visible: !isHiddenFlagPage ? (isHidden && !isLast) : true,
+                            child: Divider(color: Colors.white54,)
                         );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        if(section.settings[index].widgetType != SettingWidgetType.multiText) {
-                          return Divider(color: Colors.white54,);
-                        } else {
-                          return Container();
-                        }
-                      },
-                      itemCount: section.settings.length
-                  ),
+                      } else {
+                        return Container();
+                      }
+                    },
+                    itemCount: section.settings.length
+                ),
               )
             ],
           ),
@@ -181,7 +221,7 @@ class _SettingRow extends StatelessWidget {
 
   Widget _buildTrailing(BuildContext context) {
     return switch (setting.widgetType) {
-      // SettingWidgetType.text => Text(setting.value.isEmpty ? "-" : setting.value, style: Theme.of(context).textTheme.bodyMedium,),
+    // SettingWidgetType.text => Text(setting.value.isEmpty ? "-" : setting.value, style: Theme.of(context).textTheme.bodyMedium,),
       SettingWidgetType.text => _TextInput(setting: setting, onChanged: _onChanged(context)),
       SettingWidgetType.toggle => Switch(
         value: setting.value == "ON",
@@ -206,10 +246,6 @@ class _SettingRow extends StatelessWidget {
     String? newValue;
 
     switch (setting.widgetType) {
-      /*case SettingWidgetType.text:
-        newValue = await _showTextDialog(context);
-        break;*/
-
       case SettingWidgetType.toggle:
         newValue = setting.value == "OF" ? "ON" : "OF";
         break;
@@ -229,29 +265,6 @@ class _SettingRow extends StatelessWidget {
     if (newValue != null && newValue != setting.value) {
       _onChanged(context)(newValue);
     }
-  }
-
-  Future<String?> _showTextDialog(BuildContext context) async {
-    final controller = TextEditingController(text: setting.value);
-    return GlassyAlertDialog.show<String>(
-      context: context,
-      title: setting.title,
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(border: OutlineInputBorder()),
-        onTap: () => controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length),
-      ),
-      actions: [
-        ActionButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-        ActionButton(
-          isPrimary: true,
-          onPressed: () => Navigator.pop(context, controller.text.trim()),
-          child: const Text("Save"),
-        ),
-      ],
-    );
   }
 }
 

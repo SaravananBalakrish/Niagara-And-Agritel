@@ -73,6 +73,6 @@ class PumpSettingsCubit extends Cubit<PumpSettingsState> {
   }
 
   void updateHiddenFlag() {
-
+    if (state is! GetPumpSettingsLoaded) return;
   }
 }
