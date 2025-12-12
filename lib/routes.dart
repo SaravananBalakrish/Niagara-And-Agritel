@@ -291,6 +291,11 @@ class AppRouter {
               path: RouteConstants.chat,
               builder: (context, state) => const Chat(),
             ),
+            _authRoute(
+              name: 'sendRevMsgPage',
+              path: RouteConstants.sendRevMsgPage,
+              builder: (context, state) => const Chat(),
+            ),
           ],
         ),
       ],
