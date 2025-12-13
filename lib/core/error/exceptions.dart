@@ -85,5 +85,12 @@ class ValidationException implements Exception {
   @override
   String toString() => "$message (code: $code)";
 }
+class NoDataException implements Exception {
+  final String message;
+   NoDataException({required this.message});
+  @override
+  String toString() => "$message";
+}
+
 
 

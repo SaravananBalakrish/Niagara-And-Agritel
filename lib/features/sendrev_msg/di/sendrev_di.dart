@@ -6,6 +6,7 @@ import '../../../core/di/injection.dart';
 import '../data/datasources/sendrev_datasource.dart';
 import '../data/repositories/sendrev_repositories.dart';
 import '../domain/usecases/sendrev_params.dart';
+import '../domain/usecases/sendrevmsgParams.dart';
 import '../presentation/bloc/sendrev_bloc.dart';
 
 void initSendRev() {

@@ -63,6 +63,7 @@ class SendRevRemoteDataSourceImpl extends SendRevRemoteDataSource {
         return SendrevModel.fromJson(response);
       }
 
+
       /// Error Response
       throw ServerException(
         statusCode: response["code"],
@@ -70,7 +71,7 @@ class SendRevRemoteDataSourceImpl extends SendRevRemoteDataSource {
       );
     } catch (e) {
       print("❌ getSendReceiveMessages ERROR: ${e.toString()}");
-      throw ServerException(statusCode: 500, message: e.toString());
+       throw ServerException(statusCode: 500, message: e.toString());
     }
   }
 }

@@ -32,9 +32,9 @@ final FaultMsgPagesRoutes = <GoRoute>[
       /// Get parameters from extra
       final params = state.extra as Map<String, dynamic>;
 
-      final userId = 2411; //params["userId"];
+      final userId = params["userId"];
       final subuserId = params["subuserId"] ?? 0;
-      final controllerId = 4985 ;//params["controllerId"];
+      final controllerId = params["controllerId"];
       // http://3.1.62.165:8080/api/v1/user/2411/subuser/0/controller/4985/messages/
 
       print("${userId.runtimeType}");

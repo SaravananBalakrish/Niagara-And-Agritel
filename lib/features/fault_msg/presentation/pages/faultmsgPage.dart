@@ -7,9 +7,7 @@ import '../bloc/faultmsg_bloc_event.dart';
 import '../bloc/faultmsg_bloc_state.dart';
 
 class faultmsgPage extends StatelessWidget {
-  const faultmsgPage(
-      // {super.key, required userId, required subuserId, required controllerId, required fromDate, required toDate}
-      );
+  const faultmsgPage();
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +15,12 @@ class faultmsgPage extends StatelessWidget {
       appBar: AppBar(title: const Text("FAULT MESSAGE")),
       body: BlocBuilder<faultmsgBloc, faultmsgState>(
         builder: (context, state) {
-          if (state is faultmsgLoading) {
+           if (state is faultmsgLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (state is faultmsgLoaded) {
-            return ListView.builder(
+             return ListView.builder(
               itemCount: state.messages.length,
               itemBuilder: (context, index) {
                 final m = state.messages[index];
@@ -34,10 +32,10 @@ class faultmsgPage extends StatelessWidget {
           }
 
           if (state is faultmsgError) {
-            return Center(child: Text(state.message));
+            return Center(child: Text(state.message,style: TextStyle(color: Colors.black),));
           }
 
-          return const SizedBox();
+           return const SizedBox();
         },
       ),
     );

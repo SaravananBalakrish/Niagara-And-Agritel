@@ -57,6 +57,7 @@ class faultmsgRemoteDataSourceImpl extends faultmsgRemoteDataSource {
         return FaultMsgModel.fromJson(response);
       }
 
+
       /// Error Response
       throw ServerException(
         statusCode: response["code"],
