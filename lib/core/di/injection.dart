@@ -10,6 +10,7 @@ import '../../features/controller_details/domain/repositories/controller_details
 import '../../features/controller_details/domain/usecase/controller_details_usercase.dart';
 import '../../features/controller_details/presentation/bloc/controller_details_bloc.dart';
 import '../../features/controller_details/presentation/bloc/controller_details_state.dart';
+import '../../features/fault_msg/di/faultmsg_di.dart';
 import '../../features/sendrev_msg/di/sendrev_di.dart';
 import '../../features/setserialsettings/data/datasources/setserial_datasource.dart';
 import '../../features/setserialsettings/domain/repositories/setserial_details_repo.dart';
@@ -102,6 +103,8 @@ Future<void> init({bool clear = false, SharedPreferences? prefs, http.Client? ht
   sl.registerFactory(() => LoadSerialEvent(userId: sl(), controllerId: sl()));
 
   initSendRev();
+  initfaultmsg();
+
 }
 
 // Reset all

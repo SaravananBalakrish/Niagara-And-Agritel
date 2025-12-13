@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niagara_smart_drip_irrigation/core/widgets/glass_effect.dart';
+import 'package:niagara_smart_drip_irrigation/features/fault_msg/utils/faultmsg_routes.dart';
 import 'package:niagara_smart_drip_irrigation/features/pump_settings/utils/pump_settings_page_routes.dart';
 
 import '../../../sendrev_msg/utils/senrev_routes.dart';
@@ -89,7 +90,9 @@ class ActionsSection extends StatelessWidget {
             child: MenuButton(
               icon: Icons.error_sharp,
               title: "Fault\nMessage",
-              onTap: () {},
+              onTap: () {
+                dialogContext.push(FaultMsgPageRoutes.FaultMsgMsgPage,extra: data);
+              },
             ),
           ),
         ],
