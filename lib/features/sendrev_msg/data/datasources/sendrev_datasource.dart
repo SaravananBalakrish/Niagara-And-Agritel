@@ -47,12 +47,10 @@ class SendRevRemoteDataSourceImpl extends SendRevRemoteDataSource {
           .replaceAll(':fromDate', fromDate)
           .replaceAll(':toDate', toDate);
 
-      print("➡️ GET API: $endpoint");
 
       /// Make API call
       final response = await apiClient.get(endpoint);
 
-      print("⬅️ GET RESPONSE: $response");
 
       if (response == null) {
         throw ServerException(statusCode: 500, message: "Empty server response");
@@ -70,8 +68,7 @@ class SendRevRemoteDataSourceImpl extends SendRevRemoteDataSource {
         message: response["message"] ?? "Unknown error in sendrev API",
       );
     } catch (e) {
-      print("❌ getSendReceiveMessages ERROR: ${e.toString()}");
-       throw ServerException(statusCode: 500, message: e.toString());
+        throw ServerException(statusCode: 500, message: e.toString());
     }
   }
 }

@@ -41,24 +41,17 @@ class faultmsgRemoteDataSourceImpl extends faultmsgRemoteDataSource {
           .replaceAll(':subuserId', '$subuserId')
           .replaceAll(':controllerId', '$controllerId');
 
-      print("➡️ GET API: $endpoint");
-
-      /// Make API call
+       /// Make API call
       final response = await apiClient.get(endpoint);
 
-      print("⬅️ GET RESPONSE: $response");
-
-      if (response == null) {
+       if (response == null) {
         throw ServerException(statusCode: 500, message: "Empty server response");
       }
-
-      /// Success Response
+       /// Success Response
       if (response["code"] == 200) {
         return FaultMsgModel.fromJson(response);
       }
-
-
-      /// Error Response
+       /// Error Response
       throw ServerException(
         statusCode: response["code"],
         message: response["message"] ?? "Unknown error in faultmsg API",

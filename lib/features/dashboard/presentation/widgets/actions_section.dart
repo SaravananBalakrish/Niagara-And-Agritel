@@ -51,6 +51,15 @@ class ActionsSection extends StatelessWidget {
           ),
           Expanded(
             child: MenuButton(
+              icon: Icons.error_sharp,
+              title: "Fault\nMessage",
+              onTap: () {
+                dialogContext.push(FaultMsgPageRoutes.FaultMsgMsgPage,extra: data);
+              },
+            ),
+          ),
+          Expanded(
+            child: MenuButton(
               icon: Icons.settings,
               title: "Irrigation\nSettings",
               onTap: () {},

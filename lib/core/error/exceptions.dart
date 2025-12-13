@@ -5,7 +5,7 @@ class ServerException implements Exception {
   ServerException({this.message = "Server Exception", this.statusCode});
 
   @override
-  String toString() => "$message (code: $statusCode)";
+  String toString() => "$message ";
 }
 
 class AuthException implements Exception {

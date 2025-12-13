@@ -48,7 +48,7 @@ class ChatBubble extends StatelessWidget {
 
                 /// ✔ Show tick only for SENT messages
                 if (msg.status == "1")
-                  Row(
+                  msg.msgType == "SENT" ? Row(
                     children: [
                       const SizedBox(width: 4),
                       Icon(
@@ -57,7 +57,7 @@ class ChatBubble extends StatelessWidget {
                         color: msg.status == "1" ? Colors.white : Colors.white70,
                       ),
                     ],
-                  ),
+                  ) : SizedBox()
               ],
             )
           ],
