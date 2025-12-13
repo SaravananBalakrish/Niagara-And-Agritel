@@ -15,6 +15,7 @@ import 'package:niagara_smart_drip_irrigation/features/side_drawer/sub_users/uti
 import 'features/controller_settings/presentaion/cubit/controller_tab_cubit.dart';
 import 'features/controller_settings/utils/controller_settings_routes.dart';
 import 'features/dashboard/utils/dashboard_routes.dart';
+import 'features/sendrev_msg/utils/senrev_routes.dart';
 import 'features/side_drawer/groups/utils/group_routes.dart';
 import 'features/auth/utils/auth_routes.dart';
 
@@ -325,11 +326,7 @@ class AppRouter {
               path: RouteConstants.chat,
               builder: (context, state) => const Chat(),
             ),
-            _authRoute(
-              name: 'sendRevMsgPage',
-              path: RouteConstants.sendRevMsgPage,
-              builder: (context, state) => const Chat(),
-            ),
+
             GoRoute(
               path: DealerRoutes.dealerDashboard,
               builder: (context, state) => BlocProvider.value(
@@ -375,6 +372,7 @@ class AppRouter {
               ),
             ]
         ),
+        ...sendRevPageRoutes
       ],
     );
   }
